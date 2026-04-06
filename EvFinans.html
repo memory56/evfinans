@@ -615,7 +615,37 @@ function loadCustomLists(){
   if(custom.gel)custom.gel.forEach(g=>{if(!gelList.includes(g))gelList.push(g);});
   if(custom.mas)custom.mas.forEach(m=>{if(!masList.includes(m))masList.push(m);});
 }
-function saveData(){localStorage.setItem(SK,JSON.stringify(txs));}
+function saveData(){
+  localStorage.setItem(SK,JSON.stringify(txs));
+  scheduleAutoSync();
+}
+
+// Auto-sync to OneDrive: debounced 5 minutes after last change
+var autoSyncTimer = null;
+var AUTO_SYNC_DELAY = 5 * 60 * 1000; // 5 dakika
+
+function scheduleAutoSync(){
+  if(!odAccount) return; // not logged in
+  if(autoSyncTimer) clearTimeout(autoSyncTimer);
+  // Show pending indicator
+  var info = document.getElementById('od-sync-info');
+  if(info && !info.textContent.startsWith('Hata')){
+    info.textContent = 'Degisiklikler 5 dk sonra kaydedilecek...';
+  }
+  autoSyncTimer = setTimeout(function(){
+    autoSyncTimer = null;
+    odSync(true); // true = silent (no toast on success)
+  }, AUTO_SYNC_DELAY);
+}
+
+// Also save before page unload
+window.addEventListener('beforeunload', function(){
+  if(odAccount && autoSyncTimer){
+    clearTimeout(autoSyncTimer);
+    // Best effort sync (may not complete but triggers)
+    odSync(true);
+  }
+});
 function saveCustom(){localStorage.setItem(CK,JSON.stringify(custom));}
 function saveBudgets(){localStorage.setItem(BK,JSON.stringify(budgets));}
 
@@ -1655,7 +1685,7 @@ function xhrPut(url, headers, body){
   });
 }
 
-async function odSync(){
+async function odSync(silent){
   try{
     if(!window.XLSX){ toast('SheetJS yukleniyor, bekleyin...','var(--orange)'); return; }
     toast('Excel hazirlaniyor...','var(--blue)');
@@ -1703,7 +1733,8 @@ async function odSync(){
       + now.getDate() + ' ' + AYLAR_K[now.getMonth()] + ' '
       + now.getHours().toString().padStart(2,'0') + ':'
       + now.getMinutes().toString().padStart(2,'0');
-    toast('Excel\'e kaydedildi: ' + txs.length + ' islem');
+    if(!silent) toast('Excel\'e kaydedildi: ' + txs.length + ' islem');
+    else toast('☁️ OneDrive\'a otomatik kaydedildi', 'var(--teal)');
   }catch(e){
     console.error('odSync error:', e);
     toast('Hata: ' + (e.message||String(e)).substring(0,100), 'var(--red)');
