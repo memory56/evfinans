@@ -396,6 +396,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="chip" data-type="T" onclick="setChip(this,'T')">Transfer</div>
     <div class="chip" data-type="done" onclick="setChip(this,'done')">Ödendi</div>
     <div class="chip" data-type="plan" onclick="setChip(this,'plan')">Planlandı</div>
+    <div class="chip" data-type="future" onclick="setChip(this,'future')">Gelecek</div>
   </div>
   <div class="sfilt">
     <select id="s_acc" onchange="doSearch()"><option value="">Tüm hesaplar</option></select>
@@ -630,6 +631,7 @@ function showPg(pg){
   else if(pg==='rapor')renderRapor();
   else if(pg==='netwr'){renderNetwr();fetchRates();}
   else if(pg==='budge')renderBudget();
+  else if(pg==='searc')doSearch();
   else if(pg==='setin')document.getElementById('txCount').textContent=txs.length;
 }
 
@@ -1172,24 +1174,37 @@ function doSearch(){
     const f=[t.kasa,t.hedefKasa,t.masrafGrp,t.altGrp,t.altGrp2,t.gelirAltGrp,t.aciklama,t.islemTuru].join(' ').toLowerCase();
     return f.includes(q);
   });
+  const todayS2=fmtDate(new Date());
   if(sChip==='G')results=results.filter(t=>t.islemTuru==='Gider');
   else if(sChip==='L')results=results.filter(t=>t.islemTuru==='Gelir');
   else if(sChip==='T')results=results.filter(t=>t.islemTuru==='Transfer');
   else if(sChip==='done')results=results.filter(t=>t.gerceklesme==='Gerçekleşmiş');
   else if(sChip==='plan')results=results.filter(t=>t.gerceklesme==='Gerçekleşmemiş');
+  else if(sChip==='future')results=results.filter(t=>t.tarih>todayS2);
   if(acc)results=results.filter(t=>t.kasa===acc||t.hedefKasa===acc);
   if(cat)results=results.filter(t=>t.masrafGrp===cat||t.gelirAltGrp===cat);
   if(per){
     const now=new Date();
-    if(per==='thismonth'){const ms=fmtDate(new Date(now.getFullYear(),now.getMonth(),1));results=results.filter(t=>t.tarih>=ms&&t.tarih<=todayS);}
+    if(per==='thismonth'){const ms=fmtDate(new Date(now.getFullYear(),now.getMonth(),1));const me=fmtDate(new Date(now.getFullYear(),now.getMonth()+1,0));results=results.filter(t=>t.tarih>=ms&&t.tarih<=me);}
     else if(per==='lastmonth'){const lm=new Date(now.getFullYear(),now.getMonth()-1,1);const lme=new Date(now.getFullYear(),now.getMonth(),0);results=results.filter(t=>t.tarih>=fmtDate(lm)&&t.tarih<=fmtDate(lme));}
     else if(per==='3months'){const d=new Date(now);d.setMonth(d.getMonth()-3);results=results.filter(t=>t.tarih>=fmtDate(d));}
     else if(per==='thisyear'){results=results.filter(t=>t.tarih>=now.getFullYear()+'-01-01');}
   }
-  results=results.sort((a,b)=>b.tarih.localeCompare(a.tarih)).slice(0,200);
+  // Sort: planned future first (ascending), then past (descending)
+  if(sChip==='plan'){
+    results=results.sort((a,b)=>a.tarih.localeCompare(b.tarih));
+  } else {
+    results=results.sort((a,b)=>b.tarih.localeCompare(a.tarih));
+  }
+  results=results.slice(0,500);
   let totG=0,totL=0;
   results.forEach(t=>{if(t.islemTuru==='Gider')totG+=t.tutar;if(t.islemTuru==='Gelir')totL+=t.tutar;});
-  document.getElementById('sResult').textContent=results.length+' işlem'+(totG?' · −₺'+fmt(totG):'')+(totL?' · +₺'+fmt(totL):'');
+  const planCount=results.filter(t=>t.gerceklesme==='Gerçekleşmemiş').length;
+  document.getElementById('sResult').textContent=
+    results.length+' işlem'
+    +(planCount?' ('+planCount+' planlandı)':'')
+    +(totG?' · −₺'+fmt(totG):'')
+    +(totL?' · +₺'+fmt(totL):'');
   let html='';
   if(!results.length)html='<div class="empty">Sonuç bulunamadı</div>';
   results.forEach(t=>html+=txCard(t));
@@ -1603,12 +1618,34 @@ async function graphFetch(url, method, body, token){
   return res.json();
 }
 
+const MINIMAL_XLSX_B64 = 'UEsDBBQAAAAIABqOhly9XP2Q8gAAABwCAAATAAAAW0NvbnRlbnRfVHlwZXNdLnhtbK2RvU7DMBDHX8XyWsVOOyCEknQodASG8gCHc0ms+Es+t4S3x0kLAyqwMJ3s/8fvZFfbyRp2wkjau5qvRckZOuVb7fqavxz2xS3fNtXhPSCxbHVU8yGlcCclqQEtkPABXVY6Hy2kfIy9DKBG6FFuyvJGKu8SulSkuYM31T12cDSJPUz5+oyNaIiz3dk4s2oOIRitIGVdnlz7jVJcCCInFw8NOtAqG7i8SpiVnwGX3FN+h6hbZM8Q0yPY7JKTkW8+jq/ej+L3kitb+q7TCluvjjZHBIWI0NKAmKwRyxQWtFv9zV/MJJex/udFvvo/95DLdzcfUEsDBBQAAAAIABqOhlwcSfe+pAAAABYBAAALAAAAX3JlbHMvLnJlbHONz8EOwiAMBuBXIb07pgdjzNguxmRXMx8AWcfIBiWAOt9ejs548Nj0/7+mVbPYmT0wRENOwLYogaFT1BunBVy78+YATV1dcJYpJ+JofGS54qKAMSV/5DyqEa2MBXl0eTNQsDLlMWjupZqkRr4ryz0PnwasTdb2AkLbb4F1L4//2DQMRuGJ1N2iSz9OfCWyLIPGJGCZ+ZPCdCOaiowCryu+erB+A1BLAwQUAAAACAAajoZc9QUJR68AAAAMAQAADwAAAHhsL3dvcmtib29rLnhtbI2Puw7CMAxFfyXyDmkZEKr6WBBSd/iA0Lpt1CSu7PD4fCJKdybb1/axb9m8vVNPZLEUKsj3GSgMHfU2jBXcrpfdCZq6fBHPd6JZpekgFUwxLoXW0k3ojexpwZA6A7E3MZU8alkYTS8TYvROH7LsqL2xAVZCwf8waBhsh2fqHh5DXCGMzsT0q0x2EajL7wX5RRWMxwpacegdMqiv2vbJGCgubEq47XPQdam3Rb15qz9QSwMEFAAAAAgAGo6GXPCmYoGmAAAAFwEAABoAAAB4bC9fcmVscy93b3JrYm9vay54bWwucmVsc43PSwrCMBAA0KuE2dtpXYhI025E6FbqAUI6TUqbD0n83d7gQiy4cDXM7w1Ttw+zsBuFODnLoSpKYGSlGyarOFz602YPbVOfaREpT0Q9+cjyio0cdEr+gBilJiNi4TzZ3BldMCLlNCj0Qs5CEW7Lcofh24C1ybqBQ+iGClj/9PSP7cZxknR08mrIph8n8O7CHDVRyqgIihKHTyniO1RFVgGbGlcfNi9QSwMEFAAAAAgAGo6GXPI5uc94AAAAiwAAABgAAAB4bC93b3Jrc2hlZXRzL3NoZWV0MS54bWw9jEsOwjAMRK8SeU8dWCCEknRTcQI4gNWaJqL5KI6A4xN1wXLmzRszfuOm3lwl5GThOGhQnOa8hLRaeNxvhwuMznxyfYlnbqrPk1jwrZUrosyeI8mQC6dOnrlGaj3WFaVUpmWX4oYnrc8YKSRwZu8maoTO4P/Z/QBQSwECFAMUAAAACAAajoZcvVz9kPIAAAAcAgAAEwAAAAAAAAAAAAAAgAEAAAAAW0NvbnRlbnRfVHlwZXNdLnhtbFBLAQIUAxQAAAAIABqOhlwcSfe+pAAAABYBAAALAAAAAAAAAAAAAACAASMBAABfcmVscy8ucmVsc1BLAQIUAxQAAAAIABqOhlz1BQlHrwAAAAwBAAAPAAAAAAAAAAAAAACAAfABAAB4bC93b3JrYm9vay54bWxQSwECFAMUAAAACAAajoZc8KZigaYAAAAXAQAAGgAAAAAAAAAAAAAAgAHMAgAAeGwvX3JlbHMvd29ya2Jvb2sueG1sLnJlbHNQSwECFAMUAAAACAAajoZc8jm5z3gAAACLAAAAGAAAAAAAAAAAAAAAgAGqAwAAeGwvd29ya3NoZWV0cy9zaGVldDEueG1sUEsFBgAAAAAFAAUARQEAAFgEAAAAAA==';
+
 async function ensureExcelFile(token){
   try{
     await graphFetch('/me/drive/root:/'+EXCEL_FILE+':/workbook/worksheets', 'GET', null, token);
     return true;
   }catch(e){
-    throw new Error('OneDrive\'da EvFinans.xlsx bulunamadi. Lutfen once OneDrive\'da bos bir Excel dosyasi olusturun ve "EvFinans.xlsx" olarak kaydedin.');
+    // File not found — create it automatically
+    toast('EvFinans.xlsx olusturuluyor...', 'var(--blue)');
+    // Decode base64 to binary
+    const binStr = atob(MINIMAL_XLSX_B64);
+    const bytes = new Uint8Array(binStr.length);
+    for(var i=0;i<binStr.length;i++) bytes[i]=binStr.charCodeAt(i);
+    // Upload via fetch directly (not graphFetch, needs binary body)
+    const uploadRes = await fetch('https://graph.microsoft.com/v1.0/me/drive/root:/'+EXCEL_FILE+':/content', {
+      method: 'PUT',
+      headers: {
+        'Authorization': 'Bearer '+token,
+        'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      },
+      body: bytes.buffer
+    });
+    if(!uploadRes.ok){
+      const err = await uploadRes.text();
+      throw new Error('Excel dosyasi olusturulamadi: '+err);
+    }
+    toast('EvFinans.xlsx olusturuldu!', 'var(--green)');
+    return true;
   }
 }
 
