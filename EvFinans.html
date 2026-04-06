@@ -1634,40 +1634,69 @@ function rowToTx(row){
 
 // Build XLSX binary using SheetJS and upload to OneDrive via PUT /content
 // This method bypasses Excel session locks entirely
+// XHR-based upload — more reliable than fetch for binary PUT (preserves body through redirects)
+function xhrPut(url, headers, body){
+  return new Promise(function(resolve, reject){
+    var xhr = new XMLHttpRequest();
+    xhr.open('PUT', url, true);
+    xhr.responseType = 'text';
+    for(var h in headers) xhr.setRequestHeader(h, headers[h]);
+    xhr.onload = function(){
+      if(xhr.status >= 200 && xhr.status < 300){
+        resolve({ok:true, status:xhr.status, text:xhr.responseText});
+      } else {
+        reject(new Error('HTTP ' + xhr.status + ': ' + xhr.responseText.substring(0,300)));
+      }
+    };
+    xhr.onerror = function(){ reject(new Error('Network error (XHR)')); };
+    xhr.ontimeout = function(){ reject(new Error('Timeout')); };
+    xhr.timeout = 60000;
+    xhr.send(body);
+  });
+}
+
 async function odSync(){
   try{
     if(!window.XLSX){ toast('SheetJS yukleniyor, bekleyin...','var(--orange)'); return; }
     toast('Excel hazirlaniyor...','var(--blue)');
     var token = await getToken();
 
-    // Build XLSX binary with SheetJS
+    // Build XLSX
     var wsData = [EXCEL_COLS].concat(txs.map(txToRow));
     var ws = XLSX.utils.aoa_to_sheet(wsData);
     var wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, EXCEL_SHEET);
-    // Use 'binary' type then convert to Blob — most compatible across browsers
-    var binStr = XLSX.write(wb, {bookType:'xlsx', type:'binary'});
-    var bytes = new Uint8Array(binStr.length);
-    for(var i=0; i<binStr.length; i++) bytes[i] = binStr.charCodeAt(i) & 0xff;
-    var blob = new Blob([bytes], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+    var xlsxArr = XLSX.write(wb, {bookType:'xlsx', type:'array'});
+    var blob = new Blob([new Uint8Array(xlsxArr)],
+      {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
 
-    console.log('XLSX size:', blob.size, 'bytes, rows:', wsData.length);
-    if(blob.size < 100){ throw new Error('XLSX olusturulamadi (bos dosya)'); }
+    console.log('XLSX blob size:', blob.size, 'bytes,', wsData.length, 'rows');
+    if(blob.size < 200){ throw new Error('XLSX olusturulamadi, boyut: ' + blob.size); }
 
-    // Direct PUT to OneDrive /content — creates file if not exists, replaces if exists
-    toast('OneDrive\'a yukleniyor (' + Math.round(blob.size/1024) + ' KB)...','var(--blue)');
-    var uploadRes = await fetch(
-      'https://graph.microsoft.com/v1.0/me/drive/root:/' + EXCEL_FILE + ':/content',
+    // Create upload session (avoids redirect issues, direct Azure storage URL)
+    toast('Upload session baslatiliyor...','var(--blue)');
+    var sessionRes = await fetch(
+      'https://graph.microsoft.com/v1.0/me/drive/root:/' + EXCEL_FILE + ':/createUploadSession',
       {
-        method: 'PUT',
-        headers: { 'Authorization': 'Bearer ' + token },
-        body: blob
+        method:'POST',
+        headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
+        body:JSON.stringify({'item':{'@microsoft.graph.conflictBehavior':'replace','name':EXCEL_FILE}})
       }
     );
-    if(!uploadRes.ok){
-      var upErr = await uploadRes.text();
-      throw new Error('Yukleme hatasi ' + uploadRes.status + ': ' + upErr);
+    if(!sessionRes.ok){
+      var sErr = await sessionRes.text();
+      throw new Error('Session hatasi ' + sessionRes.status + ': ' + sErr.substring(0,200));
     }
+    var sessionJson = await sessionRes.json();
+    var uploadUrl = sessionJson.uploadUrl;
+    if(!uploadUrl) throw new Error('uploadUrl alinamadi');
+
+    // Upload via XHR to direct storage URL (no auth needed, no redirects)
+    toast('Yukleniyor ' + Math.round(blob.size/1024) + ' KB...','var(--blue)');
+    await xhrPut(uploadUrl, {
+      'Content-Range': 'bytes 0-' + (blob.size-1) + '/' + blob.size
+    }, blob);
+
     var now = new Date();
     document.getElementById('od-sync-info').textContent =
       txs.length + ' islem - '
@@ -1676,9 +1705,9 @@ async function odSync(){
       + now.getMinutes().toString().padStart(2,'0');
     toast('Excel\'e kaydedildi: ' + txs.length + ' islem');
   }catch(e){
-    console.error(e);
+    console.error('odSync error:', e);
     toast('Hata: ' + (e.message||String(e)).substring(0,100), 'var(--red)');
-    document.getElementById('od-sync-info').textContent = 'Hata: ' + (e.message||'').substring(0,150);
+    document.getElementById('od-sync-info').textContent = 'Hata: ' + (e.message||'').substring(0,200);
   }
 }
 
