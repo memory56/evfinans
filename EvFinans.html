@@ -1637,68 +1637,76 @@ function rowToTx(row){
 async function odSync(){
   try{
     if(!window.XLSX){ toast('SheetJS yukleniyor, bekleyin...','var(--orange)'); return; }
-    toast('Excel dosyasi hazirlaniyor...','var(--blue)');
+    toast('Excel hazirlaniyor...','var(--blue)');
     var token = await getToken();
 
-    // Build worksheet data
+    // Build XLSX binary with SheetJS
     var wsData = [EXCEL_COLS].concat(txs.map(txToRow));
     var ws = XLSX.utils.aoa_to_sheet(wsData);
     var wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, EXCEL_SHEET);
+    // Use 'binary' type then convert to Blob — most compatible across browsers
+    var binStr = XLSX.write(wb, {bookType:'xlsx', type:'binary'});
+    var bytes = new Uint8Array(binStr.length);
+    for(var i=0; i<binStr.length; i++) bytes[i] = binStr.charCodeAt(i) & 0xff;
+    var blob = new Blob([bytes], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
 
-    // Generate binary XLSX
-    var xlsxBin = XLSX.write(wb, {bookType:'xlsx', type:'array'});
-    var bytes = new Uint8Array(xlsxBin);
+    console.log('XLSX size:', blob.size, 'bytes, rows:', wsData.length);
+    if(blob.size < 100){ throw new Error('XLSX olusturulamadi (bos dosya)'); }
 
-    // Upload directly as file content (PUT replaces file, no lock needed)
-    toast('OneDrive\'a yukleniyor...','var(--blue)');
+    // Direct PUT to OneDrive /content — creates file if not exists, replaces if exists
+    toast('OneDrive\'a yukleniyor (' + Math.round(blob.size/1024) + ' KB)...','var(--blue)');
     var uploadRes = await fetch(
       'https://graph.microsoft.com/v1.0/me/drive/root:/' + EXCEL_FILE + ':/content',
       {
         method: 'PUT',
-        headers: {
-          'Authorization': 'Bearer ' + token,
-          'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-        },
-        body: bytes.buffer
+        headers: { 'Authorization': 'Bearer ' + token },
+        body: blob
       }
     );
     if(!uploadRes.ok){
-      var err = await uploadRes.text();
-      throw new Error('Graph API ' + uploadRes.status + ': ' + err);
+      var upErr = await uploadRes.text();
+      throw new Error('Yukleme hatasi ' + uploadRes.status + ': ' + upErr);
     }
     var now = new Date();
-    var msg = txs.length + ' islem yuklendi - ' + now.getDate() + ' ' + AYLAR_K[now.getMonth()] + ' ' + now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
-    document.getElementById('od-sync-info').textContent = msg;
+    document.getElementById('od-sync-info').textContent =
+      txs.length + ' islem - '
+      + now.getDate() + ' ' + AYLAR_K[now.getMonth()] + ' '
+      + now.getHours().toString().padStart(2,'0') + ':'
+      + now.getMinutes().toString().padStart(2,'0');
     toast('Excel\'e kaydedildi: ' + txs.length + ' islem');
   }catch(e){
     console.error(e);
-    toast('Hata: ' + e.message, 'var(--red)');
-    document.getElementById('od-sync-info').textContent = 'Hata: ' + e.message;
+    toast('Hata: ' + (e.message||String(e)).substring(0,100), 'var(--red)');
+    document.getElementById('od-sync-info').textContent = 'Hata: ' + (e.message||'').substring(0,150);
   }
 }
 
-// Download from OneDrive: fetch the file binary and parse with SheetJS
 async function odPull(){
   if(!confirm('OneDrive\'daki veriler yerel verilerin USTUNE yazilacak. Emin misiniz?')) return;
   try{
     if(!window.XLSX){ toast('SheetJS yukleniyor, bekleyin...','var(--orange)'); return; }
-    toast('Excel\'den alinıyor...','var(--blue)');
+    toast('Excel\'den indiriliyor...','var(--blue)');
     var token = await getToken();
 
+    // Download file content directly
     var dlRes = await fetch(
       'https://graph.microsoft.com/v1.0/me/drive/root:/' + EXCEL_FILE + ':/content',
       { headers: {'Authorization': 'Bearer ' + token} }
     );
     if(!dlRes.ok){
+      if(dlRes.status === 404){
+        throw new Error('EvFinans.xlsx OneDrive\'da bulunamadi. Once "Excel\'e Kaydet" ile yukleyin.');
+      }
       var err = await dlRes.text();
-      throw new Error('Graph API ' + dlRes.status + ': ' + err);
+      throw new Error('Indirme hatasi ' + dlRes.status + ': ' + err);
     }
     var arrayBuf = await dlRes.arrayBuffer();
-    var wb = XLSX.read(arrayBuf, {type:'array'});
-    var ws = wb.Sheets[EXCEL_SHEET] || wb.Sheets[wb.SheetNames[0]];
-    if(!ws){ toast('Sayfa bulunamadi','var(--orange)'); return; }
-    var data = XLSX.utils.sheet_to_json(ws, {header:1});
+    var wb2 = XLSX.read(arrayBuf, {type:'array'});
+    var sheetName = wb2.SheetNames.find(function(n){ return n===EXCEL_SHEET; }) || wb2.SheetNames[0];
+    var ws2 = wb2.Sheets[sheetName];
+    if(!ws2){ toast('Excel sayfasi bulunamadi','var(--orange)'); return; }
+    var data = XLSX.utils.sheet_to_json(ws2, {header:1, raw:false});
     if(data.length < 2){ toast('Excel bos veya veri yok','var(--orange)'); return; }
     var newTxs = data.slice(1).map(rowToTx).filter(Boolean);
     if(!newTxs.length){ toast('Aktarilacak veri bulunamadi','var(--orange)'); return; }
@@ -1709,7 +1717,8 @@ async function odPull(){
     toast(txs.length + ' islem alindi');
   }catch(e){
     console.error(e);
-    toast('Hata: ' + e.message, 'var(--red)');
+    var msg3 = e.message || String(e);
+    toast('Hata: ' + msg3.substring(0,80), 'var(--red)');
   }
 }
 // Set GitHub URL display
