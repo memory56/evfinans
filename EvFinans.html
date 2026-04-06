@@ -638,7 +638,7 @@ function toast(m,col){
 }
 
 // ═══ CALENDAR ═══
-// calMode: 'month' = tüm ay, 'day' = seçili gün
+// calMode: month = tüm ay, day = seçili gün
 let calMode='day';
 
 const CAT_IC={
@@ -1514,10 +1514,9 @@ function importCSV(input){
 }
 
 // ═══ ONEDRIVE SYNC ═══
-// ─── Config — Azure App Registration'dan alınan değerleri buraya girin ───
+// Config: Azure App Registration degerlerini asagiya girin
 const MSAL_CFG = {
-  clientId: bb5edae6-2364-4789-a70c-c844fe42cc95
-,   // Azure Portal > App registrations > Application ID
+  clientId: 'bb5edae6-2364-4789-a70c-c844fe42cc95',   // Azure Portal > App registrations > Application ID
   authority: 'https://login.microsoftonline.com/consumers',
   redirectUri: window.location.origin + window.location.pathname,
 };
@@ -1554,7 +1553,7 @@ function odUpdateUI(){
   document.getElementById('od-status-lbl').textContent=loggedIn?'Giriş yapıldı':'Giriş yapılmadı';
   document.getElementById('od-user-lbl').textContent=loggedIn?(odAccount.username||odAccount.name||''):'';
   if(loggedIn&&typeof ghUrl!=='undefined'){
-    document.getElementById('od-sync-info').textContent='OneDrive'da EvFinans.xlsx dosyasına senkronize edilir.';
+    document.getElementById('od-sync-info').textContent="OneDrive'da EvFinans.xlsx dosyasına senkronize edilir.";
   }
 }
 
@@ -1617,7 +1616,7 @@ async function findOrCreateExcel(token){
       // Use a workaround: create via workbook API after creating a dummy file
       // Actually we need a valid xlsx. Use Graph to create from template.
       // Best approach: use /content with a real minimal xlsx blob
-      throw new Error('Excel dosyası oluşturulamadı. OneDrive'ı tarayıcıda açıp EvFinans.xlsx adında boş bir Excel dosyası oluşturun.');
+      throw new Error("Excel dosyasi olusturulamadi. OneDrive hesabinizda EvFinans.xlsx adli bos bir Excel dosyasi olusturun.");
     }
     // Add sheet
     try{await graphFetch('/me/drive/root:/'+EXCEL_FILE+':/workbook/worksheets','POST',{name:EXCEL_SHEET},t2);}catch(e2){}
@@ -1637,20 +1636,20 @@ function rowToTx(row){
 
 async function odSync(){
   try{
-    toast('Excel'e kaydediliyor...','var(--blue)');
+    toast("Excel'e kaydediliyor...","var(--blue)");
     const token=await getToken();
     await findOrCreateExcel(token);
     // Write header + all rows
     const rows=[EXCEL_COLS,...txs.map(txToRow)];
-    const colLast=String.fromCharCode(64+EXCEL_COLS.length); // 'Q'
+    const colLast=String.fromCharCode(64+EXCEL_COLS.length); // Q
     const lastRow=rows.length;
     const addr=EXCEL_SHEET+'!A1:'+colLast+lastRow;
-    await graphFetch('/me/drive/root:/'+EXCEL_FILE+':/workbook/worksheets/'+EXCEL_SHEET+'/range(address=''+addr+'')',
+    await graphFetch('/me/drive/root:/'+EXCEL_FILE+':/workbook/worksheets/'+EXCEL_SHEET+"/range(address='"+addr+"')",
       'PATCH',{values:rows},token);
     const now=new Date();
     document.getElementById('od-sync-info').textContent=
       '✅ '+txs.length+' işlem kaydedildi · '+now.getDate()+' '+AYLAR_K[now.getMonth()]+' '+now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');
-    toast('✅ Excel'e kaydedildi: '+txs.length+' işlem');
+    toast('\u2705 Excel\u2019e kaydedildi: '+txs.length+' işlem');
   }catch(e){
     console.error(e);
     toast('❌ Senkronizasyon hatası: '+e.message,'var(--red)');
@@ -1659,9 +1658,9 @@ async function odSync(){
 }
 
 async function odPull(){
-  if(!confirm('OneDrive'daki veriler yerel verilerin ÜSTÜNE yazılacak. Emin misiniz?'))return;
+  if(!confirm("OneDrive'daki veriler yerel verilerin ÜSTÜNE yazilacak. Emin misiniz?"))return;
   try{
-    toast('Excel'den alınıyor...','var(--blue)');
+    toast("Excel'den al\u0131n\u0131yor...","var(--blue)");
     const token=await getToken();
     const data=await graphFetch('/me/drive/root:/'+EXCEL_FILE+':/workbook/worksheets/'+EXCEL_SHEET+'/usedRange',undefined,null,token);
     if(!data||!data.values||data.values.length<2){toast('Excel boş veya veri yok','var(--orange)');return;}
