@@ -604,7 +604,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <script>
 // ═══ DATA & STATE ═══
 const SK='evfinans_tx',CK='evfinans_custom',BK='evfinans_budget',RK='evfinans_rates',RTK='evfinans_rates_time';
-const DATA_VER='v4'; // increment when seed data format changes
+const DATA_VER='v5'; // increment when seed data format changes
 let txs=[],custom={},budgets={};
 let curPg='calnd',curMonth=new Date().getMonth(),curYear=new Date().getFullYear();
 let selDate=new Date(),fType='I',actTxId=null,editTxId=null;
@@ -1384,14 +1384,14 @@ function renderHesap(){
 
   document.getElementById('hesapList').innerHTML=html;
   document.getElementById('h_net').textContent='₺'+fmt(netTotal);
-  // Attach click listeners via event delegation
-  setTimeout(function(){
+  // Parent-level click delegation - survives re-renders
+  var hl=document.getElementById('hesapList');
+  hl.onclick=function(e){
+    var el=e.target.closest('[data-acc]');
+    if(!el)return;
     var b2=calcBal().bal;
-    document.querySelectorAll('#hesapList [data-acc]').forEach(function(el){
-      el.style.cursor='pointer';
-      el.onclick=function(){ openAccAct(el.dataset.acc, b2[el.dataset.acc]||0); };
-    });
-  },0);
+    openAccAct(el.dataset.acc, b2[el.dataset.acc]||0);
+  };
 }
 
 function toggleHiddenAccs(){
