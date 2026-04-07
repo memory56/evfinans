@@ -471,8 +471,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <button class="hb-ic" onclick="showAddType()">＋</button>
   </div>
   <div class="bsum">
-    <div class="bcard bg"><div class="bcard-l">Toplam Gelir</div><div class="bcard-v" id="h_gelir">₺0</div></div>
-    <div class="bcard br"><div class="bcard-l">Toplam Gider</div><div class="bcard-v" id="h_gider">₺0</div></div>
+    <div class="bcard bg"><div class="bcard-l">Kasa & Banka</div><div class="bcard-v" id="h_gelir">₺0</div></div>
+    <div class="bcard br"><div class="bcard-l">Kredi Kartı Borcu</div><div class="bcard-v" id="h_gider">₺0</div></div>
     <div class="bcard bt"><div class="bcard-l">Yatırım</div><div class="bcard-v" id="h_yatirim">₺0</div></div>
   </div>
   <div id="hesapList"></div>
@@ -1315,16 +1315,21 @@ function calcBal(){
   return{bal,totalG,totalL};
 }
 function renderHesap(){
-  const{bal,totalG,totalL}=calcBal();
-  document.getElementById('h_gelir').textContent='₺'+fmt(totalL);
-  document.getElementById('h_gider').textContent='₺'+fmt(totalG);
+  const{bal}=calcBal();
+  // Kasa & Banka: tüm KASA hesaplarının pozitif bakiyelerinin toplamı
+  const kasaKeys=[...ACC_KASA,...(custom.accGroups&&custom.accGroups.kasa||[])];
+  const kasaToplam=kasaKeys.reduce((s,k)=>s+Math.max(bal[k]||0,0),0);
+  document.getElementById('h_gelir').textContent='₺'+fmt(kasaToplam);
+  // Kredi Kartı Borcu: KK hesaplarının negatif bakiyelerinin mutlak değeri
+  const kkKeys=[...ACC_KK,...(custom.accGroups&&custom.accGroups.kk||[])];
+  const kkBorc=kkKeys.reduce((s,k)=>s+Math.abs(Math.min(bal[k]||0,0)),0);
+  document.getElementById('h_gider').textContent='₺'+fmt(kkBorc);
+  // Yatırım
   const yat=(bal['Vadeli']||0)+(bal['Yatırım']||0);
-  document.getElementById('h_yatirim').textContent='₺'+fmt(yat);
+  document.getElementById('h_yatirim').textContent='₺'+fmt(Math.abs(yat));
 
   const hiddenAccs=getHiddenAccs();
   // Build dynamic groups including custom accounts
-  const kasaKeys=[...ACC_KASA,...(custom.accGroups&&custom.accGroups.kasa||[])];
-  const kkKeys=[...ACC_KK,...(custom.accGroups&&custom.accGroups.kk||[])];
   const digerKeys=[...ACC_DIGER,...(custom.accGroups&&custom.accGroups.diger||[])];
 
   const groups=[
