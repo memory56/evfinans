@@ -493,10 +493,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       </div>
       <div class="strow" id="od-pull-row" style="display:none;" onclick="odPull()">
         <div class="stic" style="background:rgba(78,205,196,.15);">⬇️</div>
-        <div class="stlbl">Excel'den Al (üzerine yaz)</div>
+        <div class="stlbl" style="color:var(--orange);">⚠️ Excel'den Al (üzerine yazar)</div>
         <span class="starr">›</span>
       </div>
       <div style="padding:10px 13px;font-size:11px;color:var(--t3);line-height:1.5;" id="od-sync-info"></div>
+      <div style="padding:4px 13px 10px;font-size:10px;color:var(--t3);line-height:1.4;">
+        💡 Otomatik kayıt: değişiklikten 5 dk sonra Excel'e yüklenir.<br>
+        ⚠️ Excel'den Al: yalnızca başka cihazdan sonra kullanın.
+      </div>
     </div>
   </div>
 
@@ -1541,8 +1545,11 @@ function exportCSV(){
   a.download='evfinans_'+fmtDate(new Date())+'.csv';a.click();toast('📥 İndirildi');
 }
 function resetAllData(){
-  if(!confirm('Tüm veriler silinecek. Emin misiniz?'))return;
-  [SK,CK,BK,RK,RTK].forEach(k=>localStorage.removeItem(k));location.reload();
+  if(!confirm('Tüm yerel veriler silinecek ve uygulama baştan yüklenecek.\n\nOneDrive\'daki Excel dosyasına dokunulmaz.\n\nEmin misiniz?'))return;
+  // Cancel any pending auto-sync to prevent overwriting Excel with empty data
+  if(autoSyncTimer){ clearTimeout(autoSyncTimer); autoSyncTimer=null; }
+  [SK,CK,BK,RK,RTK,'evfinans_ver'].forEach(k=>localStorage.removeItem(k));
+  location.reload();
 }
 function importCSV(input){
   const f=input.files[0];if(!f)return;
@@ -1743,7 +1750,10 @@ async function odSync(silent){
 }
 
 async function odPull(){
-  if(!confirm('OneDrive\'daki veriler yerel verilerin USTUNE yazilacak. Emin misiniz?')) return;
+  var msg = 'UYARI: Bu cihazdaki TUM veriler silinip OneDrive\u2019daki Excel ile degistirilecek.\n\n'
+    + 'Bunu yalnizca iki cihaz arasinda senkronize etmek istediginizde kullanin.\n\n'
+    + 'Devam etmek istiyor musunuz?';
+  if(!confirm(msg)) return;
   try{
     if(!window.XLSX){ toast('SheetJS yukleniyor, bekleyin...','var(--orange)'); return; }
     toast('Excel\'den indiriliyor...','var(--blue)');
