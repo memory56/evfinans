@@ -1337,17 +1337,18 @@ function renderHesap(){
     if(!items.length)return;
     let grpTotal=0;items.forEach(k=>grpTotal+=(bal[k]||0));
     html+='<div class="bsec"><div class="bsec-h"><span class="bsec-ht">'+grp.title+'</span><span class="bsec-tot">₺'+fmt(grpTotal)+'</span></div>';
-    items.forEach(k=>{
-      const b=bal[k]||0;netTotal+=b;
-      const nc=b<0?' neg':'';
-      const ic=ACC_ICONS[k]||'🏦';
-      html+='<div class="bi" data-acc="'+k+'">'
-        +'<div class="bi-ic">'+ic+'</div>'
-        +'<div class="bi-name">'+k+'</div>'
-        +'<div style="display:flex;align-items:center;gap:6px;">'
-        +'<div class="bi-amt'+nc+'">'+'₺'+fmt(Math.abs(b))+'</div>'
-        +'<span style="color:var(--t3);font-size:16px;">'+'›'+'</span>'
-        +'</div></div>';
+    items.forEach(function(k){
+      var b=bal[k]||0; netTotal+=b;
+      var neg=b<0?' neg':'';
+      var ic2=ACC_ICONS[k]||'🏦';
+      var row='<div class="bi" data-acc="'+k+'">';
+      row+='<div class="bi-ic">'+ic2+'</div>';
+      row+='<div class="bi-name">'+k+'</div>';
+      row+='<div style="display:flex;align-items:center;gap:6px;">';
+      row+='<div class="bi-amt'+neg+'">'+'₺'+fmt(Math.abs(b))+'</div>';
+      row+='<span style="color:var(--t3);font-size:16px;">›</span>';
+      row+='</div></div>';
+      html+=row;
     });
     html+='</div>';
   });
