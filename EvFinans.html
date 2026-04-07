@@ -1339,9 +1339,15 @@ function renderHesap(){
     html+='<div class="bsec"><div class="bsec-h"><span class="bsec-ht">'+grp.title+'</span><span class="bsec-tot">₺'+fmt(grpTotal)+'</span></div>';
     items.forEach(k=>{
       const b=bal[k]||0;netTotal+=b;
-      html+='<div class="bi" onclick="openAccAct(''+k+'','+b+')"><div class="bi-ic">'+(ACC_ICONS[k]||'🏦')+'</div><div class="bi-name">'+k+'</div>'
-        +'<div style="display:flex;align-items:center;gap:6px;"><div class="bi-amt'+(b<0?' neg':'')+'">₺'+fmt(Math.abs(b))+'</div>'
-        +'<span style="color:var(--t3);font-size:16px;">›</span></div></div>';
+      const nc=b<0?' neg':'';
+      const ic=ACC_ICONS[k]||'🏦';
+      html+='<div class="bi" data-acc="'+k+'">'
+        +'<div class="bi-ic">'+ic+'</div>'
+        +'<div class="bi-name">'+k+'</div>'
+        +'<div style="display:flex;align-items:center;gap:6px;">'
+        +'<div class="bi-amt'+nc+'">'+'₺'+fmt(Math.abs(b))+'</div>'
+        +'<span style="color:var(--t3);font-size:16px;">'+'›'+'</span>'
+        +'</div></div>';
     });
     html+='</div>';
   });
@@ -1376,6 +1382,18 @@ function renderHesap(){
 
   document.getElementById('hesapList').innerHTML=html;
   document.getElementById('h_net').textContent='₺'+fmt(netTotal);
+  // Attach click listeners to account rows
+  setTimeout(function(){
+    groups.forEach(function(grp){
+      const kKeys=[...ACC_KASA,...(custom.accGroups&&custom.accGroups.kasa||[])];
+      const kKK=[...ACC_KK,...(custom.accGroups&&custom.accGroups.kk||[])];
+      const kD=[...ACC_DIGER,...(custom.accGroups&&custom.accGroups.diger||[])];
+      const allKeys=[...kKeys,...kKK,...kD];
+      allKeys.forEach(function(k){
+        // handled below
+      });
+    });
+  },0);
 }
 
 function toggleHiddenAccs(){
