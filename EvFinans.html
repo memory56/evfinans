@@ -57,6 +57,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .mp-sum-l{font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:.6px;}
 .mp-sum-v{font-size:13px;font-weight:500;}
 .empty{text-align:center;padding:32px 20px;color:var(--t3);font-size:14px;}
+/* account management */
+.bi{cursor:pointer;}
+.bi:active{background:rgba(255,255,255,.05);}
+.acc-act-sheet .asbtn{font-size:13px;padding:11px 14px;}
+.acc-hidden-sect{margin:0 14px 8px;}
+.acc-hidden-hd{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.8px;padding:8px 0 4px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;}
 .empty{text-align:center;padding:32px 20px;color:var(--t3);font-size:14px;}
 /* form */
 .fsec{padding:0 14px;margin-top:10px;}
@@ -326,6 +332,55 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 <!-- ═══ PAGES ═══ -->
 
+
+<!-- Hesap Action Sheet -->
+<div class="asback hid" id="accActS">
+  <div class="asbox">
+    <div class="as-tit" id="accActTitle">Hesap</div>
+    <button class="asbtn" onclick="showBalAdj()"><div class="asi" style="background:rgba(78,205,196,.15);">✏️</div>Bakiye Düzenle (Düzeltme Girdisi)</button>
+    <button class="asbtn" onclick="showAccRename()"><div class="asi" style="background:rgba(52,152,219,.15);">🏷️</div>Adını Değiştir</button>
+    <button class="asbtn red" onclick="hideAcc()"><div class="asi" style="background:rgba(231,76,60,.1);">👁️</div>Listeden Kaldır</button>
+    <button class="ascancel" onclick="closeAccAct()">İptal</button>
+  </div>
+</div>
+
+<!-- Bakiye Düzeltme Modal -->
+<div class="mback hid" id="balAdjM">
+  <div class="mbox">
+    <div class="mtitle">Bakiye Düzelt — <span id="balAdjAccName"></span></div>
+    <div style="font-size:11px;color:var(--t2);margin-bottom:10px;text-align:center;">Mevcut bakiye: <b id="balAdjCurrent"></b></div>
+    <div class="mlbl">Hedef Bakiye (₺)</div>
+    <div class="eamount"><input type="number" id="balAdjTarget" placeholder="0" step="0.01" inputmode="decimal"></div>
+    <div style="font-size:11px;color:var(--t3);margin-top:6px;">Fark kadar "Bakiye Düzeltme" işlemi oluşturulur. Excel'de korunur.</div>
+    <div class="mbtns"><button class="bc" onclick="closeBalAdj()">İptal</button><button class="bk" onclick="confirmBalAdj()">Uygula</button></div>
+  </div>
+</div>
+
+<!-- Hesap Adı Değiştir Modal -->
+<div class="mback hid" id="accRenameM">
+  <div class="mbox">
+    <div class="mtitle">Hesap Adını Değiştir</div>
+    <div class="mlbl">Yeni Ad</div>
+    <input class="minput" type="text" id="accRenameInput" placeholder="Hesap adı...">
+    <div class="mbtns"><button class="bc" onclick="closeAccRename()">İptal</button><button class="bk" onclick="confirmAccRename()">Kaydet</button></div>
+  </div>
+</div>
+
+<!-- Yeni Hesap Ekle Modal -->
+<div class="mback hid" id="newAccM">
+  <div class="mbox">
+    <div class="mtitle">Yeni Hesap Ekle</div>
+    <div class="mlbl">Hesap Adı</div>
+    <input class="minput" type="text" id="newAccName" placeholder="Örn: Ziraat, N26...">
+    <div class="mlbl">Grup</div>
+    <select class="msel" id="newAccGroup">
+      <option value="kasa">Kasa & Banka</option>
+      <option value="kk">Kredi Kartı</option>
+      <option value="diger">Diğer</option>
+    </select>
+    <div class="mbtns"><button class="bc" onclick="closeNewAcc()">İptal</button><button class="bk" onclick="confirmNewAcc()">Ekle</button></div>
+  </div>
+</div>
 <!-- 1. TAKVİM -->
 <div class="pg on" id="pg-calnd">
   <div class="ph" style="padding:9px 10px;">
@@ -412,6 +467,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <div class="ph">
     <h1>Bakiye</h1>
     <button class="hb-ic" onclick="showPg('calnd')">📅</button>
+    <button class="hb" onclick="showNewAcc()" style="font-size:13px;color:var(--teal);">+ Hesap</button>
     <button class="hb-ic" onclick="showAddType()">＋</button>
   </div>
   <div class="bsum">
@@ -1263,22 +1319,209 @@ function renderHesap(){
   document.getElementById('h_gider').textContent='₺'+fmt(totalG);
   const yat=(bal['Vadeli']||0)+(bal['Yatırım']||0);
   document.getElementById('h_yatirim').textContent='₺'+fmt(yat);
-  const groups=[{title:'KASA & BANKA',keys:ACC_KASA},{title:'KREDİ KARTLARI',keys:ACC_KK},{title:'DİĞER',keys:ACC_DIGER}];
+
+  const hiddenAccs=getHiddenAccs();
+  // Build dynamic groups including custom accounts
+  const kasaKeys=[...ACC_KASA,...(custom.accGroups&&custom.accGroups.kasa||[])];
+  const kkKeys=[...ACC_KK,...(custom.accGroups&&custom.accGroups.kk||[])];
+  const digerKeys=[...ACC_DIGER,...(custom.accGroups&&custom.accGroups.diger||[])];
+
+  const groups=[
+    {title:'KASA & BANKA',keys:kasaKeys},
+    {title:'KREDİ KARTLARI',keys:kkKeys},
+    {title:'DİĞER',keys:digerKeys},
+  ];
   let html='',netTotal=0;
   groups.forEach(grp=>{
-    const items=grp.keys.filter(k=>accList.includes(k));if(!items.length)return;
+    const items=grp.keys.filter(k=>accList.includes(k)&&!hiddenAccs.includes(k));
+    if(!items.length)return;
     let grpTotal=0;items.forEach(k=>grpTotal+=(bal[k]||0));
     html+='<div class="bsec"><div class="bsec-h"><span class="bsec-ht">'+grp.title+'</span><span class="bsec-tot">₺'+fmt(grpTotal)+'</span></div>';
     items.forEach(k=>{
       const b=bal[k]||0;netTotal+=b;
-      html+='<div class="bi"><div class="bi-ic">'+(ACC_ICONS[k]||'🏦')+'</div><div class="bi-name">'+k+'</div><div class="bi-amt'+(b<0?' neg':'')+'">₺'+fmt(Math.abs(b))+'</div></div>';
+      html+='<div class="bi" onclick="openAccAct(''+k+'','+b+')"><div class="bi-ic">'+(ACC_ICONS[k]||'🏦')+'</div><div class="bi-name">'+k+'</div>'
+        +'<div style="display:flex;align-items:center;gap:6px;"><div class="bi-amt'+(b<0?' neg':'')+'">₺'+fmt(Math.abs(b))+'</div>'
+        +'<span style="color:var(--t3);font-size:16px;">›</span></div></div>';
     });
     html+='</div>';
   });
+
+  // Hidden accounts section (collapsible)
+  const hiddenWithData=hiddenAccs.filter(k=>accList.includes(k));
+  if(hiddenWithData.length){
+    html+='<div class="acc-hidden-sect"><div class="acc-hidden-hd" onclick="toggleHiddenAccs()">'
+      +'<span>GİZLİ HESAPLAR ('+hiddenWithData.length+')</span><span id="hiddenToggleIcon">▶</span></div>'
+      +'<div id="hiddenAccsList" style="display:none;">';
+    hiddenWithData.forEach(k=>{
+      const b=bal[k]||0;
+      const amtCl=b<0?' neg':'';
+      const safeId='unhide_'+k.replace(/[^a-zA-Z0-9]/g,'_');
+      html+='<div class="bi" style="background:var(--bg3);opacity:.7;">'
+        +'<div class="bi-ic">'+(ACC_ICONS[k]||'🏦')+'</div>'
+        +'<div class="bi-name" style="color:var(--t3);">'+k+'</div>'
+        +'<div style="display:flex;align-items:center;gap:6px;">'
+        +'<div class="bi-amt'+amtCl+'">₺'+fmt(Math.abs(b))+'</div>'
+        +'<button id="'+safeId+'" style="background:rgba(78,205,196,.15);color:var(--teal);border:none;border-radius:6px;font-size:11px;padding:3px 8px;cursor:pointer;">Göster</button>'
+        +'</div></div>';
+    });
+    html+='</div></div>';
+    setTimeout(function(){
+      hiddenWithData.forEach(k=>{
+        const safeId2='unhide_'+k.replace(/[^a-zA-Z0-9]/g,'_');
+        const btn=document.getElementById(safeId2);
+        if(btn) btn.onclick=function(e){ e.stopPropagation(); unhideAcc(k); };
+      });
+    },0);
+  }
+
   document.getElementById('hesapList').innerHTML=html;
   document.getElementById('h_net').textContent='₺'+fmt(netTotal);
 }
 
+function toggleHiddenAccs(){
+  const el=document.getElementById('hiddenAccsList');
+  const ic=document.getElementById('hiddenToggleIcon');
+  if(el){el.style.display=el.style.display==='none'?'':'none';}
+  if(ic){ic.textContent=ic.textContent==='▶'?'▼':'▶';}
+}
+
+
+// ═══ HESAP YÖNETİMİ ═══
+let curAccName='', curAccBal=0;
+
+function getHiddenAccs(){ return (custom.hiddenAccs||[]); }
+function saveHidden(list){ custom.hiddenAccs=list; saveCustom(); }
+
+// Hesap action sheet
+function openAccAct(name, bal){
+  curAccName=name; curAccBal=bal;
+  document.getElementById('accActTitle').textContent=name+' — ₺'+fmt(Math.abs(bal));
+  document.getElementById('accActS').classList.remove('hid');
+}
+function closeAccAct(){ document.getElementById('accActS').classList.add('hid'); }
+
+// Bakiye düzeltme
+function showBalAdj(){
+  closeAccAct();
+  document.getElementById('balAdjAccName').textContent=curAccName;
+  document.getElementById('balAdjCurrent').textContent='₺'+fmt(curAccBal);
+  document.getElementById('balAdjTarget').value='';
+  document.getElementById('balAdjM').classList.remove('hid');
+  setTimeout(()=>document.getElementById('balAdjTarget').focus(),150);
+}
+function closeBalAdj(){ document.getElementById('balAdjM').classList.add('hid'); }
+function confirmBalAdj(){
+  const target=parseFloat(document.getElementById('balAdjTarget').value);
+  if(isNaN(target)){ toast('Geçerli bir tutar girin','var(--red)'); return; }
+  const diff=Math.round((target-curAccBal)*100)/100;
+  if(diff===0){ closeBalAdj(); return; }
+  // Create balance adjustment transaction
+  const nextId=txs.length?Math.max(...txs.map(t=>t.id))+1:1;
+  const isIncome=diff>0;
+  txs.push({
+    id:nextId, tarih:fmtDate(new Date()),
+    islemTuru:isIncome?'Gelir':'Gider',
+    kasa:curAccName, hedefKasa:'',
+    gelirAltGrp:isIncome?'Diğer':'', masrafGrp:isIncome?'':'Diğer',
+    altGrp:'', altGrp2:'',
+    tutar:Math.abs(diff),
+    aciklama:'Bakiye Düzeltme',
+    gerceklesme:'Gerçekleşmiş',
+    taksitSayisi:1, taksitNo:1,
+    tekrarPeriyodu:'Tekrar Yok', tekrarBitis:'', anaIslemId:nextId
+  });
+  saveData(); closeBalAdj();
+  toast('Bakiye düzeltildi: '+(diff>0?'+':'')+'₺'+fmt(diff));
+  renderHesap(); renderCal();
+}
+
+// Hesap yeniden adlandır
+function showAccRename(){
+  closeAccAct();
+  document.getElementById('accRenameInput').value=curAccName;
+  document.getElementById('accRenameM').classList.remove('hid');
+  setTimeout(()=>document.getElementById('accRenameInput').select(),150);
+}
+function closeAccRename(){ document.getElementById('accRenameM').classList.add('hid'); }
+function confirmAccRename(){
+  const newName=document.getElementById('accRenameInput').value.trim();
+  if(!newName || newName===curAccName){ closeAccRename(); return; }
+  if(accList.includes(newName)){ toast('Bu ad zaten mevcut','var(--orange)'); return; }
+  // Rename in accList
+  const idx=accList.indexOf(curAccName);
+  if(idx>=0) accList[idx]=newName;
+  // Update all transactions
+  txs.forEach(t=>{
+    if(t.kasa===curAccName) t.kasa=newName;
+    if(t.hedefKasa===curAccName) t.hedefKasa=newName;
+  });
+  // Update custom groups
+  if(custom.accGroups){
+    Object.keys(custom.accGroups).forEach(g=>{
+      const gi=custom.accGroups[g].indexOf(curAccName);
+      if(gi>=0) custom.accGroups[g][gi]=newName;
+    });
+  }
+  // Update hidden list
+  const hi=(custom.hiddenAccs||[]).indexOf(curAccName);
+  if(hi>=0) custom.hiddenAccs[hi]=newName;
+  // Update ACC_ICONS
+  if(ACC_ICONS[curAccName]){ ACC_ICONS[newName]=ACC_ICONS[curAccName]; }
+  saveData(); saveCustom(); closeAccRename();
+  toast('✓ '+curAccName+' → '+newName);
+  fillFormSelects(); renderHesap();
+}
+
+// Hesap gizle (listeden kaldır, veri korunur)
+function hideAcc(){
+  closeAccAct();
+  // Check if account has future planned transactions
+  const todayS=fmtDate(new Date());
+  const futureTxs=txs.filter(t=>t.kasa===curAccName&&t.tarih>todayS&&t.gerceklesme==='Gerçekleşmemiş');
+  if(futureTxs.length){
+    if(!confirm(curAccName+' hesabında '+futureTxs.length+' planlanmış işlem var. Yine de gizlemek istiyor musunuz?')) return;
+  }
+  const hidden=getHiddenAccs();
+  if(!hidden.includes(curAccName)) hidden.push(curAccName);
+  saveHidden(hidden);
+  toast(curAccName+' gizlendi. Veriler korunuyor.');
+  renderHesap();
+}
+
+// Gizli hesabı geri getir
+function unhideAcc(name){
+  const hidden=getHiddenAccs().filter(h=>h!==name);
+  saveHidden(hidden);
+  toast(name+' tekrar listelendi');
+  renderHesap();
+}
+
+// Yeni hesap ekle
+function showNewAcc(){
+  document.getElementById('newAccName').value='';
+  document.getElementById('newAccM').classList.remove('hid');
+  setTimeout(()=>document.getElementById('newAccName').focus(),150);
+}
+function closeNewAcc(){ document.getElementById('newAccM').classList.add('hid'); }
+function confirmNewAcc(){
+  const name=document.getElementById('newAccName').value.trim();
+  if(!name){ closeNewAcc(); return; }
+  if(accList.includes(name)){ toast('Bu hesap zaten mevcut','var(--orange)'); return; }
+  const grp=document.getElementById('newAccGroup').value;
+  accList.push(name);
+  if(!custom.acc) custom.acc=[];
+  custom.acc.push(name);
+  if(!custom.accGroups) custom.accGroups={kasa:[],kk:[],diger:[]};
+  if(!custom.accGroups[grp]) custom.accGroups[grp]=[];
+  custom.accGroups[grp].push(name);
+  // Remove from hidden if it was hidden before
+  if(custom.hiddenAccs){
+    custom.hiddenAccs=custom.hiddenAccs.filter(h=>h!==name);
+  }
+  saveCustom(); closeNewAcc();
+  fillFormSelects(); renderHesap();
+  toast('✓ '+name+' eklendi');
+}
 // ═══ RAPOR (Money Pro style) ═══
 function initRaporDates(){
   const now=new Date();
