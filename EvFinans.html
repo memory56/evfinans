@@ -1307,8 +1307,9 @@ function calcBal(){
   let totalG=0,totalL=0;
   txs.forEach(t=>{
     if(t.gerceklesme!=='Gerçekleşmiş')return;
-    if(t.islemTuru==='Gelir'){bal[t.kasa]=(bal[t.kasa]||0)+t.tutar;totalL+=t.tutar;}
-    else if(t.islemTuru==='Gider'){bal[t.kasa]=(bal[t.kasa]||0)-t.tutar;totalG+=t.tutar;}
+    const isDuzeltme=t.aciklama==='Bakiye Düzeltme';
+    if(t.islemTuru==='Gelir'){bal[t.kasa]=(bal[t.kasa]||0)+t.tutar;if(!isDuzeltme)totalL+=t.tutar;}
+    else if(t.islemTuru==='Gider'){bal[t.kasa]=(bal[t.kasa]||0)-t.tutar;if(!isDuzeltme)totalG+=t.tutar;}
     else{bal[t.kasa]=(bal[t.kasa]||0)-t.tutar;if(t.hedefKasa)bal[t.hedefKasa]=(bal[t.hedefKasa]||0)+t.tutar;}
   });
   return{bal,totalG,totalL};
@@ -1383,16 +1384,12 @@ function renderHesap(){
 
   document.getElementById('hesapList').innerHTML=html;
   document.getElementById('h_net').textContent='₺'+fmt(netTotal);
-  // Attach click listeners to account rows
+  // Attach click listeners via event delegation
   setTimeout(function(){
-    groups.forEach(function(grp){
-      const kKeys=[...ACC_KASA,...(custom.accGroups&&custom.accGroups.kasa||[])];
-      const kKK=[...ACC_KK,...(custom.accGroups&&custom.accGroups.kk||[])];
-      const kD=[...ACC_DIGER,...(custom.accGroups&&custom.accGroups.diger||[])];
-      const allKeys=[...kKeys,...kKK,...kD];
-      allKeys.forEach(function(k){
-        // handled below
-      });
+    var b2=calcBal().bal;
+    document.querySelectorAll('#hesapList [data-acc]').forEach(function(el){
+      el.style.cursor='pointer';
+      el.onclick=function(){ openAccAct(el.dataset.acc, b2[el.dataset.acc]||0); };
     });
   },0);
 }
