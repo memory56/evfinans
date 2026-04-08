@@ -320,7 +320,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <p style="font-size:13px;color:var(--t2);margin-bottom:13px;text-align:center;line-height:1.5;" id="delMsg">Bu işlemi silmek istiyor musunuz?</p>
     <div style="display:flex;flex-direction:column;gap:7px;">
       <button style="background:rgba(231,76,60,.15);color:var(--red);padding:12px;border-radius:11px;border:none;font-size:13px;font-weight:500;cursor:pointer;" onclick="doDel('one')">Sadece bu kaydı sil</button>
-      <button id="delAllBtn" style="background:rgba(231,76,60,.3);color:var(--red);padding:12px;border-radius:11px;border:none;font-size:13px;font-weight:500;cursor:pointer;" onclick="doDel('all')">Tüm seriyi sil</button>
+      <button id="delFwdBtn" style="background:rgba(231,76,60,.25);color:var(--red);padding:12px;border-radius:11px;border:none;font-size:13px;font-weight:500;cursor:pointer;" onclick="doDel('forward')">Bu ve sonraki kayıtları sil</button>
+      <button id="delAllBtn" style="background:rgba(231,76,60,.4);color:var(--red);padding:12px;border-radius:11px;border:none;font-size:13px;font-weight:500;cursor:pointer;" onclick="doDel('all')">Tüm seriyi sil</button>
       <button class="bc" style="padding:12px;border-radius:11px;border:none;font-size:13px;cursor:pointer;" onclick="closeDel()">İptal</button>
     </div>
   </div>
@@ -1174,13 +1175,15 @@ function doDelTx(){
   const series=txs.filter(x=>x.anaIslemId===t.anaIslemId);
   const single=series.length<=1;
   document.getElementById('delMsg').textContent=single?'Bu işlemi silmek istiyor musunuz?':'Bu işlem '+series.length+' kayıtlık bir seri.';
+  document.getElementById('delFwdBtn').style.display=single?'none':'block';
   document.getElementById('delAllBtn').style.display=single?'none':'block';
   document.getElementById('delM').classList.remove('hid');
 }
 function closeDel(){document.getElementById('delM').classList.add('hid');}
 function doDel(scope){
   const t=txs.find(x=>x.id===editTxId);if(!t){closeDel();return;}
-  if(scope==='all')txs=txs.filter(x=>x.anaIslemId!==t.anaIslemId);
+  if(scope==='all') txs=txs.filter(x=>x.anaIslemId!==t.anaIslemId);
+  else if(scope==='forward') txs=txs.filter(x=>(x.anaIslemId||x.id)!==t.anaIslemId||x.tarih<t.tarih);
   else txs=txs.filter(x=>x.id!==editTxId);
   saveData();closeDel();toast('🗑️ Silindi');renderCal();renderHesap();
 }
