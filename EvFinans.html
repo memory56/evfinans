@@ -309,7 +309,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <span id="e_durL" style="font-size:13px;">✅ ÖDENDİ</span>
       <div class="tsw on" id="e_durT" onclick="eTogDur()"></div>
     </div>
-    <div class="mbtns"><button class="bc" onclick="closeEdit()">İptal</button><button class="bk" onclick="saveEdit()">Kaydet</button></div>
+    <div class="mbtns"><button class="bc" onclick="closeEdit()">İptal</button><button class="bk" style="flex:1;" onclick="saveEdit()">Bu kaydı</button><button class="bk" style="flex:1.3;background:var(--teal);" onclick="saveEditAll()">Bu ve sonrakiler</button></div>
   </div>
 </div>
 
@@ -1116,7 +1116,7 @@ function saveTx(){
   const dates=[];const base=new Date(date);
   if(taks>1){for(let i=0;i<taks;i++){const d=new Date(base);d.setMonth(d.getMonth()+i);dates.push(d);}}
   else if(tekp){
-    const end=tkbt?new Date(tkbt):new Date(base.getFullYear()+1,base.getMonth(),base.getDate());
+    const end=tkbt?new Date(tkbt):new Date(2027,11,31); // bitiş yoksa 2027 sonuna kadar
     let d=new Date(base);
     while(d<=end){
       dates.push(new Date(d));
@@ -1251,7 +1251,42 @@ function saveEdit(){
     altGrp2:editEType==='I'?(isVarlık?valt:document.getElementById('e_a2grp').value):(isVarlık?valt:''),
     aciklama:document.getElementById('e_note').value,gerceklesme:paid,
     taksitSayisi:eTaks,tekrarPeriyodu:eTekp||'Tekrar Yok',tekrarBitis:eTkbt};
+  // Sadece bu kaydı güncelle
   saveData();closeEdit();toast('✓ Güncellendi');renderCal();renderHesap();
+}
+function saveEditAll(){
+  // Tüm seriyi güncelle (aynı anaIslemId)
+  const amt=parseFloat(document.getElementById('e_amt').value);
+  if(!amt||amt<=0){toast('Tutar girin!','var(--red)');return;}
+  const idx=txs.findIndex(x=>x.id===editTxId);if(idx<0){closeEdit();return;}
+  const t=txs[idx];
+  const anaId=t.anaIslemId||t.id;
+  const paid=document.getElementById('e_durT').classList.contains('on')?'Gerçekleşmiş':'Gerçekleşmemiş';
+  const isVarlık=document.getElementById('e_acc').value==='Varlık'||document.getElementById('e_hacc').value==='Varlık';
+  const vgrp=isVarlık?document.getElementById('e_vgrp').value:'';
+  const valt=isVarlık?document.getElementById('e_valt').value:'';
+  const eTaks=parseInt(document.getElementById('e_taks').value)||1;
+  const eTekp=document.getElementById('e_tekp').value;
+  const eTkbt=document.getElementById('e_tkbt').value;
+  const newKasa=document.getElementById('e_acc').value;
+  const newAmt=amt;
+  const newNote=document.getElementById('e_note').value;
+  const newMgrp=editEType==='I'?document.getElementById('e_mgrp').value:'';
+  const newAgrp=editEType==='I'?(isVarlık?vgrp:document.getElementById('e_agrp').value):(isVarlık?vgrp:'');
+  const newA2grp=editEType==='I'?(isVarlık?valt:document.getElementById('e_a2grp').value):(isVarlık?valt:'');
+  const newGgrp=editEType==='G'?document.getElementById('e_ggrp').value:'';
+  let count=0;
+  txs.forEach((tx,i)=>{
+    if((tx.anaIslemId||tx.id)!==anaId)return;
+    // Sadece bu kayıttan sonrakileri güncelle (geçmiş gerçekleşmişlere dokunma)
+    if(tx.tarih<t.tarih)return;
+    txs[i]={...tx,tutar:newAmt,kasa:newKasa,aciklama:newNote,
+      masrafGrp:newMgrp,altGrp:newAgrp,altGrp2:newA2grp,gelirAltGrp:newGgrp,
+      taksitSayisi:eTaks,tekrarPeriyodu:eTekp||'Tekrar Yok',tekrarBitis:eTkbt,
+      gerceklesme:tx.tarih===t.tarih?paid:tx.gerceklesme};
+    count++;
+  });
+  saveData();closeEdit();toast('✓ '+count+' kayıt güncellendi');renderCal();renderHesap();
 }
 
 // ═══ CUSTOM OPTIONS ═══
