@@ -676,20 +676,27 @@ function linkRecurring(txList){
   const groups={};
   txList.forEach(t=>{
     const day=t.tarih.slice(8); // gün (01-31)
-    const key=t.islemTuru+'|'+t.kasa+'|'+t.hedefKasa+'|'+t.masrafGrp+'|'+t.altGrp+'|'+t.gelirAltGrp+'|'+t.tutar+'|'+t.aciklama+'|'+day;
+    const key=t.islemTuru+'|'+t.kasa+'|'+(t.hedefKasa||'')+'|'+t.masrafGrp+'|'+t.altGrp+'|'+t.gelirAltGrp+'|'+t.tutar+'|'+(t.aciklama||'')+'|'+day;
     if(!groups[key])groups[key]=[];
     groups[key].push(t);
   });
   Object.values(groups).forEach(grp=>{
     if(grp.length<2)return;
-    // Aylık kontrol: aylar art arda geliyor mu?
     const sorted=grp.slice().sort((a,b)=>a.tarih.localeCompare(b.tarih));
     const months=sorted.map(t=>parseInt(t.tarih.slice(0,4))*12+parseInt(t.tarih.slice(5,7)));
-    const diffs=months.slice(1).map((m,i)=>m-months[i]);
-    if(!diffs.every(d=>d===1))return;
-    // Aylık tekrar - ilk kaydın id'sini anaIslemId yap
-    const anaId=sorted[0].id;
-    sorted.forEach(t=>{t.anaIslemId=anaId;t.tekrarPeriyodu='Aylık';});
+    // Art arda gelen alt grupları ayrı ayrı bağla (boşluk olsa bile çalışır)
+    let runStart=0;
+    for(let i=1;i<=sorted.length;i++){
+      const gap=i===sorted.length||months[i]-months[i-1]!==1;
+      if(gap){
+        const run=sorted.slice(runStart,i);
+        if(run.length>=2){
+          const anaId=run[0].id;
+          run.forEach(t=>{t.anaIslemId=anaId;t.tekrarPeriyodu='Aylık';});
+        }
+        runStart=i;
+      }
+    }
   });
   return txList;
 }
