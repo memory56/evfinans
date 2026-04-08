@@ -1255,7 +1255,6 @@ function saveEdit(){
   saveData();closeEdit();toast('✓ Güncellendi');renderCal();renderHesap();
 }
 function saveEditAll(){
-  // Tüm seriyi güncelle (aynı anaIslemId)
   const amt=parseFloat(document.getElementById('e_amt').value);
   if(!amt||amt<=0){toast('Tutar girin!','var(--red)');return;}
   const idx=txs.findIndex(x=>x.id===editTxId);if(idx<0){closeEdit();return;}
@@ -1265,27 +1264,55 @@ function saveEditAll(){
   const isVarlık=document.getElementById('e_acc').value==='Varlık'||document.getElementById('e_hacc').value==='Varlık';
   const vgrp=isVarlık?document.getElementById('e_vgrp').value:'';
   const valt=isVarlık?document.getElementById('e_valt').value:'';
-  const eTaks=parseInt(document.getElementById('e_taks').value)||1;
   const eTekp=document.getElementById('e_tekp').value;
   const eTkbt=document.getElementById('e_tkbt').value;
   const newKasa=document.getElementById('e_acc').value;
-  const newAmt=amt;
   const newNote=document.getElementById('e_note').value;
   const newMgrp=editEType==='I'?document.getElementById('e_mgrp').value:'';
   const newAgrp=editEType==='I'?(isVarlık?vgrp:document.getElementById('e_agrp').value):(isVarlık?vgrp:'');
   const newA2grp=editEType==='I'?(isVarlık?valt:document.getElementById('e_a2grp').value):(isVarlık?valt:'');
   const newGgrp=editEType==='G'?document.getElementById('e_ggrp').value:'';
+  const newHacc=editEType==='T'?document.getElementById('e_hacc').value:'';
+  const newTp=editEType==='G'?'Gelir':editEType==='T'?'Transfer':'Gider';
+
+  // Mevcut seri kayıtlarını güncelle (bu tarihten itibaren)
   let count=0;
   txs.forEach((tx,i)=>{
     if((tx.anaIslemId||tx.id)!==anaId)return;
-    // Sadece bu kayıttan sonrakileri güncelle (geçmiş gerçekleşmişlere dokunma)
     if(tx.tarih<t.tarih)return;
-    txs[i]={...tx,tutar:newAmt,kasa:newKasa,aciklama:newNote,
-      masrafGrp:newMgrp,altGrp:newAgrp,altGrp2:newA2grp,gelirAltGrp:newGgrp,
-      taksitSayisi:eTaks,tekrarPeriyodu:eTekp||'Tekrar Yok',tekrarBitis:eTkbt,
+    txs[i]={...tx,tutar:amt,kasa:newKasa,hedefKasa:newHacc,aciklama:newNote,
+      islemTuru:newTp,masrafGrp:newMgrp,altGrp:newAgrp,altGrp2:newA2grp,gelirAltGrp:newGgrp,
+      tekrarPeriyodu:eTekp||'Tekrar Yok',tekrarBitis:eTkbt,
       gerceklesme:tx.tarih===t.tarih?paid:tx.gerceklesme};
     count++;
   });
+
+  // Eğer tekrar seçildi ve mevcut seri yoksa (tekrarsız kayıt → tekrara dönüştür)
+  if(eTekp && count<=1){
+    // Bu kayıttan sonra 2027-12-31'e kadar yeni kayıtlar üret
+    const base=new Date(t.tarih);
+    const end=eTkbt?new Date(eTkbt):new Date(2027,11,31);
+    let d=new Date(base);
+    // İlk kaydı atla (zaten güncelledik)
+    if(eTekp==='Günlük')d.setDate(d.getDate()+1);
+    else if(eTekp==='Haftalık')d.setDate(d.getDate()+7);
+    else if(eTekp==='Aylık')d.setMonth(d.getMonth()+1);
+    else d.setFullYear(d.getFullYear()+1);
+    const baseAnaId=t.id;
+    // Önce mevcut kaydın anaIslemId'sini kendisi yap
+    txs[idx]={...txs[idx],anaIslemId:baseAnaId};
+    let nid=Math.max(...txs.map(x=>x.id))+1;
+    while(d<=end){
+      txs.push({...txs[idx],id:nid++,tarih:fmtDate(d),
+        gerceklesme:'Gerçekleşmemiş',anaIslemId:baseAnaId});
+      if(eTekp==='Günlük')d.setDate(d.getDate()+1);
+      else if(eTekp==='Haftalık')d.setDate(d.getDate()+7);
+      else if(eTekp==='Aylık')d.setMonth(d.getMonth()+1);
+      else d.setFullYear(d.getFullYear()+1);
+      count++;
+    }
+  }
+
   saveData();closeEdit();toast('✓ '+count+' kayıt güncellendi');renderCal();renderHesap();
 }
 
