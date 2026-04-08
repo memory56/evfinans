@@ -658,7 +658,7 @@ const CAT_ICONS={Alışveriş:'🛒',Araba:'🚗',Ev:'🏠',Hizmet:'💡',İnter
 // ═══ INIT ═══
 function decompress(seed){
   const{acc,mas,alt,gel,rows}=seed;
-  return rows.map(([id,tarih,tp,k,h,c1,c2,tutar,g,ac])=>({
+  const txList=rows.map(([id,tarih,tp,k,h,c1,c2,tutar,g,ac])=>({
     id,tarih,
     islemTuru:{G:'Gider',L:'Gelir',T:'Transfer'}[tp]||'Gider',
     kasa:acc[k]||'',hedefKasa:h>=0?acc[h]:'',
@@ -669,6 +669,29 @@ function decompress(seed){
     gerceklesme:g?'Gerçekleşmiş':'Gerçekleşmemiş',
     taksitSayisi:1,taksitNo:1,tekrarPeriyodu:'Tekrar Yok',tekrarBitis:'',anaIslemId:id
   }));
+  return linkRecurring(txList);
+}
+function linkRecurring(txList){
+  // Aynı hesap+tutar+kategori+açıklama ile aynı ay günü tekrarlayan kayıtları bağla
+  const groups={};
+  txList.forEach(t=>{
+    const day=t.tarih.slice(8); // gün (01-31)
+    const key=t.islemTuru+'|'+t.kasa+'|'+t.hedefKasa+'|'+t.masrafGrp+'|'+t.altGrp+'|'+t.gelirAltGrp+'|'+t.tutar+'|'+t.aciklama+'|'+day;
+    if(!groups[key])groups[key]=[];
+    groups[key].push(t);
+  });
+  Object.values(groups).forEach(grp=>{
+    if(grp.length<2)return;
+    // Aylık kontrol: aylar art arda geliyor mu?
+    const sorted=grp.slice().sort((a,b)=>a.tarih.localeCompare(b.tarih));
+    const months=sorted.map(t=>parseInt(t.tarih.slice(0,4))*12+parseInt(t.tarih.slice(5,7)));
+    const diffs=months.slice(1).map((m,i)=>m-months[i]);
+    if(!diffs.every(d=>d===1))return;
+    // Aylık tekrar - ilk kaydın id'sini anaIslemId yap
+    const anaId=sorted[0].id;
+    sorted.forEach(t=>{t.anaIslemId=anaId;t.tekrarPeriyodu='Aylık';});
+  });
+  return txList;
 }
 function init(){
   try{custom=JSON.parse(localStorage.getItem(CK)||'{}');}catch(e){custom={};}
@@ -683,7 +706,7 @@ function init(){
     toast('Veriler güncellendi: '+txs.length+' işlem');
   } else {
     const stored=localStorage.getItem(SK);
-    if(stored){try{txs=JSON.parse(stored);}catch(e){txs=[];}}
+    if(stored){try{txs=linkRecurring(JSON.parse(stored));}catch(e){txs=[];}}
     if(!txs||txs.length===0){txs=decompress(SEED);saveData();}
   }
   selDate=new Date();curMonth=selDate.getMonth();curYear=selDate.getFullYear();
