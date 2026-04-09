@@ -5,6 +5,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
 <title>Ev Finans</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23111927'/%3E%3Crect x='2' y='2' width='60' height='60' rx='13' fill='url(%23g)'/%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%234ecdc4'/%3E%3Cstop offset='1' stop-color='%2327ae60'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ctext x='32' y='46' text-anchor='middle' font-family='system-ui' font-size='36' font-weight='700' fill='%23fff'%3E%E2%82%BA%3C/text%3E%3C/svg%3E">
 <style>
 :root{
   --bg:#111927;--bg2:#151e2d;--bg3:#1c2a3a;--card:#1e2d3e;
@@ -234,6 +235,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sa
 .catrow{display:flex;align-items:center;padding:11px 14px;background:var(--card);border-radius:12px;margin-bottom:7px;cursor:pointer;transition:opacity .15s;}
 .catrow:active{opacity:.75;}
 .cat-dot{width:9px;height:9px;border-radius:50%;margin-right:10px;flex-shrink:0;}
+.cat-ic-sm{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;margin-right:10px;flex-shrink:0;}
 .cat-nm{flex:1;font-size:13px;font-weight:500;}
 .cat-bw{width:60px;height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin:0 10px;}
 .cat-bf{height:100%;border-radius:2px;}
@@ -765,7 +767,17 @@ const AYLAR=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağusto
 const AYLAR_K=['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
 const GUNLER=['Pt','Sa','Ça','Pe','Cu','Ct','Pz'];
 const CCOLORS=['#e74c3c','#f5a623','#3498db','#27ae60','#9b59b6','#4ecdc4','#e67e22','#f0b429','#1abc9c','#d35400','#2980b9','#8e44ad','#16a085','#c0392b','#7f8c8d','#2c3e50','#f39c12','#27ae60','#e74c3c'];
-const CAT_ICONS={Alışveriş:'🛒',Araba:'🚗',Ev:'🏠',Hizmet:'💡',İnternet:'📦',Yemek:'🍽️',Giyim:'👗',Sağlık:'🏥',KişiBakım:'💆',Bağış:'❤️',Aidat:'🏛️',Kültürel:'📚',Eğlence:'🎭',Yazılım:'💻',Sigorta:'🛡️',Seyahat:'✈️',Kırtasiye:'📎',Hediye:'🎁',Diğer:'📋'};
+const CAT_ICONS={
+  // Gider ana kategoriler
+  Alışveriş:'🛍️',Araba:'🚗',Ev:'🏠',Hizmet:'📞',İnternet:'🌐',Yemek:'🥗',
+  Giyim:'👔',Sağlık:'❤️‍🩹',KişiBakım:'💈',Bağış:'❤️',Aidat:'🏛️',
+  Kültürel:'🎨',Eğlence:'🎮',Yazılım:'💻',Sigorta:'🛡️',Seyahat:'✈️',
+  Kırtasiye:'✏️',Hediye:'🎁',Diğer:'📋',
+  // Gelir
+  Maaş:'💰',Kira:'🏘️',Faiz:'📊',Promosyon:'🎉',
+  // Transfer
+  Transfer:'↔️',
+};
 
 // ═══ INIT ═══
 function decompress(seed){
@@ -902,20 +914,66 @@ function toast(m,col){
 let calMode='day';
 
 const CAT_IC={
-  Alışveriş:'🛒',Araba:'🚗',Ev:'🏠',Hizmet:'💡',İnternet:'📦',Yemek:'🍽️',
-  Giyim:'👗',Sağlık:'🏥',KişiBakım:'💆',Bağış:'❤️',Aidat:'🏛️',Kültürel:'📚',
-  Eğlence:'🎭',Yazılım:'💻',Sigorta:'🛡️',Seyahat:'✈️',Kırtasiye:'📎',
-  Hediye:'🎁',Diğer:'📋',Transfer:'↔️',
-  Maaş:'💰',Kira:'🏘️',Faiz:'📈',Promosyon:'🎁',
+  // ── Gider ana kategoriler ──
+  Alışveriş:'🛍️', Araba:'🚗',     Ev:'🏠',      Hizmet:'📞',
+  İnternet:'🌐',  Yemek:'🥗',     Giyim:'👔',   Sağlık:'❤️‍🩹',
+  KişiBakım:'💈', Bağış:'❤️',     Aidat:'🏛️',  Kültürel:'🎨',
+  Eğlence:'🎮',   Yazılım:'💻',   Sigorta:'🛡️',Seyahat:'✈️',
+  Kırtasiye:'✏️', Hediye:'🎁',    Diğer:'📋',   Transfer:'↔️',
+  // ── Gelir kategoriler ──
+  Maaş:'💰', Kira:'🏘️', Faiz:'📊', Promosyon:'🎉',
+  // ── Alışveriş alt kategoriler ──
+  Amazon:'📦',   Hepsiburada:'🛍️', N11:'🛍️', Temu:'🛍️',
+  Pazarama:'🛍️',Trendyol:'🛍️',   Market:'🏪', 'Pazar&Manav':'🥕',
+  Kuruyemiş:'🥜',
+  // ── Araba alt kategoriler ──
+  MTV:'📋',         Kasko:'🛡️',    Yakıt:'⛽',   'Bakım, Tamir':'🔧',
+  HGS:'🛣️',        Yıkama:'🚿',   Otopark:'🅿️', Muayene:'🔍',
+  // ── Ev alt kategoriler ──
+  Elektrik:'⚡',   Su:'💧',         Tüp:'🔥',    'İçme Suyu':'🚰',
+  Arıtma:'💧',     Bahçe:'🌿',     Temizlik:'🧹','Halı Yıkama':'🧹',
+  // ── Hizmet alt kategoriler ──
+  'Cep Tel MD':'📱','Cep Tel VD':'📱',
+  // ── Yemek alt kategoriler ──
+  Kasap:'🥩', Balık:'🐟', Fırın:'🍞', Süt:'🥛',
+  'Süt Ürün':'🧀', Yumurta:'🥚', 'Zeytin&Z.Yağ':'🫒',
+  // ── KişiBakım alt kategoriler ──
+  Berber:'✂️', Kuaför:'💇',
+  // ── Bağış alt kategoriler ──
+  Dernek:'🤝',
+  // ── Kültürel alt kategoriler ──
+  Kitap:'📖', Müze:'🏛️', Müzik:'🎵',
+  // ── Yazılım alt kategoriler ──
+  Uygulama:'📱', Apple:'🍎',
+  // ── Seyahat alt kategoriler ──
+  Otobüs:'🚌', Tren:'🚆', 'Taksi, Dolmuş':'🚕',
 };
+// Ana kategori renkleri (Money Pro paleti)
 const CAT_COL={
-  Alışveriş:'#2980b9',Araba:'#7f8c8d',Ev:'#16a085',Hizmet:'#8e44ad',
-  İnternet:'#2c3e50',Yemek:'#d35400',Giyim:'#9b59b6',Sağlık:'#27ae60',
-  KişiBakım:'#1abc9c',Bağış:'#e74c3c',Aidat:'#34495e',Kültürel:'#2980b9',
-  Eğlence:'#8e44ad',Yazılım:'#3498db',Sigorta:'#7f8c8d',Seyahat:'#e67e22',
-  Kırtasiye:'#95a5a6',Hediye:'#e91e63',Diğer:'#546e7a',
-  Maaş:'#27ae60',Kira:'#2ecc71',Faiz:'#27ae60',Promosyon:'#27ae60',
+  Alışveriş:'#4a90e2', Araba:'#8e9eab',    Ev:'#00b894',     Hizmet:'#6c5ce7',
+  İnternet:'#2d3436',  Yemek:'#e17055',    Giyim:'#a29bfe',  Sağlık:'#e74c3c',
+  KişiBakım:'#00cec9', Bağış:'#fd79a8',    Aidat:'#636e72',  Kültürel:'#0984e3',
+  Eğlence:'#8e44ad',   Yazılım:'#0652dd',  Sigorta:'#7f8c8d',Seyahat:'#e67e22',
+  Kırtasiye:'#b2bec3', Hediye:'#e84393',   Diğer:'#546e7a',
+  Maaş:'#27ae60',      Kira:'#00b894',     Faiz:'#00cec9',   Promosyon:'#2ecc71',
   Transfer:'#3498db',
+};
+// Alt kategoriler → parent rengi için harita
+const ALT_PARENT_COL={
+  Amazon:'#4a90e2',Hepsiburada:'#4a90e2',N11:'#4a90e2',Temu:'#4a90e2',
+  Pazarama:'#4a90e2',Trendyol:'#4a90e2',Market:'#4a90e2','Pazar&Manav':'#4a90e2',Kuruyemiş:'#4a90e2',
+  MTV:'#8e9eab',Kasko:'#8e9eab',Yakıt:'#8e9eab','Bakım, Tamir':'#8e9eab',
+  HGS:'#8e9eab',Yıkama:'#8e9eab',Otopark:'#8e9eab',Muayene:'#8e9eab',
+  Elektrik:'#00b894',Su:'#00b894',Tüp:'#00b894','İçme Suyu':'#00b894',
+  Arıtma:'#00b894',Bahçe:'#00b894',Temizlik:'#00b894','Halı Yıkama':'#00b894',
+  'Cep Tel MD':'#6c5ce7','Cep Tel VD':'#6c5ce7',
+  Kasap:'#e17055',Balık:'#e17055',Fırın:'#e17055',Süt:'#e17055',
+  'Süt Ürün':'#e17055',Yumurta:'#e17055','Zeytin&Z.Yağ':'#e17055',
+  Berber:'#00cec9',Kuaför:'#00cec9',
+  Dernek:'#fd79a8',
+  Kitap:'#0984e3',Müze:'#0984e3',Müzik:'#0984e3',
+  Uygulama:'#0652dd',Apple:'#0652dd',
+  Otobüs:'#e67e22',Tren:'#e67e22','Taksi, Dolmuş':'#e67e22',
 };
 
 function goToday(){
@@ -1057,8 +1115,8 @@ function mpRow(t,todayS,showDate){
   const isTransfer=t.islemTuru==='Transfer';
   const cat=t.masrafGrp||t.gelirAltGrp||(isTransfer?'Transfer':'Diğer');
   const subcat=t.altGrp||'';
-  const icon=CAT_IC[cat]||(isIncome?'💰':isTransfer?'↔️':'📋');
-  const bgCol=CAT_COL[cat]||(isIncome?'#27ae60':isTransfer?'#3498db':'#546e7a');
+  const icon=(subcat&&CAT_IC[subcat])||CAT_IC[cat]||(isIncome?'💰':isTransfer?'↔️':'📋');
+  const bgCol=CAT_COL[cat]||ALT_PARENT_COL[cat]||(isIncome?'#27ae60':isTransfer?'#3498db':'#546e7a');
   // Name: cat (subcat) or aciklama
   let name=cat;
   if(subcat&&subcat!==cat)name+=' ('+subcat+(t.altGrp2?'/'+t.altGrp2:'')+')';
@@ -1988,10 +2046,12 @@ function renderRaporLevel0(all,ge,gi){
   let html='';
   sorted.forEach(([k,v],i)=>{
     const pct=Math.round(v/total*100);
+    const col=CAT_COL[k]||CCOLORS[i%CCOLORS.length];
+    const ic=CAT_IC[k]||'📋';
     html+=`<div class="catrow" onclick="rDrill(0,'${k.replace(/'/g,"\\'")}')">
-      <div class="cat-dot" style="background:${CCOLORS[i%CCOLORS.length]};"></div>
+      <div class="cat-ic-sm" style="background:${col}22;">${ic}</div>
       <div class="cat-nm">${k}</div>
-      <div class="cat-bw"><div class="cat-bf" style="width:${pct}%;background:${CCOLORS[i%CCOLORS.length]};"></div></div>
+      <div class="cat-bw"><div class="cat-bf" style="width:${pct}%;background:${col};"></div></div>
       <div class="cat-am">${fmt(v)} ₺</div>
       <div class="cat-arr">›</div></div>`;
   });
@@ -2008,13 +2068,15 @@ function renderRaporLevel1(all){
   const sorted=Object.entries(data).sort((a,b)=>b[1]-a[1]);
   const total=sorted.reduce((s,v)=>s+v[1],0)||1;
   renderPie(sorted,total,isG);
+  const parentCol=CAT_COL[rCat]||'#546e7a';
   let html='';
   sorted.forEach(([k,v],i)=>{
     const pct=Math.round(v/total*100);
+    const ic=CAT_IC[k]||CAT_IC[rCat]||'📋';
     html+=`<div class="catrow" onclick="rDrill(1,'${k.replace(/'/g,"\\'")}')">
-      <div class="cat-dot" style="background:${CCOLORS[i%CCOLORS.length]};"></div>
+      <div class="cat-ic-sm" style="background:${parentCol}22;">${ic}</div>
       <div class="cat-nm">${k}</div>
-      <div class="cat-bw"><div class="cat-bf" style="width:${pct}%;background:${CCOLORS[i%CCOLORS.length]};"></div></div>
+      <div class="cat-bw"><div class="cat-bf" style="width:${pct}%;background:${parentCol};"></div></div>
       <div class="cat-am">${fmt(v)} ₺</div>
       <div class="cat-arr">›</div></div>`;
   });
