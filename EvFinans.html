@@ -1661,23 +1661,15 @@ function renderHesap(){
     hiddenWithData.forEach(k=>{
       const b=bal[k]||0;
       const amtCl=b<0?' neg':'';
-      const safeId='unhide_'+k.replace(/[^a-zA-Z0-9]/g,'_');
-      html+='<div class="bi" style="background:var(--bg3);opacity:.7;">'
+      html+='<div class="bi" data-acc="'+k+'" style="background:var(--bg3);opacity:.7;">'
         +'<div class="bi-ic">'+(ACC_ICONS[k]||'🏦')+'</div>'
         +'<div class="bi-name" style="color:var(--t3);">'+k+'</div>'
         +'<div style="display:flex;align-items:center;gap:6px;">'
         +'<div class="bi-amt'+amtCl+'">₺'+fmt(Math.abs(b))+'</div>'
-        +'<button id="'+safeId+'" style="background:rgba(78,205,196,.15);color:var(--teal);border:none;border-radius:6px;font-size:11px;padding:3px 8px;cursor:pointer;">Göster</button>'
+        +'<span style="color:var(--t3);font-size:16px;">›</span>'
         +'</div></div>';
     });
     html+='</div></div>';
-    setTimeout(function(){
-      hiddenWithData.forEach(k=>{
-        const safeId2='unhide_'+k.replace(/[^a-zA-Z0-9]/g,'_');
-        const btn=document.getElementById(safeId2);
-        if(btn) btn.onclick=function(e){ e.stopPropagation(); unhideAcc(k); };
-      });
-    },0);
   }
 
   document.getElementById('hesapList').innerHTML=html;
@@ -1710,6 +1702,15 @@ function saveHidden(list){ custom.hiddenAccs=list; saveCustom(); }
 function openAccAct(name, bal){
   curAccName=name; curAccBal=bal;
   document.getElementById('accActTitle').textContent=name+' — ₺'+fmt(Math.abs(bal));
+  const isHidden=getHiddenAccs().includes(name);
+  const hideBtn=document.querySelector('#accActS .asbtn.red');
+  if(hideBtn){
+    if(isHidden){
+      hideBtn.innerHTML='<div class="asi" style="background:rgba(78,205,196,.15);">👁️</div>Tekrar Göster';
+    } else {
+      hideBtn.innerHTML='<div class="asi" style="background:rgba(231,76,60,.1);">👁️</div>Listeden Kaldır';
+    }
+  }
   document.getElementById('accActS').classList.remove('hid');
 }
 function closeAccAct(){ document.getElementById('accActS').classList.add('hid'); }
@@ -1797,17 +1798,24 @@ function confirmAccRename(){
   fillFormSelects(); renderHesap();
 }
 
-// Hesap gizle (listeden kaldır, veri korunur)
+// Hesap gizle/göster (toggle)
 function hideAcc(){
   closeAccAct();
+  const hidden=getHiddenAccs();
+  if(hidden.includes(curAccName)){
+    // Already hidden → unhide
+    saveHidden(hidden.filter(h=>h!==curAccName));
+    toast(curAccName+' tekrar gösterildi.');
+    renderHesap();
+    return;
+  }
   // Check if account has future planned transactions
   const todayS=fmtDate(new Date());
   const futureTxs=txs.filter(t=>t.kasa===curAccName&&t.tarih>todayS&&t.gerceklesme==='Gerçekleşmemiş');
   if(futureTxs.length){
     if(!confirm(curAccName+' hesabında '+futureTxs.length+' planlanmış işlem var. Yine de gizlemek istiyor musunuz?')) return;
   }
-  const hidden=getHiddenAccs();
-  if(!hidden.includes(curAccName)) hidden.push(curAccName);
+  hidden.push(curAccName);
   saveHidden(hidden);
   toast(curAccName+' gizlendi. Veriler korunuyor.');
   renderHesap();
