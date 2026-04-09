@@ -280,8 +280,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     </div>
     <div id="e_rvarlik">
       <div class="mlbl">Varlık Türü</div>
-      <div style="display:flex;gap:6px;align-items:center;"><select class="msel" id="e_vgrp" onchange="eRefVarlık()" style="flex:1;"></select><button class="sadd" onclick="showOpt('vgrp','e_vgrp',null)" style="font-size:20px;background:none;border:none;color:var(--teal);cursor:pointer;padding:0 4px;">＋</button></div>
-      <div id="e_rvalt"><div class="mlbl">Tür Detayı</div><div style="display:flex;gap:6px;align-items:center;"><select class="msel" id="e_valt" style="flex:1;"></select><button class="sadd" onclick="showOpt('valt','e_valt',document.getElementById('e_vgrp').value)" style="font-size:20px;background:none;border:none;color:var(--teal);cursor:pointer;padding:0 4px;">＋</button></div></div>
+      <select class="msel" id="e_vgrp" onchange="eRefVarlık()"></select>
+      <div id="e_rvalt"><div class="mlbl">Tür Detayı</div><select class="msel" id="e_valt"></select></div>
     </div>
     <div class="mlbl">Taksit Sayısı</div>
     <select class="msel" id="e_taks">
@@ -430,7 +430,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
   <div class="fsec">
     <div id="fTypeBadge" style="text-align:center;padding:10px 0 4px;font-size:12px;color:var(--t3);">İşlem Türü</div>
-    <div class="famount"><div class="cur">₺ TRY</div><input type="number" id="f_amt" placeholder="0" step="0.01" min="0" inputmode="decimal"></div>
+    <div class="famount">
+      <div class="cur">₺ TRY</div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:6px;">
+        <button id="f_sign_btn" onclick="toggleAmtSign()" style="background:rgba(78,90,110,.5);border:none;color:var(--t1);font-size:20px;font-weight:700;cursor:pointer;border-radius:8px;padding:2px 10px;line-height:1.4;flex-shrink:0;">+</button>
+        <input type="number" id="f_amt" placeholder="0" step="0.01" min="0" inputmode="decimal">
+      </div>
+    </div>
     <div class="fgrp" id="f_gKasa">
       <div class="frow"><span class="ficon">🏦</span><span class="flbl">Hesap</span><div class="saw"><select id="f_acc"></select><button class="sadd" onclick="showOpt('acc','f_acc',null)">＋</button></div></div>
     </div>
@@ -446,8 +452,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <div class="frow hid" id="f_ralt2"><span class="ficon">📄</span><span class="flbl">Alt 2</span><div class="saw"><select id="f_a2grp"></select><button class="sadd" onclick="showOpt('a2grp','f_a2grp',document.getElementById('f_agrp').value)">＋</button></div></div>
     </div>
     <div class="fgrp hid" id="f_rvarlik">
-      <div class="frow"><span class="ficon">💎</span><span class="flbl">Varlık Türü</span><div class="saw"><select id="f_vgrp" onchange="refreshVarlıkAlt()"></select><button class="sadd" onclick="showOpt('vgrp','f_vgrp',null)">＋</button></div></div>
-      <div class="frow hid" id="f_rvalt"><span class="ficon">📐</span><span class="flbl">Tür Detayı</span><div class="saw"><select id="f_valt"></select><button class="sadd" onclick="showOpt('valt','f_valt',document.getElementById('f_vgrp').value)">＋</button></div></div>
+      <div class="frow"><span class="ficon">💎</span><span class="flbl">Varlık Türü</span><select id="f_vgrp" onchange="refreshVarlıkAlt()"></select></div>
+      <div class="frow hid" id="f_rvalt"><span class="ficon">📐</span><span class="flbl">Tür Detayı</span><select id="f_valt"></select></div>
     </div>
     <div class="fgrp">
       <div class="frow"><span class="ficon">📅</span><span class="flbl">Tarih</span><input type="date" id="f_date" style="color-scheme:dark;"></div>
@@ -640,8 +646,8 @@ const ACC=['Cüzdan','Enpara','Enpara KK','Garanti','HGS','TEB','TEB KK','TEB VD
 const MAS=['Alışveriş','Araba','Bağış','Diğer','Ev','Eğlence','Giyim','Hediye','Hizmet','KişiBakım','Kültürel','Kırtasiye','Sağlık','Seyahat','Sigorta','Yazılım','Yemek','İnternet','Aidat'];
 const ALT=['Amazon','Apple','Arıtma','Bahçe','Bakım, Tamir','Balık','Bağış','Berber','Cep Tel MD','Cep Tel VD','Dernek','Diğer','Elektrik','Ev','Fırın','HGS','Halı Yıkama','Hepsiburada','Kasap','Kasko','Kitap','Kuaför','Kuruyemiş','MTV','Market','Muayene','Müze','Müzik','N11','Otobüs','Otopark','Pazar&Manav','Pazarama','Su','Süt','Süt Ürün','Taksi, Dolmuş','Temizlik','Temu','Tren','Trendyol','Tüp','Uygulama','Yakıt','Yumurta','Yıkama','Zeytin&Z.Yağ','İnternet','İçme Suyu'];
 const GEL=['Diğer','Faiz','Kira','Maaş','Promosyon'];
-const VARLIK_TURLERI=['Altın','USD','EUR','Borsa','Gümüş'];
-const VARLIK_ALT={Altın:['Gram','Çeyrek','Yarım Altın','Tam Altın'],USD:[],EUR:[],Borsa:[],Gümüş:['Gram']};
+const VARLIK_TURLERI=['Altın','USD','EUR','Borsa'];
+const VARLIK_ALT={Altın:['Gram','Çeyrek','Yarım Altın','Tam Altın'],USD:[],EUR:[],Borsa:[]};
 
 let accList=[...ACC],masList=[...MAS],altList=[...ALT],gelList=[...GEL];
 const ACC_KASA=['Cüzdan','Enpara','TEB','TEB VD','Garanti','İşbank','Vahide','Enpara VD','Ziraat'];
@@ -721,8 +727,6 @@ function loadCustomLists(){
   if(custom.acc)custom.acc.forEach(a=>{if(!accList.includes(a))accList.push(a);});
   if(custom.gel)custom.gel.forEach(g=>{if(!gelList.includes(g))gelList.push(g);});
   if(custom.mas)custom.mas.forEach(m=>{if(!masList.includes(m))masList.push(m);});
-  if(custom.varlıkTurleri)custom.varlıkTurleri.forEach(v=>{if(!VARLIK_TURLERI.includes(v)){VARLIK_TURLERI.push(v);if(!VARLIK_ALT[v])VARLIK_ALT[v]=[];}});
-  if(custom.varlıkAlt)Object.keys(custom.varlıkAlt).forEach(tur=>{custom.varlıkAlt[tur].forEach(x=>{if(!VARLIK_ALT[tur])VARLIK_ALT[tur]=[];if(!VARLIK_ALT[tur].includes(x))VARLIK_ALT[tur].push(x);});});
 }
 function saveData(){
   localStorage.setItem(SK,JSON.stringify(txs));
@@ -984,7 +988,20 @@ function mpRow(t,todayS,showDate){
 function txCard(t,todayS){return mpRow(t,todayS||fmtDate(new Date()),true);}
 
 
-// ═══ ADD TYPE SHEET ═══
+// ═══ AMOUNT SIGN TOGGLE ═══
+let fAmtSign='+';
+function toggleAmtSign(){
+  fAmtSign=fAmtSign==='+'?'-':'+';
+  const btn=document.getElementById('f_sign_btn');
+  btn.textContent=fAmtSign;
+  btn.style.background=fAmtSign==='-'?'rgba(231,76,60,.4)':'rgba(78,90,110,.5)';
+  btn.style.color=fAmtSign==='-'?'var(--red)':'var(--t1)';
+}
+function resetAmtSign(){
+  fAmtSign='+';
+  const btn=document.getElementById('f_sign_btn');
+  if(btn){btn.textContent='+';btn.style.background='rgba(78,90,110,.5)';btn.style.color='var(--t1)';}
+}
 function showAddType(){document.getElementById('addTypeS').classList.remove('hid');}
 function closeAddType(){document.getElementById('addTypeS').classList.add('hid');}
 function openAddType(type){
@@ -1032,23 +1049,13 @@ function openAddType(type){
   document.getElementById('f_ralt2').classList.add('hid');
   showPg('addtx');
 }
-function getVarlıkAlt(tur){
-  let list=[...(VARLIK_ALT[tur]||[])];
-  if(custom.varlıkAlt&&custom.varlıkAlt[tur])custom.varlıkAlt[tur].forEach(x=>{if(!list.includes(x))list.push(x);});
-  return list;
-}
-function getVarlıkTurleri(){
-  let list=[...VARLIK_TURLERI];
-  if(custom.varlıkTurleri)custom.varlıkTurleri.forEach(x=>{if(!list.includes(x))list.push(x);});
-  return list;
-}
 function fillVarlıkSel(){
-  fillSel('f_vgrp',getVarlıkTurleri());
+  fillSel('f_vgrp',VARLIK_TURLERI);
   refreshVarlıkAlt();
 }
 function refreshVarlıkAlt(){
   const vt=document.getElementById('f_vgrp').value;
-  const alts=getVarlıkAlt(vt);
+  const alts=VARLIK_ALT[vt]||[];
   document.getElementById('f_rvalt').classList.toggle('hid',!alts.length);
   fillSel('f_valt',alts,true);
 }
@@ -1073,6 +1080,7 @@ function togDur(){
 }
 function resetForm(){
   document.getElementById('f_amt').value='';
+  resetAmtSign();
   document.getElementById('f_note').value='';
   document.getElementById('f_taks').value='1';
   document.getElementById('f_tekp').value='';
@@ -1141,6 +1149,7 @@ function getAlt2For(a){
 function saveTx(){
   const amt=parseFloat(document.getElementById('f_amt').value);
   if(!amt||amt<=0){toast('Tutar girin!','var(--red)');return;}
+  const signedAmt=fAmtSign==='-'?-amt:amt;
   const date=document.getElementById('f_date').value;if(!date){toast('Tarih seçin!','var(--red)');return;}
   const paid=document.getElementById('f_durT').classList.contains('on');
   const taks=parseInt(document.getElementById('f_taks').value)||1;
@@ -1162,7 +1171,7 @@ function saveTx(){
       else d.setFullYear(d.getFullYear()+1);
     }
   }else dates.push(base);
-  const perAmt=taks>1?Math.round(amt/taks*100)/100:amt;
+  const perAmt=taks>1?Math.round(signedAmt/taks*100)/100:signedAmt;
   let nid=nextId;
   dates.forEach((d,i)=>{
     const vgrp=isVarlık?document.getElementById('f_vgrp').value:'';
@@ -1236,7 +1245,7 @@ function openEdit(t){
   const a2=getAlt2For(t.altGrp||'');
   document.getElementById('e_ralt2').style.display=a2.length?'':'none';
   fillSel('e_a2grp',a2,true);
-  fillSel('e_vgrp',getVarlıkTurleri());
+  fillSel('e_vgrp',VARLIK_TURLERI);
   eRefVarlık();
   document.getElementById('e_amt').value=t.tutar;
   document.getElementById('e_date').value=t.tarih;
@@ -1264,7 +1273,7 @@ function openEdit(t){
 }
 function eRefMas(){const m=document.getElementById('e_mgrp').value;fillSel('e_agrp',getAltFor(m),true);eRefAlt();}
 function eRefAlt(){const a=document.getElementById('e_agrp').value;const a2=getAlt2For(a);document.getElementById('e_ralt2').style.display=a2.length?'':'none';fillSel('e_a2grp',a2,true);}
-function eRefVarlık(){const vt=document.getElementById('e_vgrp').value;const alts=getVarlıkAlt(vt);document.getElementById('e_rvalt').style.display=alts.length?'':'none';fillSel('e_valt',alts,true);}
+function eRefVarlık(){const vt=document.getElementById('e_vgrp').value;const alts=VARLIK_ALT[vt]||[];document.getElementById('e_rvalt').style.display=alts.length?'':'none';fillSel('e_valt',alts,true);}
 function eTogDur(){const t=document.getElementById('e_durT'),l=document.getElementById('e_durL');t.classList.toggle('on');l.textContent=t.classList.contains('on')?'✅ ÖDENDİ':'⏳ PLANLANMIŞ';}
 function closeEdit(){document.getElementById('editM').classList.add('hid');editTxId=null;}
 function saveEdit(){
@@ -1358,9 +1367,8 @@ function saveEditAll(){
 let curOpt=null;
 function showOpt(type,selId,parent){
   if((type==='agrp'||type==='a2grp')&&!parent){toast('Önce üst grubu seçin!','var(--orange)');return;}
-  if(type==='valt'&&!parent){toast('Önce varlık türünü seçin!','var(--orange)');return;}
   curOpt={type,selId,parent};
-  const titles={acc:'Yeni Hesap',ggrp:'Yeni Gelir Türü',mgrp:'Yeni Kategori',agrp:'Yeni Alt Kategori',a2grp:'Yeni Alt 2',vgrp:'Yeni Varlık Türü',valt:'Yeni Tür Detayı'};
+  const titles={acc:'Yeni Hesap',ggrp:'Yeni Gelir Türü',mgrp:'Yeni Kategori',agrp:'Yeni Alt Kategori',a2grp:'Yeni Alt 2'};
   document.getElementById('addOptT').textContent=titles[type]||'Yeni Seçenek';
   document.getElementById('addOptI').value='';
   document.getElementById('addOptM').classList.remove('hid');
@@ -1375,20 +1383,6 @@ function confirmOpt(){
   else if(type==='mgrp'){if(!custom.mas)custom.mas=[];if(!custom.mas.includes(val)){custom.mas.push(val);masList.push(val);}fillSel(selId,masList,true);}
   else if(type==='agrp'){if(!custom.altByMas)custom.altByMas={};if(!custom.altByMas[parent])custom.altByMas[parent]=[];if(!custom.altByMas[parent].includes(val))custom.altByMas[parent].push(val);fillSel(selId,getAltFor(parent),true);}
   else if(type==='a2grp'){if(!custom.alt2ByAlt)custom.alt2ByAlt={};if(!custom.alt2ByAlt[parent])custom.alt2ByAlt[parent]=[];if(!custom.alt2ByAlt[parent].includes(val))custom.alt2ByAlt[parent].push(val);fillSel(selId,getAlt2For(parent),true);}
-  else if(type==='vgrp'){
-    if(!custom.varlıkTurleri)custom.varlıkTurleri=[];
-    if(!custom.varlıkTurleri.includes(val)){custom.varlıkTurleri.push(val);VARLIK_TURLERI.push(val);VARLIK_ALT[val]=[];}
-    fillSel(selId,VARLIK_TURLERI);
-  }
-  else if(type==='valt'){
-    if(!custom.varlıkAlt)custom.varlıkAlt={};
-    if(!custom.varlıkAlt[parent])custom.varlıkAlt[parent]=[];
-    if(!custom.varlıkAlt[parent].includes(val)){custom.varlıkAlt[parent].push(val);if(!VARLIK_ALT[parent])VARLIK_ALT[parent]=[];VARLIK_ALT[parent].push(val);}
-    fillSel(selId,getVarlıkAlt(parent),true);
-    // tür detayı satırını göster
-    const rvalt=document.getElementById('f_rvalt')||document.getElementById('e_rvalt');
-    if(rvalt)rvalt.style.display='';
-  }
   document.getElementById(selId).value=val;
   saveCustom();cancelOpt();toast('✓ '+val+' eklendi');
 }
@@ -1506,7 +1500,7 @@ function renderHesap(){
       row+='<div class="bi-ic">'+ic2+'</div>';
       row+='<div class="bi-name">'+k+'</div>';
       row+='<div style="display:flex;align-items:center;gap:6px;">';
-      row+='<div class="bi-amt'+neg+'">'+'₺'+fmt(Math.abs(b))+'</div>';
+      row+='<div class="bi-amt'+neg+'">'+(b<0?'−':'')+'₺'+fmt(Math.abs(b))+'</div>';
       row+='<span style="color:var(--t3);font-size:16px;">›</span>';
       row+='</div></div>';
       html+=row;
@@ -1528,7 +1522,7 @@ function renderHesap(){
         +'<div class="bi-ic">'+(ACC_ICONS[k]||'🏦')+'</div>'
         +'<div class="bi-name" style="color:var(--t3);">'+k+'</div>'
         +'<div style="display:flex;align-items:center;gap:6px;">'
-        +'<div class="bi-amt'+amtCl+'">₺'+fmt(Math.abs(b))+'</div>'
+        +'<div class="bi-amt'+amtCl+'">'+(b<0?'−':'')+'₺'+fmt(Math.abs(b))+'</div>'
         +'<button id="'+safeId+'" style="background:rgba(78,205,196,.15);color:var(--teal);border:none;border-radius:6px;font-size:11px;padding:3px 8px;cursor:pointer;">Göster</button>'
         +'</div></div>';
     });
