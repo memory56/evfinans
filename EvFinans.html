@@ -373,9 +373,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <div class="mbox">
     <div class="mtitle">Bakiye Düzelt — <span id="balAdjAccName"></span></div>
     <div style="font-size:11px;color:var(--t2);margin-bottom:10px;text-align:center;">Mevcut bakiye: <b id="balAdjCurrent"></b></div>
-    <div class="mlbl">Hedef Bakiye (₺)</div>
-    <div class="eamount"><input type="number" id="balAdjTarget" placeholder="0" step="0.01" inputmode="decimal"></div>
-    <div style="font-size:11px;color:var(--t3);margin-top:6px;">Fark kadar "Bakiye Düzeltme" işlemi oluşturulur. Excel'de korunur.</div>
+    <div class="mlbl">Düzeltme Tutarı (₺)</div>
+    <div class="eamount"><input type="number" id="balAdjTarget" placeholder="0" step="0.01" min="0" inputmode="decimal">
+    <button id="balAdj_sign_btn" onclick="balAdjToggleSign()" style="margin-top:8px;background:rgba(78,90,110,.5);border:none;color:var(--t1);font-size:15px;font-weight:600;cursor:pointer;border-radius:8px;padding:5px 20px;">+ Pozitif</button></div>
+    <div style="font-size:11px;color:var(--t3);margin-top:6px;">"Bakiye Düzeltme" işlemi oluşturulur. Excel'de korunur.</div>
     <div class="mbtns"><button class="bc" onclick="closeBalAdj()">İptal</button><button class="bk" onclick="confirmBalAdj()">Uygula</button></div>
   </div>
 </div>
@@ -965,9 +966,12 @@ function mpRow(t,todayS,showDate){
   const dateLabel=AYLAR_K[parseInt(dp[1])-1]+' '+parseInt(dp[2]);
   const clockIcon='⏱';
   // Amount color class
+  const isDuzeltme=t.aciklama==='Bakiye Düzeltme';
+  const varlıkAccs=[...ACC_VARLIK,...((custom&&custom.accGroups&&custom.accGroups.varlik)||[])];
+  const isVarlıkAcc=varlıkAccs.includes(t.kasa);
   let amtCl;
   if(isTransfer) amtCl='blue';
-  else if(isIncome) amtCl='green';
+  else if(isIncome||( isDuzeltme&&isVarlıkAcc)) amtCl='green';
   else if(isLate) amtCl='red';
   else amtCl='gray';
   // Account sub
@@ -1623,8 +1627,19 @@ function openAccAct(name, bal){
 function closeAccAct(){ document.getElementById('accActS').classList.add('hid'); }
 
 // Bakiye düzeltme
+let balAdjSign='+';
+function balAdjToggleSign(){
+  balAdjSign=balAdjSign==='+'?'-':'+';
+  const btn=document.getElementById('balAdj_sign_btn');
+  btn.textContent=balAdjSign==='-'?'− Negatif':'+ Pozitif';
+  btn.style.background=balAdjSign==='-'?'rgba(231,76,60,.4)':'rgba(78,90,110,.5)';
+  btn.style.color=balAdjSign==='-'?'var(--red)':'var(--t1)';
+}
 function showBalAdj(){
   closeAccAct();
+  balAdjSign='+';
+  const btn=document.getElementById('balAdj_sign_btn');
+  if(btn){btn.textContent='+ Pozitif';btn.style.background='rgba(78,90,110,.5)';btn.style.color='var(--t1)';}
   document.getElementById('balAdjAccName').textContent=curAccName;
   document.getElementById('balAdjCurrent').textContent='₺'+fmt(curAccBal);
   document.getElementById('balAdjTarget').value='';
@@ -1633,11 +1648,9 @@ function showBalAdj(){
 }
 function closeBalAdj(){ document.getElementById('balAdjM').classList.add('hid'); }
 function confirmBalAdj(){
-  const target=parseFloat(document.getElementById('balAdjTarget').value);
-  if(isNaN(target)){ toast('Geçerli bir tutar girin','var(--red)'); return; }
-  const diff=Math.round((target-curAccBal)*100)/100;
-  if(diff===0){ closeBalAdj(); return; }
-  // Create balance adjustment transaction
+  const amt=parseFloat(document.getElementById('balAdjTarget').value);
+  if(!amt||amt<=0){ toast('Geçerli bir tutar girin','var(--red)'); return; }
+  const diff=balAdjSign==='-'?-amt:amt;
   const nextId=txs.length?Math.max(...txs.map(t=>t.id))+1:1;
   const isIncome=diff>0;
   txs.push({
@@ -1653,7 +1666,7 @@ function confirmBalAdj(){
     tekrarPeriyodu:'Tekrar Yok', tekrarBitis:'', anaIslemId:nextId
   });
   saveData(); closeBalAdj();
-  toast('Bakiye düzeltildi: '+(diff>0?'+':'')+'₺'+fmt(diff));
+  toast('Bakiye düzeltildi: '+(diff>0?'+':'-')+'₺'+fmt(Math.abs(diff)));
   renderHesap(); renderCal();
 }
 
