@@ -119,7 +119,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .bi-ic{width:30px;height:30px;border-radius:8px;background:var(--bg3);display:flex;align-items:center;justify-content:center;margin-right:10px;font-size:13px;flex-shrink:0;}
 .bi-name{flex:1;font-size:13px;}
 .bi-amt{font-size:13px;font-weight:500;color:var(--green);text-align:right;}
-.bi-amt.neg{color:var(--red);}
+.bi-amt.neg{color:var(--t2);}
 .gtotal{margin:5px 14px 14px;padding:14px;background:linear-gradient(135deg,var(--teal),var(--blue));border-radius:12px;text-align:center;}
 .gtotal .gl{font-size:10px;opacity:.8;}
 .gtotal .gv{font-size:26px;font-weight:600;margin-top:3px;}
@@ -968,10 +968,7 @@ function mpRow(t,todayS,showDate){
   let amtCl;
   if(isTransfer) amtCl='blue';
   else if(isIncome) amtCl='green';
-  else if(isLate) amtCl='red';
-  else if(isPaid) amtCl='gray';
-  else amtCl='blue';
-  const sign=isIncome?'+':'';
+  else amtCl='gray';
   // Account sub
   const accLine=t.kasa+(t.hedefKasa?' → '+t.hedefKasa:'');
   return '<div class="mp-row" onclick="openAct('+t.id+')">'
@@ -980,7 +977,7 @@ function mpRow(t,todayS,showDate){
     +'<div class="mp-name">'+name+'</div>'
     +'<div class="mp-sub">'+(showDate?'<span>'+dateLabel+'</span><span>'+clockIcon+'</span><span style="color:var(--t3)">'+accLine+'</span>':'<span>'+accLine+'</span>')+'</div>'
     +'</div>'
-    +'<div class="mp-amt '+amtCl+'">'+sign+'₺'+fmt(t.tutar)+'</div>'
+    +'<div class="mp-amt '+amtCl+'">₺'+fmt(Math.abs(t.tutar))+'</div>'
     +'</div>';
 }
 
@@ -1544,7 +1541,7 @@ function renderHesap(){
     const items=grp.keys.filter(k=>accList.includes(k)&&!hiddenAccs.includes(k));
     if(!items.length)return;
     let grpTotal=0;items.forEach(k=>grpTotal+=(bal[k]||0));
-    var showGrpTotal=grp.title!=='KASA & BANKA';  html+='<div class="bsec"><div class="bsec-h"><span class="bsec-ht">'+grp.title+'</span>'+(showGrpTotal?'<span class="bsec-tot">₺'+fmt(grpTotal)+'</span>':'')+'</div>';
+    var showGrpTotal=grp.title!=='KASA & BANKA';  html+='<div class="bsec"><div class="bsec-h"><span class="bsec-ht">'+grp.title+'</span>'+(showGrpTotal?'<span class="bsec-tot">₺'+fmt(Math.abs(grpTotal))+'</span>':'')+'</div>';
     items.forEach(function(k){
       var b=bal[k]||0; netTotal+=b;
       var neg=b<0?' neg':'';
@@ -1553,7 +1550,7 @@ function renderHesap(){
       row+='<div class="bi-ic">'+ic2+'</div>';
       row+='<div class="bi-name">'+k+'</div>';
       row+='<div style="display:flex;align-items:center;gap:6px;">';
-      row+='<div class="bi-amt'+neg+'">'+(b<0?'−':'')+'₺'+fmt(Math.abs(b))+'</div>';
+      row+='<div class="bi-amt'+neg+'">'+'₺'+fmt(Math.abs(b))+'</div>';
       row+='<span style="color:var(--t3);font-size:16px;">›</span>';
       row+='</div></div>';
       html+=row;
