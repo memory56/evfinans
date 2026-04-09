@@ -280,8 +280,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     </div>
     <div id="e_rvarlik">
       <div class="mlbl">Varlık Türü</div>
-      <select class="msel" id="e_vgrp" onchange="eRefVarlık()"></select>
-      <div id="e_rvalt"><div class="mlbl">Tür Detayı</div><select class="msel" id="e_valt"></select></div>
+      <div style="display:flex;gap:6px;align-items:center;"><select class="msel" id="e_vgrp" onchange="eRefVarlık()" style="flex:1;"></select><button class="sadd" onclick="showOpt('vgrp','e_vgrp',null)" style="font-size:20px;background:none;border:none;color:var(--teal);cursor:pointer;padding:0 4px;">＋</button></div>
+      <div id="e_rvalt"><div class="mlbl">Tür Detayı</div><div style="display:flex;gap:6px;align-items:center;"><select class="msel" id="e_valt" style="flex:1;"></select><button class="sadd" onclick="showOpt('valt','e_valt',document.getElementById('e_vgrp').value)" style="font-size:20px;background:none;border:none;color:var(--teal);cursor:pointer;padding:0 4px;">＋</button></div></div>
     </div>
     <div class="mlbl">Taksit Sayısı</div>
     <select class="msel" id="e_taks">
@@ -332,7 +332,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <div class="asbox">
     <div class="as-tit" id="actTitle">İşlem</div>
     <button class="asbtn" onclick="doEditTx()"><div class="asi" style="background:rgba(78,205,196,.15);">✏️</div>Düzenle</button>
-    <button class="asbtn" onclick="doCopyTx()"><div class="asi" style="background:rgba(240,180,41,.15);">📋</div>Kopyala (bugünün tarihi ile)</button>
     <button class="asbtn red" onclick="doDelTx()"><div class="asi" style="background:rgba(231,76,60,.1);">🗑️</div>Sil</button>
     <button class="asbtn" id="actMarkBtn" onclick="doMarkPaid()"><div class="asi" style="background:rgba(39,174,96,.15);">✅</div><span id="actMarkLbl">Ödendi İşaretle</span></button>
     <button class="ascancel" onclick="closeAct()">İptal</button>
@@ -447,8 +446,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <div class="frow hid" id="f_ralt2"><span class="ficon">📄</span><span class="flbl">Alt 2</span><div class="saw"><select id="f_a2grp"></select><button class="sadd" onclick="showOpt('a2grp','f_a2grp',document.getElementById('f_agrp').value)">＋</button></div></div>
     </div>
     <div class="fgrp hid" id="f_rvarlik">
-      <div class="frow"><span class="ficon">💎</span><span class="flbl">Varlık Türü</span><select id="f_vgrp" onchange="refreshVarlıkAlt()"></select></div>
-      <div class="frow hid" id="f_rvalt"><span class="ficon">📐</span><span class="flbl">Tür Detayı</span><select id="f_valt"></select></div>
+      <div class="frow"><span class="ficon">💎</span><span class="flbl">Varlık Türü</span><div class="saw"><select id="f_vgrp" onchange="refreshVarlıkAlt()"></select><button class="sadd" onclick="showOpt('vgrp','f_vgrp',null)">＋</button></div></div>
+      <div class="frow hid" id="f_rvalt"><span class="ficon">📐</span><span class="flbl">Tür Detayı</span><div class="saw"><select id="f_valt"></select><button class="sadd" onclick="showOpt('valt','f_valt',document.getElementById('f_vgrp').value)">＋</button></div></div>
     </div>
     <div class="fgrp">
       <div class="frow"><span class="ficon">📅</span><span class="flbl">Tarih</span><input type="date" id="f_date" style="color-scheme:dark;"></div>
@@ -641,8 +640,8 @@ const ACC=['Cüzdan','Enpara','Enpara KK','Garanti','HGS','TEB','TEB KK','TEB VD
 const MAS=['Alışveriş','Araba','Bağış','Diğer','Ev','Eğlence','Giyim','Hediye','Hizmet','KişiBakım','Kültürel','Kırtasiye','Sağlık','Seyahat','Sigorta','Yazılım','Yemek','İnternet','Aidat'];
 const ALT=['Amazon','Apple','Arıtma','Bahçe','Bakım, Tamir','Balık','Bağış','Berber','Cep Tel MD','Cep Tel VD','Dernek','Diğer','Elektrik','Ev','Fırın','HGS','Halı Yıkama','Hepsiburada','Kasap','Kasko','Kitap','Kuaför','Kuruyemiş','MTV','Market','Muayene','Müze','Müzik','N11','Otobüs','Otopark','Pazar&Manav','Pazarama','Su','Süt','Süt Ürün','Taksi, Dolmuş','Temizlik','Temu','Tren','Trendyol','Tüp','Uygulama','Yakıt','Yumurta','Yıkama','Zeytin&Z.Yağ','İnternet','İçme Suyu'];
 const GEL=['Diğer','Faiz','Kira','Maaş','Promosyon'];
-const VARLIK_TURLERI=['Altın','USD','EUR','Borsa'];
-const VARLIK_ALT={Altın:['Gram','Çeyrek','Yarım Altın','Tam Altın'],USD:[],EUR:[],Borsa:[]};
+const VARLIK_TURLERI=['Altın','USD','EUR','Borsa','Gümüş'];
+const VARLIK_ALT={Altın:['Gram','Çeyrek','Yarım Altın','Tam Altın'],USD:[],EUR:[],Borsa:[],Gümüş:['Gram']};
 
 let accList=[...ACC],masList=[...MAS],altList=[...ALT],gelList=[...GEL];
 const ACC_KASA=['Cüzdan','Enpara','TEB','TEB VD','Garanti','İşbank','Vahide','Enpara VD','Ziraat'];
@@ -722,6 +721,8 @@ function loadCustomLists(){
   if(custom.acc)custom.acc.forEach(a=>{if(!accList.includes(a))accList.push(a);});
   if(custom.gel)custom.gel.forEach(g=>{if(!gelList.includes(g))gelList.push(g);});
   if(custom.mas)custom.mas.forEach(m=>{if(!masList.includes(m))masList.push(m);});
+  if(custom.varlıkTurleri)custom.varlıkTurleri.forEach(v=>{if(!VARLIK_TURLERI.includes(v)){VARLIK_TURLERI.push(v);if(!VARLIK_ALT[v])VARLIK_ALT[v]=[];}});
+  if(custom.varlıkAlt)Object.keys(custom.varlıkAlt).forEach(tur=>{custom.varlıkAlt[tur].forEach(x=>{if(!VARLIK_ALT[tur])VARLIK_ALT[tur]=[];if(!VARLIK_ALT[tur].includes(x))VARLIK_ALT[tur].push(x);});});
 }
 function saveData(){
   localStorage.setItem(SK,JSON.stringify(txs));
@@ -966,7 +967,7 @@ function mpRow(t,todayS,showDate){
   else if(isLate) amtCl='red';
   else if(isPaid) amtCl='gray';
   else amtCl='blue';
-  const sign=isIncome?'+':'';
+  const sign=isIncome?'+':isTransfer?'':'-';
   // Account sub
   const accLine=t.kasa+(t.hedefKasa?' → '+t.hedefKasa:'');
   return '<div class="mp-row" onclick="openAct('+t.id+')">'
@@ -1031,13 +1032,23 @@ function openAddType(type){
   document.getElementById('f_ralt2').classList.add('hid');
   showPg('addtx');
 }
+function getVarlıkAlt(tur){
+  let list=[...(VARLIK_ALT[tur]||[])];
+  if(custom.varlıkAlt&&custom.varlıkAlt[tur])custom.varlıkAlt[tur].forEach(x=>{if(!list.includes(x))list.push(x);});
+  return list;
+}
+function getVarlıkTurleri(){
+  let list=[...VARLIK_TURLERI];
+  if(custom.varlıkTurleri)custom.varlıkTurleri.forEach(x=>{if(!list.includes(x))list.push(x);});
+  return list;
+}
 function fillVarlıkSel(){
-  fillSel('f_vgrp',VARLIK_TURLERI);
+  fillSel('f_vgrp',getVarlıkTurleri());
   refreshVarlıkAlt();
 }
 function refreshVarlıkAlt(){
   const vt=document.getElementById('f_vgrp').value;
-  const alts=VARLIK_ALT[vt]||[];
+  const alts=getVarlıkAlt(vt);
   document.getElementById('f_rvalt').classList.toggle('hid',!alts.length);
   fillSel('f_valt',alts,true);
 }
@@ -1193,48 +1204,6 @@ function doMarkPaid(){
   toast(t.gerceklesme==='Gerçekleşmiş'?'✅ Ödendi işaretlendi':'⏳ Bekliyor işaretlendi');
 }
 function doEditTx(){const id=actTxId;closeAct();editTxId=id;openEdit(txs.find(t=>t.id===id));}
-function doCopyTx(){
-  const id=actTxId;closeAct();
-  const t=txs.find(x=>x.id===id);if(!t)return;
-  // İşlem türünü belirle
-  const isVarlık=t.kasa==='Varlık'||t.hedefKasa==='Varlık';
-  let type='I';
-  if(t.islemTuru==='Gelir')type='G';
-  else if(t.islemTuru==='Transfer')type=isVarlık?'VA':'T';
-  openAddType(type);
-  // Formu doldur (bugünün tarihi ile)
-  setTimeout(()=>{
-    document.getElementById('f_amt').value=t.tutar;
-    document.getElementById('f_date').value=fmtDate(new Date());
-    document.getElementById('f_note').value=t.aciklama||'';
-    document.getElementById('f_taks').value=1;
-    document.getElementById('f_tekp').value='';
-    document.getElementById('f_rtkbt').classList.add('hid');
-    // Hesaplar
-    const accEl=document.getElementById('f_acc');
-    if(accEl)accEl.value=t.kasa;
-    const haccEl=document.getElementById('f_hacc');
-    if(haccEl&&t.hedefKasa)haccEl.value=t.hedefKasa;
-    // Kategori
-    const mgrpEl=document.getElementById('f_mgrp');
-    if(mgrpEl&&t.masrafGrp){mgrpEl.value=t.masrafGrp;mgrpEl.dispatchEvent(new Event('change'));}
-    const ggrpEl=document.getElementById('f_ggrp');
-    if(ggrpEl&&t.gelirAltGrp)ggrpEl.value=t.gelirAltGrp;
-    setTimeout(()=>{
-      const agrpEl=document.getElementById('f_agrp');
-      if(agrpEl&&t.altGrp){agrpEl.value=t.altGrp;agrpEl.dispatchEvent(new Event('change'));}
-      setTimeout(()=>{
-        const a2El=document.getElementById('f_a2grp');
-        if(a2El&&t.altGrp2)a2El.value=t.altGrp2;
-      },50);
-    },50);
-    // Ödeme durumu - orijinalin aynısı
-    const paid=t.gerceklesme==='Gerçekleşmiş';
-    const sw=document.getElementById('f_durT'),lb=document.getElementById('f_durL');
-    if(paid){sw.classList.add('on');lb.textContent='✅ ÖDENDİ';}
-    else{sw.classList.remove('on');lb.textContent='⏳ PLANLANMIŞ';}
-  },100);
-}
 function doDelTx(){
   const id=actTxId;closeAct();editTxId=id;
   const t=txs.find(x=>x.id===id);if(!t)return;
@@ -1267,7 +1236,7 @@ function openEdit(t){
   const a2=getAlt2For(t.altGrp||'');
   document.getElementById('e_ralt2').style.display=a2.length?'':'none';
   fillSel('e_a2grp',a2,true);
-  fillSel('e_vgrp',VARLIK_TURLERI);
+  fillSel('e_vgrp',getVarlıkTurleri());
   eRefVarlık();
   document.getElementById('e_amt').value=t.tutar;
   document.getElementById('e_date').value=t.tarih;
@@ -1295,7 +1264,7 @@ function openEdit(t){
 }
 function eRefMas(){const m=document.getElementById('e_mgrp').value;fillSel('e_agrp',getAltFor(m),true);eRefAlt();}
 function eRefAlt(){const a=document.getElementById('e_agrp').value;const a2=getAlt2For(a);document.getElementById('e_ralt2').style.display=a2.length?'':'none';fillSel('e_a2grp',a2,true);}
-function eRefVarlık(){const vt=document.getElementById('e_vgrp').value;const alts=VARLIK_ALT[vt]||[];document.getElementById('e_rvalt').style.display=alts.length?'':'none';fillSel('e_valt',alts,true);}
+function eRefVarlık(){const vt=document.getElementById('e_vgrp').value;const alts=getVarlıkAlt(vt);document.getElementById('e_rvalt').style.display=alts.length?'':'none';fillSel('e_valt',alts,true);}
 function eTogDur(){const t=document.getElementById('e_durT'),l=document.getElementById('e_durL');t.classList.toggle('on');l.textContent=t.classList.contains('on')?'✅ ÖDENDİ':'⏳ PLANLANMIŞ';}
 function closeEdit(){document.getElementById('editM').classList.add('hid');editTxId=null;}
 function saveEdit(){
@@ -1389,8 +1358,9 @@ function saveEditAll(){
 let curOpt=null;
 function showOpt(type,selId,parent){
   if((type==='agrp'||type==='a2grp')&&!parent){toast('Önce üst grubu seçin!','var(--orange)');return;}
+  if(type==='valt'&&!parent){toast('Önce varlık türünü seçin!','var(--orange)');return;}
   curOpt={type,selId,parent};
-  const titles={acc:'Yeni Hesap',ggrp:'Yeni Gelir Türü',mgrp:'Yeni Kategori',agrp:'Yeni Alt Kategori',a2grp:'Yeni Alt 2'};
+  const titles={acc:'Yeni Hesap',ggrp:'Yeni Gelir Türü',mgrp:'Yeni Kategori',agrp:'Yeni Alt Kategori',a2grp:'Yeni Alt 2',vgrp:'Yeni Varlık Türü',valt:'Yeni Tür Detayı'};
   document.getElementById('addOptT').textContent=titles[type]||'Yeni Seçenek';
   document.getElementById('addOptI').value='';
   document.getElementById('addOptM').classList.remove('hid');
@@ -1405,6 +1375,20 @@ function confirmOpt(){
   else if(type==='mgrp'){if(!custom.mas)custom.mas=[];if(!custom.mas.includes(val)){custom.mas.push(val);masList.push(val);}fillSel(selId,masList,true);}
   else if(type==='agrp'){if(!custom.altByMas)custom.altByMas={};if(!custom.altByMas[parent])custom.altByMas[parent]=[];if(!custom.altByMas[parent].includes(val))custom.altByMas[parent].push(val);fillSel(selId,getAltFor(parent),true);}
   else if(type==='a2grp'){if(!custom.alt2ByAlt)custom.alt2ByAlt={};if(!custom.alt2ByAlt[parent])custom.alt2ByAlt[parent]=[];if(!custom.alt2ByAlt[parent].includes(val))custom.alt2ByAlt[parent].push(val);fillSel(selId,getAlt2For(parent),true);}
+  else if(type==='vgrp'){
+    if(!custom.varlıkTurleri)custom.varlıkTurleri=[];
+    if(!custom.varlıkTurleri.includes(val)){custom.varlıkTurleri.push(val);VARLIK_TURLERI.push(val);VARLIK_ALT[val]=[];}
+    fillSel(selId,VARLIK_TURLERI);
+  }
+  else if(type==='valt'){
+    if(!custom.varlıkAlt)custom.varlıkAlt={};
+    if(!custom.varlıkAlt[parent])custom.varlıkAlt[parent]=[];
+    if(!custom.varlıkAlt[parent].includes(val)){custom.varlıkAlt[parent].push(val);if(!VARLIK_ALT[parent])VARLIK_ALT[parent]=[];VARLIK_ALT[parent].push(val);}
+    fillSel(selId,getVarlıkAlt(parent),true);
+    // tür detayı satırını göster
+    const rvalt=document.getElementById('f_rvalt')||document.getElementById('e_rvalt');
+    if(rvalt)rvalt.style.display='';
+  }
   document.getElementById(selId).value=val;
   saveCustom();cancelOpt();toast('✓ '+val+' eklendi');
 }
