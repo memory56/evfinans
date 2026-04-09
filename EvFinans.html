@@ -266,7 +266,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <div class="mback hid" id="editM">
   <div class="mbox">
     <div class="mtitle">İşlemi Düzenle</div>
-    <div class="eamount"><input type="number" id="e_amt" placeholder="0" step="0.01" min="0" inputmode="decimal"></div>
+    <div class="eamount"><input type="number" id="e_amt" placeholder="0" step="0.01" min="0" inputmode="decimal">
+    <button id="e_sign_btn" onclick="eToggleAmtSign()" style="margin-top:8px;background:rgba(78,90,110,.5);border:none;color:var(--t1);font-size:15px;font-weight:600;cursor:pointer;border-radius:8px;padding:5px 20px;">+ Pozitif</button></div>
     <div class="mlbl">Tarih</div>
     <input class="minput" type="date" id="e_date" style="color-scheme:dark;">
     <div class="mlbl">Hesap</div>
@@ -1001,6 +1002,13 @@ function resetAmtSign(){
   const btn=document.getElementById('f_sign_btn');
   if(btn){btn.textContent='+ Pozitif';btn.style.background='rgba(78,90,110,.5)';btn.style.color='var(--t1)';}
 }
+function eToggleAmtSign(){
+  eAmtSign=eAmtSign==='+'?'-':'+';
+  const btn=document.getElementById('e_sign_btn');
+  btn.textContent=eAmtSign==='-'?'− Negatif':'+ Pozitif';
+  btn.style.background=eAmtSign==='-'?'rgba(231,76,60,.4)':'rgba(78,90,110,.5)';
+  btn.style.color=eAmtSign==='-'?'var(--red)':'var(--t1)';
+}
 
 // ═══ ADD TYPE SHEET ═══
 function showAddType(){document.getElementById('addTypeS').classList.remove('hid');}
@@ -1274,6 +1282,7 @@ function doDel(scope){
 
 // ═══ EDIT TX ═══
 let editEType='I';
+let eAmtSign='+';
 function openEdit(t){
   if(!t)return;
   const tp=t.islemTuru==='Gelir'?'G':t.islemTuru==='Transfer'?'T':'I';
@@ -1287,7 +1296,10 @@ function openEdit(t){
   fillSel('e_a2grp',a2,true);
   fillSel('e_vgrp',VARLIK_TURLERI);
   eRefVarlık();
-  document.getElementById('e_amt').value=t.tutar;
+  eAmtSign=t.tutar<0?'-':'+';
+  const eSignBtn=document.getElementById('e_sign_btn');
+  if(eSignBtn){eSignBtn.textContent=eAmtSign==='-'?'− Negatif':'+ Pozitif';eSignBtn.style.background=eAmtSign==='-'?'rgba(231,76,60,.4)':'rgba(78,90,110,.5)';eSignBtn.style.color=eAmtSign==='-'?'var(--red)':'var(--t1)';}
+  document.getElementById('e_amt').value=Math.abs(t.tutar);
   document.getElementById('e_date').value=t.tarih;
   document.getElementById('e_acc').value=t.kasa;
   document.getElementById('e_hacc').value=t.hedefKasa||'';
@@ -1328,7 +1340,8 @@ function saveEdit(){
   const eTaks=parseInt(document.getElementById('e_taks').value)||1;
   const eTekp=document.getElementById('e_tekp').value;
   const eTkbt=document.getElementById('e_tkbt').value;
-  txs[idx]={...txs[idx],tarih:date,tutar:amt,
+  const signedAmt=eAmtSign==='-'?-amt:amt;
+  txs[idx]={...txs[idx],tarih:date,tutar:signedAmt,
     islemTuru:editEType==='G'?'Gelir':editEType==='T'?'Transfer':'Gider',
     kasa:document.getElementById('e_acc').value,
     hedefKasa:editEType==='T'?document.getElementById('e_hacc').value:'',
@@ -1367,7 +1380,7 @@ function saveEditAll(){
   txs.forEach((tx,i)=>{
     if((tx.anaIslemId||tx.id)!==anaId)return;
     if(tx.tarih<t.tarih)return;
-    txs[i]={...tx,tutar:amt,kasa:newKasa,hedefKasa:newHacc,aciklama:newNote,
+    txs[i]={...tx,tutar:eAmtSign==='-'?-amt:amt,kasa:newKasa,hedefKasa:newHacc,aciklama:newNote,
       islemTuru:newTp,masrafGrp:newMgrp,altGrp:newAgrp,altGrp2:newA2grp,gelirAltGrp:newGgrp,
       tekrarPeriyodu:eTekp||'Tekrar Yok',tekrarBitis:eTkbt,
       gerceklesme:tx.tarih===t.tarih?paid:tx.gerceklesme};
