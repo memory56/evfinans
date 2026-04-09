@@ -332,6 +332,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <div class="asbox">
     <div class="as-tit" id="actTitle">İşlem</div>
     <button class="asbtn" onclick="doEditTx()"><div class="asi" style="background:rgba(78,205,196,.15);">✏️</div>Düzenle</button>
+    <button class="asbtn" onclick="doCopyTx()"><div class="asi" style="background:rgba(240,180,41,.15);">📋</div>Kopyala (bugünün tarihi ile)</button>
     <button class="asbtn red" onclick="doDelTx()"><div class="asi" style="background:rgba(231,76,60,.1);">🗑️</div>Sil</button>
     <button class="asbtn" id="actMarkBtn" onclick="doMarkPaid()"><div class="asi" style="background:rgba(39,174,96,.15);">✅</div><span id="actMarkLbl">Ödendi İşaretle</span></button>
     <button class="ascancel" onclick="closeAct()">İptal</button>
@@ -676,27 +677,20 @@ function linkRecurring(txList){
   const groups={};
   txList.forEach(t=>{
     const day=t.tarih.slice(8); // gün (01-31)
-    const key=t.islemTuru+'|'+t.kasa+'|'+(t.hedefKasa||'')+'|'+t.masrafGrp+'|'+t.altGrp+'|'+t.gelirAltGrp+'|'+t.tutar+'|'+(t.aciklama||'')+'|'+day;
+    const key=t.islemTuru+'|'+t.kasa+'|'+t.hedefKasa+'|'+t.masrafGrp+'|'+t.altGrp+'|'+t.gelirAltGrp+'|'+t.tutar+'|'+t.aciklama+'|'+day;
     if(!groups[key])groups[key]=[];
     groups[key].push(t);
   });
   Object.values(groups).forEach(grp=>{
     if(grp.length<2)return;
+    // Aylık kontrol: aylar art arda geliyor mu?
     const sorted=grp.slice().sort((a,b)=>a.tarih.localeCompare(b.tarih));
     const months=sorted.map(t=>parseInt(t.tarih.slice(0,4))*12+parseInt(t.tarih.slice(5,7)));
-    // Art arda gelen alt grupları ayrı ayrı bağla (boşluk olsa bile çalışır)
-    let runStart=0;
-    for(let i=1;i<=sorted.length;i++){
-      const gap=i===sorted.length||months[i]-months[i-1]!==1;
-      if(gap){
-        const run=sorted.slice(runStart,i);
-        if(run.length>=2){
-          const anaId=run[0].id;
-          run.forEach(t=>{t.anaIslemId=anaId;t.tekrarPeriyodu='Aylık';});
-        }
-        runStart=i;
-      }
-    }
+    const diffs=months.slice(1).map((m,i)=>m-months[i]);
+    if(!diffs.every(d=>d===1))return;
+    // Aylık tekrar - ilk kaydın id'sini anaIslemId yap
+    const anaId=sorted[0].id;
+    sorted.forEach(t=>{t.anaIslemId=anaId;t.tekrarPeriyodu='Aylık';});
   });
   return txList;
 }
@@ -972,7 +966,7 @@ function mpRow(t,todayS,showDate){
   else if(isLate) amtCl='red';
   else if(isPaid) amtCl='gray';
   else amtCl='blue';
-  const sign=isIncome?'+':isTransfer?'':'-';
+  const sign=isIncome?'+':'';
   // Account sub
   const accLine=t.kasa+(t.hedefKasa?' → '+t.hedefKasa:'');
   return '<div class="mp-row" onclick="openAct('+t.id+')">'
@@ -1199,6 +1193,48 @@ function doMarkPaid(){
   toast(t.gerceklesme==='Gerçekleşmiş'?'✅ Ödendi işaretlendi':'⏳ Bekliyor işaretlendi');
 }
 function doEditTx(){const id=actTxId;closeAct();editTxId=id;openEdit(txs.find(t=>t.id===id));}
+function doCopyTx(){
+  const id=actTxId;closeAct();
+  const t=txs.find(x=>x.id===id);if(!t)return;
+  // İşlem türünü belirle
+  const isVarlık=t.kasa==='Varlık'||t.hedefKasa==='Varlık';
+  let type='I';
+  if(t.islemTuru==='Gelir')type='G';
+  else if(t.islemTuru==='Transfer')type=isVarlık?'VA':'T';
+  openAddType(type);
+  // Formu doldur (bugünün tarihi ile)
+  setTimeout(()=>{
+    document.getElementById('f_amt').value=t.tutar;
+    document.getElementById('f_date').value=fmtDate(new Date());
+    document.getElementById('f_note').value=t.aciklama||'';
+    document.getElementById('f_taks').value=1;
+    document.getElementById('f_tekp').value='';
+    document.getElementById('f_rtkbt').classList.add('hid');
+    // Hesaplar
+    const accEl=document.getElementById('f_acc');
+    if(accEl)accEl.value=t.kasa;
+    const haccEl=document.getElementById('f_hacc');
+    if(haccEl&&t.hedefKasa)haccEl.value=t.hedefKasa;
+    // Kategori
+    const mgrpEl=document.getElementById('f_mgrp');
+    if(mgrpEl&&t.masrafGrp){mgrpEl.value=t.masrafGrp;mgrpEl.dispatchEvent(new Event('change'));}
+    const ggrpEl=document.getElementById('f_ggrp');
+    if(ggrpEl&&t.gelirAltGrp)ggrpEl.value=t.gelirAltGrp;
+    setTimeout(()=>{
+      const agrpEl=document.getElementById('f_agrp');
+      if(agrpEl&&t.altGrp){agrpEl.value=t.altGrp;agrpEl.dispatchEvent(new Event('change'));}
+      setTimeout(()=>{
+        const a2El=document.getElementById('f_a2grp');
+        if(a2El&&t.altGrp2)a2El.value=t.altGrp2;
+      },50);
+    },50);
+    // Ödeme durumu - orijinalin aynısı
+    const paid=t.gerceklesme==='Gerçekleşmiş';
+    const sw=document.getElementById('f_durT'),lb=document.getElementById('f_durL');
+    if(paid){sw.classList.add('on');lb.textContent='✅ ÖDENDİ';}
+    else{sw.classList.remove('on');lb.textContent='⏳ PLANLANMIŞ';}
+  },100);
+}
 function doDelTx(){
   const id=actTxId;closeAct();editTxId=id;
   const t=txs.find(x=>x.id===id);if(!t)return;
