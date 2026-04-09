@@ -448,6 +448,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sa
     <div class="as-tit" id="accActTitle">Hesap</div>
     <button class="asbtn" onclick="showBalAdj()"><div class="asi" style="background:rgba(78,205,196,.15);">✏️</div>Bakiye Düzenle (Düzeltme Girdisi)</button>
     <button class="asbtn" onclick="showAccRename()"><div class="asi" style="background:rgba(52,152,219,.15);">🏷️</div>Adını Değiştir</button>
+    <button class="asbtn" onclick="showAccGroupChange()"><div class="asi" style="background:rgba(240,180,41,.15);">📁</div>Grubu Değiştir</button>
     <button class="asbtn red" onclick="hideAcc()"><div class="asi" style="background:rgba(231,76,60,.1);">👁️</div>Listeden Kaldır</button>
     <button class="ascancel" onclick="closeAccAct()">İptal</button>
   </div>
@@ -473,6 +474,21 @@ body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sa
     <div class="mlbl">Yeni Ad</div>
     <input class="minput" type="text" id="accRenameInput" placeholder="Hesap adı...">
     <div class="mbtns"><button class="bc" onclick="closeAccRename()">İptal</button><button class="bk" onclick="confirmAccRename()">Kaydet</button></div>
+  </div>
+</div>
+
+<!-- Hesap Grubu Değiştir Modal -->
+<div class="mback hid" id="accGroupM">
+  <div class="mbox">
+    <div class="mtitle">Grubu Değiştir — <span id="accGroupAccName"></span></div>
+    <div class="mlbl">Yeni Grup</div>
+    <select class="msel" id="accGroupSelect">
+      <option value="kasa">Kasa & Banka</option>
+      <option value="kk">Kredi Kartı</option>
+      <option value="diger">Diğer</option>
+      <option value="varlik">Varlık</option>
+    </select>
+    <div class="mbtns"><button class="bc" onclick="closeAccGroupChange()">İptal</button><button class="bk" onclick="confirmAccGroupChange()">Kaydet</button></div>
   </div>
 </div>
 
@@ -1798,6 +1814,38 @@ function confirmAccRename(){
   fillFormSelects(); renderHesap();
 }
 
+// Hesap grubu değiştir
+function showAccGroupChange(){
+  closeAccAct();
+  document.getElementById('accGroupAccName').textContent=curAccName;
+  // Pre-select current group
+  const sel=document.getElementById('accGroupSelect');
+  if(custom.accGroups){
+    const grps=['kasa','kk','diger','varlik'];
+    for(const g of grps){
+      if((custom.accGroups[g]||[]).includes(curAccName)){ sel.value=g; break; }
+    }
+  }
+  document.getElementById('accGroupM').classList.remove('hid');
+}
+function closeAccGroupChange(){ document.getElementById('accGroupM').classList.add('hid'); }
+function confirmAccGroupChange(){
+  const newGrp=document.getElementById('accGroupSelect').value;
+  if(!custom.accGroups) custom.accGroups={kasa:[],kk:[],diger:[],varlik:[]};
+  // Remove from all groups
+  ['kasa','kk','diger','varlik'].forEach(g=>{
+    if(custom.accGroups[g]){
+      custom.accGroups[g]=custom.accGroups[g].filter(a=>a!==curAccName);
+    }
+  });
+  // Add to new group
+  if(!custom.accGroups[newGrp]) custom.accGroups[newGrp]=[];
+  if(!custom.accGroups[newGrp].includes(curAccName)) custom.accGroups[newGrp].push(curAccName);
+  saveCustom(); closeAccGroupChange();
+  toast('✓ '+curAccName+' grubu değiştirildi');
+  renderHesap();
+}
+
 // Hesap gizle/göster (toggle)
 function hideAcc(){
   closeAccAct();
@@ -1839,18 +1887,34 @@ function closeNewAcc(){ document.getElementById('newAccM').classList.add('hid');
 function confirmNewAcc(){
   const name=document.getElementById('newAccName').value.trim();
   if(!name){ closeNewAcc(); return; }
-  if(accList.includes(name)){ toast('Bu hesap zaten mevcut','var(--orange)'); return; }
   const grp=document.getElementById('newAccGroup').value;
+  if(accList.includes(name)){
+    // If it's a hidden account, offer to unhide and re-group it
+    if(getHiddenAccs().includes(name)){
+      if(!confirm('"'+name+'" gizli bir hesap. Tekrar gösterip grubu "'+grp+'" olarak değiştirmek ister misiniz?')) return;
+      // Unhide
+      custom.hiddenAccs=custom.hiddenAccs.filter(h=>h!==name);
+      // Move to selected group
+      if(!custom.accGroups) custom.accGroups={kasa:[],kk:[],diger:[],varlik:[]};
+      ['kasa','kk','diger','varlik'].forEach(g=>{
+        if(custom.accGroups[g]) custom.accGroups[g]=custom.accGroups[g].filter(a=>a!==name);
+      });
+      if(!custom.accGroups[grp]) custom.accGroups[grp]=[];
+      if(!custom.accGroups[grp].includes(name)) custom.accGroups[grp].push(name);
+      saveCustom(); closeNewAcc();
+      fillFormSelects(); renderHesap();
+      toast('✓ '+name+' tekrar gösterildi');
+    } else {
+      toast('Bu hesap zaten mevcut','var(--orange)');
+    }
+    return;
+  }
   accList.push(name);
   if(!custom.acc) custom.acc=[];
   custom.acc.push(name);
   if(!custom.accGroups) custom.accGroups={kasa:[],kk:[],diger:[],varlik:[]};
   if(!custom.accGroups[grp]) custom.accGroups[grp]=[];
   custom.accGroups[grp].push(name);
-  // Remove from hidden if it was hidden before
-  if(custom.hiddenAccs){
-    custom.hiddenAccs=custom.hiddenAccs.filter(h=>h!==name);
-  }
   saveCustom(); closeNewAcc();
   fillFormSelects(); renderHesap();
   toast('✓ '+name+' eklendi');
