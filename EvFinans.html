@@ -1114,7 +1114,7 @@ function monthSummaryHTML(list){
     +'</div>';
 }
 
-function renderCalMonth(){
+function renderCalMontfunction showBudgetAdd(){
   const el=document.getElementById('calDay');
   const todayS=fmtDate(new Date());
   const ms=curYear+'-'+String(curMonth+1).padStart(2,'0');
@@ -1652,7 +1652,7 @@ function confirmOpt(){
 document.getElementById('addOptI').addEventListener('keydown',e=>{if(e.key==='Enter')confirmOpt();});
 
 // ═══ SEARCH ═══
-function initSearch(){
+function initSearcfunction showBudgetAdd(){
   const sa=document.getElementById('s_acc'),sc=document.getElementById('s_cat');
   if(sa){sa.innerHTML='<option value="">Tüm hesaplar</option>';accList.forEach(a=>sa.innerHTML+='<option>'+a+'</option>');}
   if(sc){sc.innerHTML='<option value="">Tüm kategoriler</option>';masList.forEach(m=>sc.innerHTML+='<option>'+m+'</option>');}
@@ -1661,8 +1661,8 @@ function setChip(el,type){
   sChip=type;
   document.querySelectorAll('.schips .chip').forEach(c=>c.classList.remove('on'));el.classList.add('on');doSearch();
 }
-function clearSearch(){document.getElementById('s_q').value='';sChip='';document.querySelectorAll('.schips .chip').forEach((c,i)=>c.classList.toggle('on',i===0));doSearch();}
-function doSearch(){
+function clearSearcfunction showBudgetAdd(){document.getElementById('s_q').value='';sChip='';document.querySelectorAll('.schips .chip').forEach((c,i)=>c.classList.toggle('on',i===0));doSearch();}
+function doSearcfunction showBudgetAdd(){
   const q=(document.getElementById('s_q').value||'').toLowerCase().trim();
   const acc=document.getElementById('s_acc').value;
   const cat=document.getElementById('s_cat').value;
@@ -2277,7 +2277,7 @@ function renderBudget(){
   html+='</div><div style="height:14px;"></div>';
   document.getElementById('budContent').innerHTML=html;
 }
-h(){
+function showBudgetAdd(){
   const cat=prompt('Kategori:\n'+masList.join(', '));if(!cat||!masList.includes(cat)){toast('Geçersiz kategori');return;}
   const amt=parseFloat(prompt('Aylık limit (₺):'));if(!amt||amt<=0)return;
   const key=budYear+'-'+budMonth;if(!budgets[key])budgets[key]={};
