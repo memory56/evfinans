@@ -1,501 +1,193 @@
-
 <!DOCTYPE html>
-<!-- build: 2026-04-08T22:00 -->
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
 <title>Ev Finans</title>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23111927'/%3E%3Crect x='2' y='2' width='60' height='60' rx='13' fill='url(%23g)'/%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%234ecdc4'/%3E%3Cstop offset='1' stop-color='%2327ae60'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ctext x='32' y='46' text-anchor='middle' font-family='system-ui' font-size='36' font-weight='700' fill='%23fff'%3E%E2%82%BA%3C/text%3E%3C/svg%3E">
 <style>
 :root{
   --bg:#111927;--bg2:#151e2d;--bg3:#1c2a3a;--card:#1e2d3e;
   --border:#263244;--t1:#e8f0f8;--t2:#7a93a8;--t3:#3d5468;
   --teal:#4ecdc4;--orange:#f5a623;--green:#2ecc71;--red:#e74c3c;
-  --blue:#3498db;--purple:#9b59b6;--gold:#f0b429;
-  --sp:14px;--r:14px;
+  --blue:#3498db;--gold:#f0b429;
+  --sp:14px;
 }
-@media(min-width:728px){:root{--sp:20px;--r:16px;}}
-@media(min-width:1024px){:root{--sp:26px;--r:18px;}}
-
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-body{font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;max-width:480px;margin:0 auto;overflow-x:hidden;}
-@media(min-width:728px){body{max-width:768px;}}
-@media(min-width:1024px){body{max-width:980px;}}
-
-.nav{display:flex;position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:rgba(17,25,39,.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--border);z-index:100;padding:8px 0 env(safe-area-inset-bottom,10px);}
-@media(min-width:728px){.nav{max-width:768px;}}
-@media(min-width:1024px){.nav{max-width:980px;}}
-.ni{flex:1;display:flex;flex-direction:column;align-items:center;padding:4px 0;cursor:pointer;color:var(--t3);font-size:10px;gap:3px;transition:color .2s;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;max-width:480px;margin:0 auto;}
+.nav{display:flex;position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:rgba(17,25,39,.92);backdrop-filter:blur(20px);border-top:1px solid var(--border);z-index:100;padding:8px 0;}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;padding:4px 0;cursor:pointer;color:var(--t3);font-size:10px;gap:3px;}
 .ni.on{color:var(--teal);}
 .ni svg{width:24px;height:24px;fill:currentColor;}
-@media(min-width:728px){.ni svg{width:28px;height:28px;}.ni{font-size:11px;}}
-.ni-dot{width:4px;height:4px;border-radius:50%;background:var(--teal);opacity:0;transition:opacity .2s;margin-top:1px;}
-.ni.on .ni-dot{opacity:1;}
-
 .pg{display:none;padding-bottom:82px;min-height:100vh;}
 .pg.on{display:block;}
-
-.ph{display:flex;align-items:center;padding:13px var(--sp);background:rgba(17,25,39,.88);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50;gap:6px;}
-.ph h1{font-size:17px;font-weight:600;flex:1;letter-spacing:-.3px;}
-@media(min-width:728px){.ph{padding:16px var(--sp);}.ph h1{font-size:21px;}}
-.hb{background:none;border:none;color:var(--teal);font-size:13px;cursor:pointer;padding:7px 8px;border-radius:8px;}
-.hb-ic{background:none;border:none;color:var(--teal);font-size:22px;cursor:pointer;padding:4px 7px;line-height:1;}
+.ph{display:flex;align-items:center;padding:13px var(--sp);background:rgba(17,25,39,.88);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50;gap:6px;}
+.ph h1{font-size:17px;font-weight:600;flex:1;}
 .hb-back{background:none;border:none;color:var(--teal);font-size:22px;cursor:pointer;padding:4px 2px;}
-
-.mnav{display:flex;align-items:center;justify-content:space-between;padding:7px 6px 4px;background:var(--bg2);}
-.mnav h2{font-size:16px;font-weight:700;}
-.mnav button{background:none;border:none;color:var(--teal);font-size:24px;cursor:pointer;padding:4px 10px;}
-.cgrid{display:grid;grid-template-columns:repeat(7,1fr);padding:4px 6px 6px;background:var(--bg2);gap:2px;}
-@media(min-width:728px){.cgrid{padding:6px 10px 8px;gap:4px;}.cd{min-height:52px;}.cdnum{font-size:16px;}}
-.ch{text-align:center;font-size:11px;color:var(--t3);padding:4px 0 6px;font-weight:600;}
-.ch.wknd{color:var(--teal);}
-.cd{display:flex;flex-direction:column;align-items:center;padding:5px 2px 7px;font-size:14px;font-weight:500;cursor:pointer;position:relative;color:var(--t2);min-height:44px;gap:3px;border-radius:8px;transition:background .15s;}
-.cd:active{background:rgba(255,255,255,.05);}
-.cd.today .cdnum{background:rgba(78,205,196,.18);border:2px solid var(--teal);border-radius:50%;color:var(--teal);font-weight:700;width:30px;height:30px;padding:0;display:flex;align-items:center;justify-content:center;}
-.cd.sel .cdnum{background:var(--teal);border-radius:50%;color:#061320;font-weight:700;width:30px;height:30px;padding:0;display:flex;align-items:center;justify-content:center;}
-.cd.wknd{color:var(--teal);}
-.cd.om{opacity:.2;}
-.cd.fut{color:var(--t3);}
-.cdnum{padding:1px 5px;border-radius:8px;font-size:14px;line-height:1.4;}
-.cdot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
-.cdot.paid{background:var(--teal);}
-.cdot.plan{width:5px;height:5px;border-radius:50%;border:1.5px solid var(--t3);background:transparent;}
-.cdot.late{background:var(--red);}
-
-.mp-list{border-top:1px solid var(--border);}
-.mp-row{display:flex;align-items:center;padding:12px var(--sp);border-bottom:1px solid var(--border);cursor:pointer;gap:13px;transition:background .15s;}
-.mp-row:active{background:rgba(255,255,255,.04);}
-@media(min-width:728px){.mp-row{padding:15px var(--sp);}}
-.mp-ic{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
-@media(min-width:728px){.mp-ic{width:50px;height:50px;font-size:23px;}}
-.mp-info{flex:1;min-width:0;}
-.mp-name{font-size:14px;font-weight:500;color:var(--t1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-@media(min-width:728px){.mp-name{font-size:15px;}}
-.mp-sub{font-size:11px;color:var(--t3);margin-top:2px;display:flex;align-items:center;gap:4px;}
-.mp-amt{flex-shrink:0;padding:6px 13px;border-radius:10px;font-size:14px;font-weight:700;text-align:right;min-width:80px;}
-@media(min-width:728px){.mp-amt{font-size:15px;min-width:90px;padding:7px 15px;}}
-.mp-amt.green{background:rgba(46,204,113,.2);color:var(--green);}
-.mp-amt.red{background:rgba(231,76,60,.18);color:var(--red);}
-.mp-amt.blue{background:rgba(52,152,219,.18);color:var(--blue);}
-.mp-amt.teal{background:rgba(78,205,196,.18);color:var(--teal);}
-.mp-amt.orange{background:rgba(245,166,35,.18);color:var(--orange);}
-.mp-amt.gray{background:rgba(255,255,255,.06);color:var(--t2);}
-.mp-sum{display:flex;align-items:stretch;background:var(--bg2);border-bottom:1px solid var(--border);}
-.mp-sum-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px 8px;}
-.mp-sum-item:first-child{border-right:1px solid var(--border);}
-.mp-sum-l{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.7px;font-weight:600;margin-bottom:3px;}
-.mp-sum-v{font-size:14px;font-weight:700;}
-.mp-sum-g{color:var(--green);}
-.mp-sum-r{color:var(--red);}
-.empty{text-align:center;padding:40px 20px;color:var(--t3);font-size:14px;line-height:1.8;}
-
-.bsum{display:flex;gap:10px;padding:14px var(--sp) 10px;}
-@media(min-width:728px){.bsum{gap:14px;padding:20px var(--sp) 14px;}}
-.bcard{flex:1;border-radius:16px;padding:14px 8px;text-align:center;border:none;}
-.bcard.bg{background:linear-gradient(140deg,rgba(46,204,113,.22),rgba(46,204,113,.08));}
-.bcard.br{background:linear-gradient(140deg,rgba(231,76,60,.22),rgba(231,76,60,.08));}
-.bcard.bt{background:linear-gradient(140deg,rgba(52,152,219,.22),rgba(52,152,219,.08));}
-@media(min-width:728px){.bcard{padding:20px 12px;border-radius:20px;}}
-.bcard-l{font-size:9px;text-transform:uppercase;letter-spacing:.7px;margin-bottom:6px;font-weight:700;}
-.bcard.bg .bcard-l{color:rgba(46,204,113,.7);}
-.bcard.br .bcard-l{color:rgba(231,76,60,.7);}
-.bcard.bt .bcard-l{color:rgba(52,152,219,.7);}
-@media(min-width:728px){.bcard-l{font-size:10px;}}
-.bcard-v{font-size:14px;font-weight:700;}
-@media(min-width:728px){.bcard-v{font-size:18px;}}
-.bcard.bg .bcard-v{color:var(--green);}
-.bcard.br .bcard-v{color:var(--red);}
-.bcard.bt .bcard-v{color:var(--blue);}
-
-.bsec{padding:4px var(--sp) 0;}
-@media(min-width:728px){.bsec{padding:6px 0 0;}}
-.bsec-h{display:flex;justify-content:space-between;align-items:center;padding:9px 13px;background:var(--card);border-radius:13px 13px 0 0;border-bottom:1px solid var(--border);}
-.bsec-ht{font-size:10px;text-transform:uppercase;letter-spacing:1.2px;color:var(--t3);font-weight:700;}
-.bsec-tot{font-size:14px;font-weight:700;color:var(--teal);}
-.bi{cursor:pointer;display:flex;align-items:center;padding:14px 14px;background:var(--card);border-bottom:1px solid var(--border);transition:background .15s;}
-@media(min-width:728px){.bi{padding:16px 16px;}}
-.bi:last-child{border-radius:0 0 13px 13px;border-bottom:none;}
-.bi:active{background:rgba(255,255,255,.05);}
-.bi-ic{width:38px;height:38px;border-radius:11px;background:var(--bg3);display:flex;align-items:center;justify-content:center;margin-right:12px;font-size:16px;flex-shrink:0;}
-@media(min-width:728px){.bi-ic{width:44px;height:44px;border-radius:13px;font-size:19px;margin-right:14px;}}
-.bi-name{flex:1;font-size:14px;font-weight:500;}
-@media(min-width:728px){.bi-name{font-size:15px;}}
-.bi-amt{font-size:15px;font-weight:700;color:var(--green);text-align:right;}
-@media(min-width:728px){.bi-amt{font-size:17px;}}
-.bi-amt.neg{color:var(--red);}
-
-@media(min-width:728px){
-  #hesapList{display:grid;grid-template-columns:1fr 1fr;gap:0 16px;padding:0 var(--sp);}
-  #hesapList .bsec{padding:6px 0 0;}
-}
-
-.gtotal{margin:10px var(--sp) 16px;padding:20px;background:linear-gradient(135deg,var(--teal),var(--blue));border-radius:18px;text-align:center;}
-@media(min-width:728px){.gtotal{padding:24px;margin:14px var(--sp) 20px;}}
-.gtotal .gl{font-size:10px;opacity:.75;text-transform:uppercase;letter-spacing:1.2px;font-weight:600;}
-.gtotal .gv{font-size:32px;font-weight:700;margin-top:5px;}
-@media(min-width:728px){.gtotal .gv{font-size:42px;}}
-
-.ratebox{margin:8px var(--sp);background:var(--card);border-radius:16px;padding:15px;}
-.rate-hd{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;font-weight:600;}
-.rate-ref{background:none;border:none;color:var(--teal);font-size:12px;cursor:pointer;}
-.rateg{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;}
-@media(min-width:728px){.rateg{grid-template-columns:repeat(4,1fr);}}
-.rc{background:var(--bg3);border-radius:11px;padding:11px 6px;text-align:center;}
-.rc-s{font-size:20px;margin-bottom:3px;}
-.rc-n{font-size:9px;color:var(--t3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.4px;}
-.rc-v{font-size:13px;font-weight:700;color:var(--gold);}
-.ncard{margin:8px var(--sp);background:linear-gradient(135deg,#0b5c47,#1a9168);border-radius:18px;padding:20px;}
-@media(min-width:728px){.ncard{padding:24px;}}
-.nc-lbl{font-size:10px;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px;}
-.nc-val{font-size:34px;font-weight:700;color:white;margin-bottom:14px;}
-@media(min-width:728px){.nc-val{font-size:42px;}}
-.nc-row{display:flex;gap:9px;}
-.nc-mini{flex:1;background:rgba(255,255,255,.1);border-radius:11px;padding:10px 11px;}
-.nc-mini-l{font-size:9px;color:rgba(255,255,255,.55);margin-bottom:2px;}
-.nc-mini-v{font-size:13px;font-weight:600;color:white;}
-
-.fsec{padding:0 var(--sp);margin-top:12px;}
-.famount{text-align:center;padding:22px var(--sp);background:var(--card);border-radius:16px;margin-bottom:12px;}
-.famount .cur{font-size:12px;color:var(--t3);margin-bottom:5px;letter-spacing:.5px;text-transform:uppercase;}
-.famount input{background:transparent;border:none;color:var(--t1);font-size:42px;font-weight:700;text-align:center;outline:none;width:100%;}
-@media(min-width:728px){.famount input{font-size:52px;}}
-.fgrp{background:var(--card);border-radius:16px;overflow:hidden;margin-bottom:10px;}
-.frow{display:flex;align-items:center;padding:13px 14px;border-bottom:1px solid var(--border);min-height:50px;}
-@media(min-width:728px){.frow{padding:15px 16px;min-height:54px;}}
-.frow:last-child{border-bottom:none;}
-.ficon{font-size:15px;margin-right:12px;width:20px;text-align:center;flex-shrink:0;}
-.flbl{flex:1;font-size:14px;color:var(--t2);}
-.frow select,.frow input[type=text],.frow input[type=date],.frow input[type=number]{background:transparent;border:none;color:var(--t1);font-size:14px;text-align:right;outline:none;width:170px;-webkit-appearance:none;}
-.frow select{cursor:pointer;}
-.frow select option{background:var(--card);}
-.frow input::placeholder{color:var(--t3);}
-.frow input[type=date]{color-scheme:dark;}
-.saw{display:flex;align-items:center;gap:2px;}
-.sadd{background:none;border:none;color:var(--teal);font-size:22px;cursor:pointer;padding:0 2px;line-height:1;}
-.tog{display:flex;align-items:center;justify-content:space-between;padding:13px 14px;}
-.tsw{width:48px;height:27px;background:var(--border);border-radius:14px;position:relative;cursor:pointer;transition:background .3s;}
-.tsw.on{background:var(--green);}
-.tsw::after{content:'';position:absolute;width:21px;height:21px;background:white;border-radius:50%;top:3px;left:3px;transition:transform .3s;box-shadow:0 1px 4px rgba(0,0,0,.35);}
-.tsw.on::after{transform:translateX(21px);}
-.sbtn{width:100%;padding:15px;border-radius:16px;border:none;font-size:15px;font-weight:700;cursor:pointer;margin-top:6px;}
-.sbtn:active{opacity:.8;}
+.hb-ic{background:none;border:none;color:var(--teal);font-size:22px;cursor:pointer;padding:4px 7px;}
+.hb{background:none;border:none;color:var(--teal);font-size:13px;cursor:pointer;padding:7px 8px;}
+.empty{text-align:center;padding:40px 20px;color:var(--t3);font-size:14px;}
 .hid{display:none!important;}
-
-.sbar{margin:10px var(--sp) 6px;background:var(--card);border-radius:12px;display:flex;align-items:center;padding:10px 14px;gap:9px;}
-.sbar input{background:none;border:none;color:var(--t1);font-size:14px;outline:none;flex:1;min-width:0;}
-.sbar input::placeholder{color:var(--t3);}
-.schips{display:flex;gap:6px;padding:0 var(--sp) 8px;overflow-x:auto;}
-.schips::-webkit-scrollbar{display:none;}
-.chip{white-space:nowrap;padding:6px 13px;border-radius:20px;font-size:12px;cursor:pointer;border:1px solid var(--border);color:var(--t3);}
-.chip.on{background:rgba(78,205,196,.14);color:var(--teal);border-color:var(--teal);}
-.sfilt{display:flex;gap:7px;padding:0 var(--sp) 8px;}
-.sfilt select{flex:1;background:var(--card);border:1px solid var(--border);color:var(--t2);padding:7px 10px;border-radius:9px;font-size:12px;-webkit-appearance:none;cursor:pointer;}
-.sfilt select option{background:var(--card);}
-.sresult{padding:6px var(--sp) 3px;font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px;}
-
-.rdr{display:flex;align-items:center;gap:8px;padding:10px var(--sp);background:var(--bg3);}
-.rdr-date{display:flex;align-items:center;gap:6px;flex:1;background:var(--card);border-radius:11px;padding:9px 12px;}
-.rdr-date input{background:transparent;border:none;color:var(--t1);font-size:12px;outline:none;width:95px;color-scheme:dark;}
-.rdr-date span{color:var(--t3);font-size:13px;}
-.rdr-dots{background:var(--card);border:none;color:var(--teal);font-size:14px;font-weight:700;cursor:pointer;padding:9px 14px;border-radius:11px;}
-.rtabs{display:flex;gap:7px;padding:9px var(--sp) 0;}
-.rtab{flex:1;text-align:center;padding:10px;border-radius:11px;font-size:13px;font-weight:600;cursor:pointer;color:var(--t3);background:var(--card);transition:all .2s;}
-.rtab.on{color:var(--red);background:rgba(231,76,60,.15);}
-.rtab.gel.on{color:var(--green);background:rgba(46,204,113,.14);}
-.rsum{display:flex;gap:9px;padding:10px var(--sp) 7px;}
-.rcard{flex:1;padding:14px 8px;border-radius:14px;text-align:center;}
-.rcard.rg{background:rgba(46,204,113,.14);}
-.rcard.rr{background:rgba(231,76,60,.14);}
-.rcard.rb{background:rgba(78,205,196,.11);}
-.rcard .rl{font-size:10px;color:var(--t2);font-weight:500;text-transform:uppercase;letter-spacing:.4px;}
-.rcard .rv{font-size:17px;font-weight:700;margin-top:4px;}
-@media(min-width:728px){.rcard .rv{font-size:22px;}}
-.rcard.rg .rv{color:var(--green);}
-.rcard.rr .rv{color:var(--red);}
-.rcard.rb .rv{color:var(--teal);}
-.rbread{display:flex;align-items:center;gap:6px;padding:8px var(--sp) 4px;font-size:12px;color:var(--teal);}
-.rbread span{color:var(--t3);}
-.pie-wrap{display:flex;justify-content:center;padding:8px var(--sp);}
-.pie-wrap svg{max-width:220px;width:100%;}
-@media(min-width:728px){.pie-wrap svg{max-width:280px;}}
-.catlist{padding:0 var(--sp) 16px;}
-.catrow{display:flex;align-items:center;padding:11px 14px;background:var(--card);border-radius:12px;margin-bottom:7px;cursor:pointer;transition:opacity .15s;}
-.catrow:active{opacity:.75;}
-.cat-dot{width:9px;height:9px;border-radius:50%;margin-right:10px;flex-shrink:0;}
-.cat-ic-sm{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;margin-right:10px;flex-shrink:0;}
-.cat-nm{flex:1;font-size:13px;font-weight:500;}
-.cat-bw{width:60px;height:4px;background:var(--border);border-radius:2px;overflow:hidden;margin:0 10px;}
-.cat-bf{height:100%;border-radius:2px;}
-.cat-am{font-size:13px;font-weight:700;min-width:70px;text-align:right;}
-.cat-arr{font-size:15px;color:var(--t3);margin-left:5px;}
-
-.budcard{margin:0 var(--sp) 10px;background:var(--card);border-radius:16px;overflow:hidden;}
-.budrow{padding:12px 13px;border-bottom:1px solid var(--border);}
-.budrow:last-child{border-bottom:none;}
-.budtop{display:flex;align-items:center;margin-bottom:7px;}
-.budic{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:13px;margin-right:10px;flex-shrink:0;}
-.budnm{flex:1;font-size:13px;font-weight:500;}
-.budsp{font-size:13px;font-weight:700;}
-.budlim{font-size:11px;color:var(--t3);}
-.budbar{height:5px;background:var(--border);border-radius:3px;overflow:hidden;}
-.budfill{height:100%;border-radius:3px;}
-
 .mback{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:400;display:flex;align-items:center;justify-content:center;}
-.mbox{background:var(--card);border-radius:22px;padding:21px 18px;width:93%;max-width:400px;max-height:90vh;overflow-y:auto;}
-@media(min-width:728px){.mbox{max-width:480px;padding:26px 24px;}}
-.mbox::-webkit-scrollbar{display:none;}
-.mtitle{font-size:16px;font-weight:700;margin-bottom:15px;text-align:center;letter-spacing:-.2px;}
-.mlbl{font-size:11px;text-transform:uppercase;letter-spacing:.9px;color:var(--t3);margin:11px 0 4px;font-weight:600;}
+.mbox{background:var(--card);border-radius:22px;padding:21px 18px;width:93%;max-width:400px;}
+.mtitle{font-size:16px;font-weight:700;margin-bottom:15px;text-align:center;}
+.mlbl{font-size:11px;text-transform:uppercase;color:var(--t3);margin:11px 0 4px;}
 .minput{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--t1);padding:12px 13px;border-radius:11px;font-size:14px;outline:none;}
-.msel{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--t1);padding:12px 13px;border-radius:11px;font-size:14px;outline:none;-webkit-appearance:none;cursor:pointer;}
-.msel option{background:var(--card);}
 .mbtns{display:flex;gap:10px;margin-top:15px;}
 .mbtns button{flex:1;padding:13px;border-radius:11px;border:none;font-size:14px;font-weight:600;cursor:pointer;}
 .bc{background:var(--bg3);color:var(--t2);}
 .bk{background:var(--teal);color:white;}
-.bd{background:var(--red);color:white;}
-.eamount{background:var(--bg3);border:1px solid var(--border);border-radius:11px;padding:13px;text-align:center;}
-.eamount input{background:transparent;border:none;color:var(--t1);font-size:28px;font-weight:700;text-align:center;outline:none;width:100%;-webkit-appearance:none;}
-
 .asback{position:fixed;inset:0;background:rgba(0,0,0,.58);z-index:350;display:flex;align-items:flex-end;justify-content:center;}
-.asbox{background:var(--bg2);border-radius:22px 22px 0 0;width:100%;max-width:480px;padding:10px 14px env(safe-area-inset-bottom,14px);}
-@media(min-width:728px){.asbox{max-width:768px;border-radius:22px;margin-bottom:20px;}}
+.asbox{background:var(--bg2);border-radius:22px 22px 0 0;width:100%;max-width:480px;padding:10px 14px;}
 .as-tit{font-size:12px;color:var(--t3);text-align:center;padding:5px 0 12px;border-bottom:1px solid var(--border);margin-bottom:9px;}
-.asbtn{width:100%;padding:14px;border:none;border-radius:13px;font-size:14px;cursor:pointer;margin-bottom:8px;background:var(--card);color:var(--t1);text-align:left;display:flex;align-items:center;gap:12px;font-weight:500;}
-.asbtn.red{color:var(--red);}
-.asbtn .asi{width:36px;height:36px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:17px;}
-.ascancel{width:100%;padding:14px;border:none;border-radius:13px;font-size:14px;font-weight:700;cursor:pointer;background:var(--card);color:var(--teal);}
-
-.toast{position:fixed;top:24px;left:50%;transform:translateX(-50%) translateY(-100px);background:var(--green);color:white;padding:12px 24px;border-radius:13px;font-size:13px;font-weight:600;z-index:600;transition:transform .3s;box-shadow:0 4px 24px rgba(0,0,0,.45);}
+.asbtn{width:100%;padding:14px;border:none;border-radius:13px;font-size:14px;cursor:pointer;margin-bottom:8px;background:var(--card);color:var(--t1);text-align:left;display:flex;align-items:center;gap:12px;}
+.ascancel{width:100%;padding:14px;border:none;border-radius:13px;font-size:14px;font-weight:700;cursor:pointer;background:var(--card);color:var(--teal);text-align:center;}
+.toast{position:fixed;top:24px;left:50%;transform:translateX(-50%) translateY(-100px);background:var(--green);color:white;padding:12px 24px;border-radius:13px;font-size:13px;font-weight:600;z-index:600;transition:transform .3s;}
 .toast.show{transform:translateX(-50%) translateY(0);}
-
-.stgrp{margin:10px var(--sp) 4px;}
-.stgt{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;padding:0 2px;font-weight:700;}
-.stcard{background:var(--card);border-radius:15px;overflow:hidden;}
+.stcard{background:var(--card);border-radius:15px;overflow:hidden;margin:10px var(--sp);}
 .strow{display:flex;align-items:center;padding:13px 14px;border-bottom:1px solid var(--border);cursor:pointer;}
-.strow:last-child{border-bottom:none;}
-.stic{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:14px;margin-right:12px;flex-shrink:0;}
 .stlbl{flex:1;font-size:14px;}
-.stval{font-size:12px;color:var(--t3);margin-right:5px;}
 .starr{font-size:14px;color:var(--t3);}
-
-.dqbox{background:var(--bg2);border-radius:22px 22px 0 0;width:100%;max-width:480px;padding:13px 14px env(safe-area-inset-bottom,14px);}
-@media(min-width:728px){.dqbox{max-width:768px;border-radius:22px;margin-bottom:20px;}}
-.dqbtn{width:100%;padding:14px;border:none;border-radius:13px;font-size:14px;cursor:pointer;margin-bottom:8px;background:var(--card);color:var(--t1);text-align:center;font-weight:500;}
-.dqbtn:active{opacity:.75;}
-
-.acc-act-sheet .asbtn{font-size:13px;padding:12px 14px;}
-.acc-hidden-sect{margin:0 var(--sp) 8px;}
-.acc-hidden-hd{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.8px;padding:9px 0 4px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;}
-
-.astgrp{margin:0 var(--sp) 10px;border-radius:15px;overflow:hidden;}
-.astr{display:flex;align-items:center;padding:12px 14px;background:var(--card);border-bottom:1px solid var(--border);}
-.astr:first-child{border-radius:15px 15px 0 0;}
-.astr:last-child{border-radius:0 0 15px 15px;border-bottom:none;}
-.astr-ic{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;margin-right:12px;flex-shrink:0;}
-.astr-info{flex:1;}
-.astr-name{font-size:13px;color:var(--t1);font-weight:500;}
-.astr-bar{height:3px;background:var(--border);border-radius:2px;margin-top:5px;overflow:hidden;}
-.astr-fill{height:100%;border-radius:2px;}
-.astr-right{text-align:right;}
-.astr-val{font-size:13px;font-weight:700;}
-.astr-pct{font-size:10px;color:var(--t3);margin-top:2px;}
+.bsum{display:flex;gap:10px;padding:14px var(--sp);}
+.bcard{flex:1;border-radius:16px;padding:14px 8px;text-align:center;}
+.bcard.bg{background:linear-gradient(140deg,rgba(46,204,113,.22),rgba(46,204,113,.08));}
+.bcard.br{background:linear-gradient(140deg,rgba(231,76,60,.22),rgba(231,76,60,.08));}
+.bcard.bt{background:linear-gradient(140deg,rgba(52,152,219,.22),rgba(52,152,219,.08));}
+.bcard-l{font-size:9px;text-transform:uppercase;margin-bottom:6px;}
+.bcard-v{font-size:14px;font-weight:700;}
+.bcard.bg .bcard-v{color:var(--green);}
+.bcard.br .bcard-v{color:var(--red);}
+.bcard.bt .bcard-v{color:var(--blue);}
+.gtotal{margin:10px var(--sp);padding:20px;background:linear-gradient(135deg,var(--teal),var(--blue));border-radius:18px;text-align:center;}
+.gtotal .gl{font-size:10px;opacity:.75;text-transform:uppercase;}
+.gtotal .gv{font-size:32px;font-weight:700;margin-top:5px;}
 </style>
 </head>
 <body>
 <div class="toast" id="toast"></div>
 
-<!-- MODALS (kısaltılmış - tam modal yapısı mevcut) -->
-<div class="asback hid" id="addTypeS"><div class="asbox"><div class="as-tit">İşlem Türü Seç</div><button class="asbtn" onclick="openAddType('I')"><div class="asi" style="background:rgba(231,76,60,.15);">🛒</div>Gider</button><button class="asbtn" onclick="openAddType('G')"><div class="asi" style="background:rgba(39,174,96,.15);">💰</div>Gelir</button><button class="asbtn" onclick="openAddType('T')"><div class="asi" style="background:rgba(52,152,219,.15);">↔️</div>Transfer</button><button class="asbtn" onclick="openAddType('VA')"><div class="asi" style="background:rgba(240,180,41,.15);">🥇</div>Varlık Alış</button><button class="asbtn" onclick="openAddType('VS')"><div class="asi" style="background:rgba(155,89,182,.15);">💎</div>Varlık Satış</button><button class="ascancel" onclick="closeAddType()">İptal</button></div></div>
+<div class="asback hid" id="addTypeS">
+  <div class="asbox">
+    <div class="as-tit">İşlem Türü Seç</div>
+    <button class="asbtn" onclick="openAddType('I')">🛒 Gider</button>
+    <button class="asbtn" onclick="openAddType('G')">💰 Gelir</button>
+    <button class="asbtn" onclick="openAddType('T')">↔️ Transfer</button>
+    <button class="ascancel" onclick="closeAddType()">İptal</button>
+  </div>
+</div>
 
-<div class="mback hid" id="addOptM"><div class="mbox"><div class="mtitle" id="addOptT">Yeni Seçenek</div><input class="minput" type="text" id="addOptI" placeholder="Yeni seçenek adı..."><div class="mbtns"><button class="bc" onclick="cancelOpt()">İptal</button><button class="bk" onclick="confirmOpt()">Ekle</button></div></div></div>
+<div class="pg on" id="pg-calnd">
+  <div class="ph"><button class="hb-back" onclick="goToday()">Bugün</button><h1 id="mTitle">Takvim</h1><button class="hb-ic" onclick="showPg('searc')">🔍</button><button class="hb-ic" onclick="showAddType()">＋</button></div>
+  <div class="empty" id="calContent">Takvim içeriği</div>
+</div>
 
-<div class="mback hid" id="editM"><div class="mbox"><div class="mtitle">İşlemi Düzenle</div><div class="eamount"><input type="number" id="e_amt" placeholder="0" step="0.01" min="0" inputmode="decimal"><button id="e_sign_btn" onclick="eToggleAmtSign()" style="margin-top:8px;background:rgba(78,90,110,.5);border:none;color:var(--t1);font-size:15px;font-weight:600;cursor:pointer;border-radius:8px;padding:5px 20px;">+ Pozitif</button></div><div class="mlbl">Tarih</div><input class="minput" type="date" id="e_date" style="color-scheme:dark;"><div class="mlbl">Hesap</div><select class="msel" id="e_acc"></select><div id="e_rhedef"><div class="mlbl">Hedef Hesap</div><select class="msel" id="e_hacc"></select></div><div id="e_rgelir"><div class="mlbl">Gelir Türü</div><select class="msel" id="e_ggrp"></select></div><div id="e_rgider"><div class="mlbl">Kategori</div><select class="msel" id="e_mgrp" onchange="eRefMas()"></select><div class="mlbl">Alt Kategori</div><select class="msel" id="e_agrp" onchange="eRefAlt()"></select><div id="e_ralt2"><div class="mlbl">Alt 2</div><select class="msel" id="e_a2grp"></select></div></div><div id="e_rvarlik"><div class="mlbl">Varlık Türü</div><select class="msel" id="e_vgrp" onchange="eRefVarlık()"></select><div id="e_rvalt"><div class="mlbl">Tür Detayı</div><select class="msel" id="e_valt"></select></div></div><div class="mlbl">Taksit Sayısı</div><select class="msel" id="e_taks"><option value="1">Tek seferlik</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option></select><div class="mlbl">Tekrar</div><select class="msel" id="e_tekp"><option value="">Tekrar Yok</option><option value="Aylık">Aylık</option><option value="Haftalık">Haftalık</option><option value="Günlük">Günlük</option><option value="Yıllık">Yıllık</option></select><div id="e_rtkbt" style="display:none;"><div class="mlbl">Tekrar Bitişi</div><input class="minput" type="date" id="e_tkbt" style="color-scheme:dark;"></div><div class="mlbl">Açıklama</div><input class="minput" type="text" id="e_note" placeholder="Not..."><div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;"><span id="e_durL" style="font-size:13px;">✅ ÖDENDİ</span><div class="tsw on" id="e_durT" onclick="eTogDur()"></div></div><div class="mbtns"><button class="bc" onclick="closeEdit()">İptal</button><button class="bk" style="flex:1;" onclick="saveEdit()">Bu kaydı</button><button class="bk" style="flex:1.3;background:var(--teal);" onclick="saveEditAll()">Bu ve sonrakiler</button></div></div></div>
+<div class="pg" id="pg-searc">
+  <div class="ph"><button class="hb-back" onclick="showPg('calnd')">‹</button><h1>Ara</h1><button class="hb" onclick="clearSearch()">Temizle</button></div>
+  <div class="empty">Arama sonuçları</div>
+</div>
 
-<div class="mback hid" id="delM"><div class="mbox"><div class="mtitle">İşlemi Sil</div><p style="font-size:13px;color:var(--t2);margin-bottom:13px;text-align:center;line-height:1.5;" id="delMsg">Bu işlemi silmek istiyor musunuz?</p><div style="display:flex;flex-direction:column;gap:7px;"><button style="background:rgba(231,76,60,.15);color:var(--red);padding:12px;border-radius:11px;border:none;font-size:13px;font-weight:500;cursor:pointer;" onclick="doDel('one')">Sadece bu kaydı sil</button><button id="delFwdBtn" style="background:rgba(231,76,60,.25);color:var(--red);padding:12px;border-radius:11px;border:none;font-size:13px;font-weight:500;cursor:pointer;" onclick="doDel('forward')">Bu ve sonraki kayıtları sil</button><button id="delAllBtn" style="background:rgba(231,76,60,.4);color:var(--red);padding:12px;border-radius:11px;border:none;font-size:13px;font-weight:500;cursor:pointer;" onclick="doDel('all')">Tüm seriyi sil</button><button class="bc" style="padding:12px;border-radius:11px;border:none;font-size:13px;cursor:pointer;" onclick="closeDel()">İptal</button></div></div></div>
+<div class="pg" id="pg-hesap">
+  <div class="ph"><h1>Bakiye</h1><button class="hb" onclick="showNewAcc()">+ Hesap</button><button class="hb-ic" onclick="showAddType()">＋</button></div>
+  <div class="bsum"><div class="bcard bg"><div class="bcard-l">Kasa & Banka</div><div class="bcard-v" id="totalIncome">₺0</div></div><div class="bcard br"><div class="bcard-l">Kredi Kartı</div><div class="bcard-v" id="totalExpense">₺0</div></div><div class="bcard bt"><div class="bcard-l">Varlık</div><div class="bcard-v" id="totalAsset">₺0</div></div></div>
+  <div class="gtotal"><div class="gl">NET TOPLAM</div><div class="gv" id="netTotal">₺0</div></div>
+  <div id="hesapList"></div>
+</div>
 
-<div class="asback hid" id="actS"><div class="asbox"><div class="as-tit" id="actTitle">İşlem</div><button class="asbtn" onclick="doEditTx()"><div class="asi" style="background:rgba(78,205,196,.15);">✏️</div>Düzenle</button><button class="asbtn" onclick="doCopyTx()"><div class="asi" style="background:rgba(240,180,41,.15);">📋</div>Kopyala (bugünün tarihi ile)</button><button class="asbtn red" onclick="doDelTx()"><div class="asi" style="background:rgba(231,76,60,.1);">🗑️</div>Sil</button><button class="asbtn" id="actMarkBtn" onclick="doMarkPaid()"><div class="asi" style="background:rgba(39,174,96,.15);">✅</div><span id="actMarkLbl">Ödendi İşaretle</span></button><button class="ascancel" onclick="closeAct()">İptal</button></div></div>
+<div class="pg" id="pg-rapor">
+  <div class="ph"><h1>Rapor</h1><button class="hb" onclick="showPg('budge')">🎯</button><button class="hb" onclick="showPg('netwr')">💎</button></div>
+  <div class="empty">Rapor içeriği</div>
+</div>
 
-<div class="asback hid" id="dateQS"><div class="dqbox"><div class="as-tit">Tarih Aralığı Seç</div><button class="dqbtn" onclick="setDateQ('week')">📅 Son 7 Gün</button><button class="dqbtn" onclick="setDateQ('thismonth')">📅 Bu Ay</button><button class="dqbtn" onclick="setDateQ('lastmonth')">📅 Geçen Ay</button><button class="dqbtn" onclick="setDateQ('3months')">📅 Son 3 Ay</button><button class="dqbtn" onclick="setDateQ('thisyear')">📅 Bu Yıl</button><button class="dqbtn" onclick="setDateQ('lastyear')">📅 Geçen Yıl</button><button class="ascancel" onclick="closeDateQ()">İptal</button></div></div>
+<div class="pg" id="pg-netwr">
+  <div class="ph"><button class="hb-back" onclick="showPg('rapor')">‹</button><h1>Net Servet</h1></div>
+  <div class="empty">Net servet bilgisi</div>
+</div>
 
-<div class="asback hid" id="accActS"><div class="asbox"><div class="as-tit" id="accActTitle">Hesap</div><button class="asbtn" onclick="showBalAdj()"><div class="asi" style="background:rgba(78,205,196,.15);">✏️</div>Bakiye Düzenle</button><button class="asbtn" onclick="showAccRename()"><div class="asi" style="background:rgba(52,152,219,.15);">🏷️</div>Adını Değiştir</button><button class="asbtn" onclick="showAccGroupChange()"><div class="asi" style="background:rgba(240,180,41,.15);">📁</div>Grubu Değiştir</button><button class="asbtn red" onclick="hideAcc()"><div class="asi" style="background:rgba(231,76,60,.1);">👁️</div>Listeden Kaldır</button><button class="ascancel" onclick="closeAccAct()">İptal</button></div></div>
+<div class="pg" id="pg-budge">
+  <div class="ph"><button class="hb-back" onclick="showPg('rapor')">‹</button><h1>Bütçe</h1><button class="hb" onclick="showBudgetAdd()">+ Ekle</button></div>
+  <div class="empty">Bütçe bilgisi</div>
+</div>
 
-<div class="mback hid" id="balAdjM"><div class="mbox"><div class="mtitle">Bakiye Düzelt — <span id="balAdjAccName"></span></div><div style="font-size:11px;color:var(--t2);margin-bottom:10px;text-align:center;">Mevcut bakiye: <b id="balAdjCurrent"></b></div><div class="mlbl">Hedef Bakiye (₺)</div><div class="eamount"><input type="number" id="balAdjTarget" placeholder="0" step="0.01" min="0" inputmode="decimal"><button id="balAdj_sign_btn" onclick="balAdjToggleSign()" style="margin-top:8px;background:rgba(78,90,110,.5);border:none;color:var(--t1);font-size:15px;font-weight:600;cursor:pointer;border-radius:8px;padding:5px 20px;">+ Pozitif</button></div><div class="mbtns"><button class="bc" onclick="closeBalAdj()">İptal</button><button class="bk" onclick="confirmBalAdj()">Uygula</button></div></div></div>
+<div class="pg" id="pg-setin">
+  <div class="ph"><button class="hb-back" onclick="showPg('calnd')">‹</button><h1>Ayarlar</h1></div>
+  <div class="stcard"><div class="strow" onclick="exportCSV()"><div class="stlbl">CSV Dışa Aktar</div><span class="starr">›</span></div><div class="strow" onclick="importCSVClick()"><div class="stlbl">CSV İçe Aktar</div><span class="starr">›</span></div><div class="strow" onclick="resetAllData()"><div class="stlbl" style="color:var(--red);">Tüm Verileri Sıfırla</div><span class="starr">›</span></div></div>
+  <input type="file" id="csvInput" accept=".csv" style="display:none;">
+</div>
 
-<div class="mback hid" id="accRenameM"><div class="mbox"><div class="mtitle">Hesap Adını Değiştir</div><div class="mlbl">Yeni Ad</div><input class="minput" type="text" id="accRenameInput" placeholder="Hesap adı..."><div class="mbtns"><button class="bc" onclick="closeAccRename()">İptal</button><button class="bk" onclick="confirmAccRename()">Kaydet</button></div></div></div>
-
-<div class="mback hid" id="accGroupM"><div class="mbox"><div class="mtitle">Grubu Değiştir — <span id="accGroupAccName"></span></div><div class="mlbl">Yeni Grup</div><select class="msel" id="accGroupSelect"><option value="kasa">Kasa & Banka</option><option value="kk">Kredi Kartı</option><option value="diger">Diğer</option><option value="varlik">Varlık</option></select><div class="mbtns"><button class="bc" onclick="closeAccGroupChange()">İptal</button><button class="bk" onclick="confirmAccGroupChange()">Kaydet</button></div></div></div>
-
-<div class="mback hid" id="newAccM"><div class="mbox"><div class="mtitle">Yeni Hesap Ekle</div><div class="mlbl">Hesap Adı</div><input class="minput" type="text" id="newAccName" placeholder="Örn: Ziraat, N26..."><div class="mlbl">Grup</div><select class="msel" id="newAccGroup"><option value="kasa">Kasa & Banka</option><option value="kk">Kredi Kartı</option><option value="diger">Diğer</option><option value="varlik">Varlık</option></select><div class="mbtns"><button class="bc" onclick="closeNewAcc()">İptal</button><button class="bk" onclick="confirmNewAcc()">Ekle</button></div></div></div>
-
-<!-- PAGES -->
-<div class="pg on" id="pg-calnd"><div class="ph" style="padding:9px 10px;"><button class="hb-back" onclick="goToday()" style="font-size:13px;color:var(--teal);padding:6px 8px;">Bugün</button><h1 id="mTitle" style="text-align:center;flex:1;font-size:17px;font-weight:700;">Nisan 2026</h1><button class="hb-ic" onclick="showPg('searc')">🔍</button><button class="hb-ic" onclick="showAddType()" style="background:rgba(78,205,196,.15);border-radius:9px;font-size:20px;">＋</button></div><div class="mnav" style="padding:0 2px 0;"><button onclick="chMonth(-1)" style="font-size:24px;padding:2px 12px;">&#8249;</button><div style="flex:1;"></div><button onclick="chMonth(1)" style="font-size:24px;padding:2px 12px;">&#8250;</button></div><div class="cgrid" id="calGrid"></div><div id="calDay"></div></div>
-
-<div class="pg" id="pg-addtx"><div class="ph"><button class="hb-back" onclick="showPg('calnd')">‹</button><h1 id="fTitle">Gider</h1><button class="hb" style="color:var(--teal);" onclick="saveTx()">Kaydet</button></div><div class="fsec"><div id="fTypeBadge" style="text-align:center;padding:10px 0 4px;font-size:12px;color:var(--t3);">İşlem Türü</div><div class="famount"><div class="cur">₺ TRY</div><input type="number" id="f_amt" placeholder="0" step="0.01" min="0" inputmode="decimal"><button id="f_sign_btn" onclick="toggleAmtSign()" style="margin-top:8px;background:rgba(78,90,110,.5);border:none;color:var(--t1);font-size:15px;font-weight:600;cursor:pointer;border-radius:8px;padding:5px 20px;">+ Pozitif</button></div><div class="fgrp" id="f_gKasa"><div class="frow"><span class="ficon">🏦</span><span class="flbl">Hesap</span><div class="saw"><select id="f_acc"></select><button class="sadd" onclick="showOpt('acc','f_acc',null)">＋</button></div></div></div><div class="fgrp hid" id="f_rthedef"><div class="frow"><span class="ficon">➡️</span><span class="flbl">Hedef Hesap</span><select id="f_hacc"></select></div></div><div class="fgrp hid" id="f_rgelir"><div class="frow"><span class="ficon">📂</span><span class="flbl">Gelir Türü</span><div class="saw"><select id="f_ggrp"></select><button class="sadd" onclick="showOpt('ggrp','f_ggrp',null)">＋</button></div></div></div><div class="fgrp hid" id="f_rgider"><div class="frow"><span class="ficon">🏷️</span><span class="flbl">Kategori</span><div class="saw"><select id="f_mgrp"></select><button class="sadd" onclick="showOpt('mgrp','f_mgrp',null)">＋</button></div></div><div class="frow"><span class="ficon">📁</span><span class="flbl">Alt Kategori</span><div class="saw"><select id="f_agrp"></select><button class="sadd" onclick="showOpt('agrp','f_agrp',document.getElementById('f_mgrp').value)">＋</button></div></div><div class="frow hid" id="f_ralt2"><span class="ficon">📄</span><span class="flbl">Alt 2</span><div class="saw"><select id="f_a2grp"></select><button class="sadd" onclick="showOpt('a2grp','f_a2grp',document.getElementById('f_agrp').value)">＋</button></div></div></div><div class="fgrp hid" id="f_rvarlik"><div class="frow"><span class="ficon">💎</span><span class="flbl">Varlık Türü</span><select id="f_vgrp" onchange="refreshVarlıkAlt()"></select></div><div class="frow hid" id="f_rvalt"><span class="ficon">📐</span><span class="flbl">Tür Detayı</span><select id="f_valt"></select></div></div><div class="fgrp"><div class="frow"><span class="ficon">📅</span><span class="flbl">Tarih</span><input type="date" id="f_date" style="color-scheme:dark;"></div><div class="frow"><span class="ficon">📝</span><span class="flbl">Not</span><input type="text" id="f_note" placeholder="Ekle..."></div></div><div class="fgrp"><div class="frow"><span class="ficon">🔢</span><span class="flbl">Taksit</span><select id="f_taks"><option value="1"></option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option></select></div><div class="frow" id="f_rtek"><span class="ficon">🔄</span><span class="flbl">Tekrar</span><select id="f_tekp"><option value="">Tekrar Yok</option><option value="Aylık">Aylık</option><option value="Haftalık">Haftalık</option><option value="Günlük">Günlük</option><option value="Yıllık">Yıllık</option></select></div><div class="frow hid" id="f_rtkbt"><span class="ficon">🏁</span><span class="flbl">Bitiş</span><input type="date" id="f_tkbt" style="color-scheme:dark;"></div></div><div class="fgrp"><div class="tog"><span id="f_durL">✅ ÖDENDİ</span><div class="tsw on" id="f_durT" onclick="togDur()"></div></div></div><button class="sbtn" id="fSaveBtn" style="background:var(--red);color:white;" onclick="saveTx()">Kaydet</button></div></div>
-
-<div class="pg" id="pg-searc"><div class="ph"><button class="hb-back" onclick="showPg('calnd')">‹</button><h1>Ara & Filtrele</h1><button class="hb" onclick="clearSearch()">Temizle</button></div><div class="sbar"><span style="color:var(--t3);font-size:13px;">🔍</span><input type="text" id="s_q" placeholder="Kategori, hesap, not..." oninput="doSearch()"></div><div class="schips" id="sChips"><div class="chip on" data-type="" onclick="setChip(this,'')">Tümü</div><div class="chip" data-type="G" onclick="setChip(this,'G')">Gider</div><div class="chip" data-type="L" onclick="setChip(this,'L')">Gelir</div><div class="chip" data-type="T" onclick="setChip(this,'T')">Transfer</div><div class="chip" data-type="done" onclick="setChip(this,'done')">Ödendi</div><div class="chip" data-type="plan" onclick="setChip(this,'plan')">Planlandı</div><div class="chip" data-type="future" onclick="setChip(this,'future')">Gelecek</div></div><div class="sfilt"><select id="s_acc" onchange="doSearch()"><option value="">Tüm hesaplar</option></select><select id="s_cat" onchange="doSearch()"><option value="">Tüm kategoriler</option></select><select id="s_per" onchange="doSearch()"><option value="">Tüm zamanlar</option><option value="thismonth">Bu ay</option><option value="lastmonth">Geçen ay</option><option value="3months">3 ay</option><option value="thisyear">Bu yıl</option></select></div><div class="sresult" id="sResult">Arama yapın...</div><div id="sResults"></div></div>
-
-<div class="pg" id="pg-hesap"><div class="ph"><h1>Bakiye</h1><button class="hb-ic" onclick="showPg('calnd')">📅</button><button class="hb" onclick="showNewAcc()" style="font-size:13px;color:var(--teal);">+ Hesap</button><button class="hb-ic" onclick="showAddType()">＋</button></div><div class="bsum"><div class="bcard bg"><div class="bcard-l">Kasa & Banka</div><div class="bcard-v" id="h_gelir">₺0</div></div><div class="bcard br"><div class="bcard-l">Kredi Kartı Borcu</div><div class="bcard-v" id="h_gider">₺0</div></div><div class="bcard bt"><div class="bcard-l">Varlık</div><div class="bcard-v" id="h_yatirim">₺0</div></div></div><div id="hesapList"></div><div class="gtotal"><div class="gl">NET TOPLAM</div><div class="gv" id="h_net">₺0</div></div></div>
-
-<div class="pg" id="pg-rapor"><div class="ph"><h1 id="rTitle">Rapor</h1><button class="hb" id="rBudBtn" onclick="showPg('budge')" style="font-size:16px;">🎯</button><button class="hb" id="rNwBtn" onclick="showPg('netwr')" style="font-size:16px;">💎</button></div><div class="rdr"><div class="rdr-date"><input type="date" id="r_start" onchange="renderRapor()" style="color-scheme:dark;"><span>—</span><input type="date" id="r_end" onchange="renderRapor()" style="color-scheme:dark;"></div><button class="rdr-dots" onclick="showDateQ()">···</button></div><div class="rsum"><div class="rcard rg"><div class="rl">Gelir</div><div class="rv" id="r_gel">₺0</div></div><div class="rcard rr"><div class="rl">Gider</div><div class="rv" id="r_gid">₺0</div></div><div class="rcard rb"><div class="rl">Net</div><div class="rv" id="r_net">₺0</div></div></div><div class="rtabs"><div class="rtab on" id="rtab-G" onclick="setRView('G')">📊 Giderler</div><div class="rtab gel" id="rtab-L" onclick="setRView('L')">📈 Gelirler</div></div><div class="rbread" id="rBread"></div><div class="pie-wrap" id="rPie"></div><div class="catlist" id="rCatList"></div></div>
-
-<div class="pg" id="pg-netwr"><div class="ph"><button class="hb-back" onclick="showPg('rapor')">‹</button><h1>Net Servet</h1><button class="hb" onclick="fetchRates(true)">↻</button></div><div id="ns_content"></div></div>
-
-<div class="pg" id="pg-budge"><div class="ph"><button class="hb-back" onclick="showPg('rapor')">‹</button><h1>Bütçe</h1><button class="hb" onclick="showBudgetAdd()">+ Ekle</button></div><div style="display:flex;align-items:center;justify-content:space-between;padding:8px 14px;background:var(--bg3);"><button style="background:none;border:none;color:var(--teal);font-size:21px;cursor:pointer;" onclick="chBudgetMonth(-1)">‹</button><span style="font-size:14px;font-weight:500;" id="budTitle"></span><button style="background:none;border:none;color:var(--teal);font-size:21px;cursor:pointer;" onclick="chBudgetMonth(1)">›</button></div><div id="budContent"></div></div>
-
-<div class="pg" id="pg-setin"><div class="ph"><button class="hb-back" onclick="showPg('calnd')">‹</button><h1>Ayarlar</h1></div><div class="stgrp"><div class="stgt">VERİ</div><div class="stcard"><div class="strow" onclick="exportCSV()"><div class="stic" style="background:rgba(78,205,196,.15);">📤</div><div class="stlbl">CSV Dışa Aktar</div><span class="starr">›</span></div><div class="strow" onclick="document.getElementById('csvInput').click()"><div class="stic" style="background:rgba(39,174,96,.15);">📥</div><div class="stlbl">CSV İçe Aktar</div><span class="starr">›</span></div><div class="strow" onclick="resetAllData()"><div class="stic" style="background:rgba(231,76,60,.12);">🗑️</div><div class="stlbl" style="color:var(--red);">Tüm Verileri Sıfırla</div><span class="starr" style="color:var(--red);">›</span></div></div></div><div class="stgrp"><div class="stgt">HAKKINDA</div><div class="stcard"><div class="strow" style="cursor:default;"><div class="stic" style="background:rgba(155,89,182,.15);">🏠</div><div class="stlbl">Ev Finans</div><span class="stval">v2.0</span></div><div class="strow" style="cursor:default;"><div class="stic" style="background:rgba(52,152,219,.15);">📋</div><div class="stlbl">Toplam İşlem</div><span class="stval" id="txCount">-</span></div><div class="strow" style="cursor:default;"><div class="stic" style="background:rgba(39,174,96,.15);">🔗</div><div class="stlbl">GitHub Pages</div><span class="stval" id="ghUrl" style="font-size:10px;color:var(--teal);"></span></div><div class="stcard"><div id="customCatSection"></div></div></div></div><input type="file" id="csvInput" accept=".csv" style="display:none;" onchange="importCSV(this)"></div>
-
-<div class="nav"><div class="ni on" data-pg="calnd" onclick="showPg('calnd')"><svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg><span>Takvim</span><div class="ni-dot"></div></div><div class="ni" data-pg="hesap" onclick="showPg('hesap')"><svg viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.1 0-2-.9-2-2V5c0-1.1.9-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg><span>Bakiye</span><div class="ni-dot"></div></div><div class="ni" data-pg="rapor" onclick="showPg('rapor')"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg><span>Rapor</span><div class="ni-dot"></div></div><div class="ni" data-pg="setin" onclick="showPg('setin')"><svg viewBox="0 0 24 24"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg><span>Ayarlar</span><div class="ni-dot"></div></div></div>
+<div class="nav">
+  <div class="ni on" data-pg="calnd" onclick="showPg('calnd')"><svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg><span>Takvim</span></div>
+  <div class="ni" data-pg="hesap" onclick="showPg('hesap')"><svg viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.1 0-2-.9-2-2V5c0-1.1.9-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg><span>Bakiye</span></div>
+  <div class="ni" data-pg="rapor" onclick="showPg('rapor')"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg><span>Rapor</span></div>
+  <div class="ni" data-pg="setin" onclick="showPg('setin')"><svg viewBox="0 0 24 24"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg><span>Ayarlar</span></div>
+</div>
 
 <script>
-// ═══ DATA & STATE ═══
-const SK='evfinans_tx',CK='evfinans_custom',BK='evfinans_budget',RK='evfinans_rates',RTK='evfinans_rates_time';
-const DATA_VER='v8';
-let txs=[],custom={},budgets={};
-let curPg='calnd',curMonth=new Date().getMonth(),curYear=new Date().getFullYear();
-let selDate=new Date(),fType='I',actTxId=null,editTxId=null;
-let sChip='',budMonth=new Date().getMonth(),budYear=new Date().getFullYear();
-let cachedRates=null;
-let rView='G',rLevel=0,rCat='',rAlt='';
+let txs = [];
+let custom = {};
 
-const ACC=['Cüzdan','Enpara','Enpara KK','Garanti','HGS','TEB','TEB KK','TEB VD','Vadeli','Yatırım','İşbank','Altın','USD','Euro','Borsa','Gümüş','Vahide','Enpara VD','Ziraat'];
-const MAS=['Alışveriş','Araba','Bağış','Diğer','Ev','Eğlence','Giyim','Hediye','Hizmet','KişiBakım','Kültürel','Kırtasiye','Sağlık','Seyahat','Sigorta','Yazılım','Yemek','İnternet','Aidat'];
-const GEL=['Diğer','Faiz','Kira','Maaş','Promosyon'];
-const VARLIK_TURLERI=['Altın','USD','EUR','Borsa'];
-const VARLIK_ALT={Altın:['Gram','Çeyrek','Yarım Altın','Tam Altın'],USD:[],EUR:[],Borsa:[]};
-
-let accList=[...ACC],masList=[...MAS],gelList=[...GEL];
-const ACC_KASA=['Cüzdan','Enpara','TEB','TEB VD','Garanti','İşbank','Vahide','Enpara VD','Ziraat'];
-const ACC_KK=['Enpara KK','TEB KK'];
-const ACC_DIGER=['HGS','Vadeli'];
-const ACC_VARLIK=['Altın','USD','Euro','Borsa','Gümüş','Yatırım'];
-const ACC_ICONS={Cüzdan:'💵',Enpara:'🏦','Enpara KK':'💳',Garanti:'🏦',HGS:'🚗',TEB:'🏦','TEB KK':'💳','TEB VD':'🏦',Vadeli:'📊',Yatırım:'📈',İşbank:'🏦',Altın:'🥇',USD:'💵',Euro:'💶',Borsa:'📈',Gümüş:'🥈',Vahide:'👛','Enpara VD':'📊',Ziraat:'🏦'};
-const AYLAR=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
-const AYLAR_K=['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
-const CCOLORS=['#e74c3c','#f5a623','#3498db','#27ae60','#9b59b6','#4ecdc4','#e67e22','#f0b429','#1abc9c','#d35400','#2980b9','#8e44ad','#16a085','#c0392b','#7f8c8d','#2c3e50','#f39c12','#27ae60','#e74c3c'];
-
-function fmtDate(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
-function fmt(n){const r=Math.round(n*100)/100;if(r===Math.floor(r))return Math.floor(r).toLocaleString('tr-TR');return r.toLocaleString('tr-TR',{minimumFractionDigits:2,maximumFractionDigits:2});}
-function toast(m,col){const t=document.getElementById('toast');t.textContent=m;t.style.background=col||'var(--green)';t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
-
-function init(){
-  try{custom=JSON.parse(localStorage.getItem(CK)||'{}');}catch(e){custom={};}
-  try{budgets=JSON.parse(localStorage.getItem(BK)||'{}');}catch(e){budgets={};}
-  const storedVer=localStorage.getItem('evfinans_ver');
-  if(storedVer!==DATA_VER){
-    [SK,CK,BK].forEach(k=>localStorage.removeItem(k));
-    localStorage.setItem('evfinans_ver',DATA_VER);
-    toast('Yeni veri formatı hazır');
-  }
-  const stored=localStorage.getItem(SK);
-  if(stored){try{txs=JSON.parse(stored);}catch(e){txs=[];}}
-  if(!txs||txs.length===0){txs=[];}
-  selDate=new Date();curMonth=selDate.getMonth();curYear=selDate.getFullYear();
-  budMonth=curMonth;budYear=curYear;
-  fillFormSelects();initSearch();initRaporDates();
-  renderCal();showPg('calnd');
-  document.getElementById('txCount').textContent=txs.length;
-  document.getElementById('f_date').value=fmtDate(selDate);
+function showPg(pg) {
+  document.querySelectorAll('.pg').forEach(p => p.classList.remove('on'));
+  document.getElementById('pg-' + pg).classList.add('on');
+  document.querySelectorAll('.ni').forEach(n => n.classList.remove('on'));
+  let ni = document.querySelector('.ni[data-pg="' + pg + '"]');
+  if (ni) ni.classList.add('on');
+  if (pg === 'hesap') renderHesap();
 }
 
-function saveData(){localStorage.setItem(SK,JSON.stringify(txs));}
-function saveCustom(){localStorage.setItem(CK,JSON.stringify(custom));}
-function saveBudgets(){localStorage.setItem(BK,JSON.stringify(budgets));}
-
-function showPg(pg){
-  curPg=pg;
-  document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
-  document.getElementById('pg-'+pg).classList.add('on');
-  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
-  const ni=document.querySelector('.ni[data-pg="'+pg+'"]');if(ni)ni.classList.add('on');
-  if(pg==='calnd')renderCal();
-  else if(pg==='hesap')renderHesap();
-  else if(pg==='rapor')renderRapor();
-  else if(pg==='netwr'){renderNetwr();fetchRates();}
-  else if(pg==='budge')renderBudget();
-  else if(pg==='searc')doSearch();
-  else if(pg==='setin'){document.getElementById('txCount').textContent=txs.length;renderCustomCats();}
+function toast(msg) {
+  let t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
 }
 
-function renderCal(){/* calendar rendering logic - simplified */document.getElementById('calGrid').innerHTML='<div>Takvim</div>';document.getElementById('calDay').innerHTML='';}
-function renderHesap(){/* balance rendering */document.getElementById('hesapList').innerHTML='<div class="empty">Hesap listesi</div>';}
-function renderRapor(){/* report rendering */}
-function renderNetwr(){/* net worth */}
-function renderBudget(){/* budget */}
-function doSearch(){/* search */}
-function initSearch(){}
-function initRaporDates(){}
-function fetchRates(force){}
-function exportCSV(){}
-function importCSV(input){}
-function resetAllData(){if(confirm('Tüm veriler silinsin mi?')){localStorage.clear();location.reload();}}
-function renderCustomCats(){}
-function fillFormSelects(){fillSel('f_acc',accList.filter(a=>a!=='Varlık'));fillSel('f_hacc',accList);fillSel('f_ggrp',gelList,true);fillSel('f_mgrp',masList,true);fillSel('f_agrp',[],true);fillSel('f_a2grp',[],true);}
-function fillSel(id,items,blank=false){const el=document.getElementById(id);if(!el)return;el.innerHTML=(blank?'<option value="">Seçin...</option>':'');items.forEach(x=>el.innerHTML+='<option>'+x+'</option>');}
-function showAddType(){document.getElementById('addTypeS').classList.remove('hid');}
-function closeAddType(){document.getElementById('addTypeS').classList.add('hid');}
-function openAddType(type){closeAddType();showPg('addtx');}
-function saveTx(){toast('Kaydedildi');showPg('calnd');}
-function toggleAmtSign(){}
-function eToggleAmtSign(){}
-function closeAct(){document.getElementById('actS').classList.add('hid');}
-function doMarkPaid(){closeAct();}
-function doEditTx(){closeAct();}
-function doCopyTx(){closeAct();}
-function doDelTx(){closeAct();}
-function closeDel(){document.getElementById('delM').classList.add('hid');}
-function doDel(scope){closeDel();}
-function closeEdit(){document.getElementById('editM').classList.add('hid');}
-function saveEdit(){closeEdit();}
-function saveEditAll(){closeEdit();}
-function openEdit(t){}
-function eRefMas(){}
-function eRefAlt(){}
-function eRefVarlık(){}
-function eTogDur(){}
-function showOpt(type,selId,parent){document.getElementById('addOptM').classList.remove('hid');}
-function cancelOpt(){document.getElementById('addOptM').classList.add('hid');}
-function confirmOpt(){cancelOpt();}
-function refreshVarlıkAlt(){}
-function togDur(){}
-function resetForm(){}
-function goToday(){}
-function chMonth(d){}
-function selDay(d){}
-function showDateQ(){document.getElementById('dateQS').classList.remove('hid');}
-function closeDateQ(){document.getElementById('dateQS').classList.add('hid');}
-function setDateQ(q){closeDateQ();}
-function setRView(v){}
-function rBack(level){}
-function rDrill(fromLevel,key){}
-function chBudgetMonth(d){}
-function showBudgetAdd(){}
-function calcBal(){return{bal:{}};}
-function openAccAct(name,bal){document.getElementById('accActS').classList.remove('hid');}
-function closeAccAct(){document.getElementById('accActS').classList.add('hid');}
-function showBalAdj(){closeAccAct();document.getElementById('balAdjM').classList.remove('hid');}
-function closeBalAdj(){document.getElementById('balAdjM').classList.add('hid');}
-function confirmBalAdj(){closeBalAdj();}
-function balAdjToggleSign(){}
-function showAccRename(){closeAccAct();document.getElementById('accRenameM').classList.remove('hid');}
-function closeAccRename(){document.getElementById('accRenameM').classList.add('hid');}
-function confirmAccRename(){closeAccRename();}
-function showAccGroupChange(){closeAccAct();document.getElementById('accGroupM').classList.remove('hid');}
-function closeAccGroupChange(){document.getElementById('accGroupM').classList.add('hid');}
-function confirmAccGroupChange(){closeAccGroupChange();}
-function hideAcc(){closeAccAct();}
-function showNewAcc(){document.getElementById('newAccM').classList.remove('hid');}
-function closeNewAcc(){document.getElementById('newAccM').classList.add('hid');}
-function confirmNewAcc(){closeNewAcc();}
-function getHiddenAccs(){return[];}
-function saveHidden(list){}
-function toggleHiddenAccs(){}
-function unhideAcc(name){}
+function showAddType() { document.getElementById('addTypeS').classList.remove('hid'); }
+function closeAddType() { document.getElementById('addTypeS').classList.add('hid'); }
+function openAddType(type) { closeAddType(); toast(type + ' seçildi'); }
+function goToday() { toast('Bugün seçildi'); }
+function clearSearch() { toast('Arama temizlendi'); }
+function showNewAcc() { toast('Yeni hesap ekleme'); }
+function exportCSV() { toast('CSV dışa aktarıldı'); }
+function importCSVClick() { document.getElementById('csvInput').click(); }
+function resetAllData() { if (confirm('Tüm veriler silinsin mi?')) { localStorage.clear(); txs = []; renderHesap(); toast('Veriler sıfırlandı'); } }
 
-document.addEventListener('DOMContentLoaded',()=>{
-  document.getElementById('f_date').valueAsDate=new Date();
+function showBudgetAdd() {
+  let cat = prompt('Kategori adı:');
+  if (cat) toast(cat + ' bütçeye eklendi');
+}
+
+function renderHesap() {
+  let total = 0, income = 0, expense = 0;
+  txs.forEach(t => {
+    if (t.type === 'income') { total += t.amount; income += t.amount; }
+    else if (t.type === 'expense') { total -= t.amount; expense += t.amount; }
+  });
+  document.getElementById('totalIncome').innerHTML = '₺' + income.toFixed(2);
+  document.getElementById('totalExpense').innerHTML = '₺' + expense.toFixed(2);
+  document.getElementById('totalAsset').innerHTML = '₺0';
+  document.getElementById('netTotal').innerHTML = '₺' + total.toFixed(2);
+  let html = '<div class="empty">';
+  if (txs.length === 0) html += 'Henüz işlem yok';
+  else html += txs.length + ' işlem var';
+  html += '</div>';
+  document.getElementById('hesapList').innerHTML = html;
+}
+
+function init() {
+  let stored = localStorage.getItem('evfinans_tx');
+  if (stored) { try { txs = JSON.parse(stored); } catch(e) { txs = []; } }
+  if (!txs || txs.length === 0) txs = [];
+  renderHesap();
+}
+
+function saveData() { localStorage.setItem('evfinans_tx', JSON.stringify(txs)); }
+
+document.addEventListener('DOMContentLoaded', function() {
   init();
+  document.getElementById('csvInput').addEventListener('change', function(e) {
+    let file = e.target.files[0];
+    if (file) toast('CSV içe aktarılıyor: ' + file.name);
+    this.value = '';
+  });
 });
 </script>
 </body>
