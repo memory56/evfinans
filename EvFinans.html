@@ -918,7 +918,7 @@ function renderCustomCats(){
   if(custom.accGroups){['kasa','kk','diger','varlik'].forEach(function(g){if(custom.accGroups[g])custom.accGroups[g].forEach(function(v){if(allGrpItems.indexOf(v)<0)allGrpItems.push(v);});});}
   var hasAny=accItems.length||masItems.length||gelItems.length||allGrpItems.length;
   if(!hasAny){html+='<div class="empty">Ozel kategori yok</div>';html+='</div>';el.innerHTML=html;return;}
-  function catRow(type,val){return '<div style="display:flex;align-items:center;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);"><span style="font-size:13px;">'+val+'</span><button onclick="deleteCustomCat(''+type+'',''+val+'')" style="background:var(--red);color:#fff;border:none;border-radius:6px;padding:2px 8px;font-size:11px;cursor:pointer;">Sil</button></div>';}
+  function catRow(type,val){return '<div style="display:flex;align-items:center;justify-content:space-between;padding:4px 0;border-bottom:1px solid var(--border);"><span style="font-size:13px;">'+val+'</span><button onclick="deleteCustomCat(\''+type+'\',\''+val+'\')" style="background:var(--red);color:#fff;border:none;border-radius:6px;padding:2px 8px;font-size:11px;cursor:pointer;">Sil</button></div>';}
   if(masItems.length){html+='<div style="font-size:11px;color:var(--t3);margin-top:4px;">Gider Kategori</div>';masItems.forEach(function(v){html+=catRow('mgrp',v);});}
   if(gelItems.length){html+='<div style="font-size:11px;color:var(--t3);margin-top:4px;">Gelir Kategori</div>';gelItems.forEach(function(v){html+=catRow('gel',v);});}
   if(accItems.length){html+='<div style="font-size:11px;color:var(--t3);margin-top:4px;">Hesap</div>';accItems.forEach(function(v){html+=catRow('acc',v);});}
