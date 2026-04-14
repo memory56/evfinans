@@ -161,10 +161,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .cat-arr{font-size:15px;color:var(--t3);margin-left:5px;}
 .dqbox{background:var(--bg2);border-radius:22px 22px 0 0;width:100%;max-width:480px;padding:13px 14px;}
 .dqbtn{width:100%;padding:14px;border:none;border-radius:13px;font-size:14px;cursor:pointer;margin-bottom:8px;background:var(--card);color:var(--t1);text-align:center;}
+.undo-bar{position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:var(--card);border-radius:12px;padding:12px 20px;display:flex;gap:15px;z-index:500;box-shadow:0 4px 12px rgba(0,0,0,.3);border:1px solid var(--teal);}
+.undo-bar button{background:var(--teal);border:none;padding:6px 16px;border-radius:8px;color:white;font-weight:600;cursor:pointer;}
 </style>
 </head>
 <body>
 <div class="toast" id="toast"></div>
+<div class="undo-bar hid" id="undoBar"><span id="undoMsg">İşlem yapıldı</span><button onclick="undoLastAction()">Geri Al</button></div>
 
 <!-- Modals -->
 <div class="asback hid" id="addTypeS"><div class="asbox"><div class="as-tit">İşlem Türü Seç</div><button class="asbtn" onclick="openAddType('I')"><div class="asi" style="background:rgba(231,76,60,.15);">🛒</div>Gider</button><button class="asbtn" onclick="openAddType('G')"><div class="asi" style="background:rgba(39,174,96,.15);">💰</div>Gelir</button><button class="asbtn" onclick="openAddType('T')"><div class="asi" style="background:rgba(52,152,219,.15);">↔️</div>Transfer</button><button class="ascancel" onclick="closeAddType()">İptal</button></div></div>
@@ -179,133 +182,33 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 <div class="mback hid" id="newAccM"><div class="mbox"><div class="mtitle">Yeni Hesap Ekle</div><div class="mlbl">Hesap Adı</div><input class="minput" type="text" id="newAccName" placeholder="Örn: Ziraat, N26..."><div class="mlbl">Grup</div><select class="msel" id="newAccGroup"><option value="odeme">Ödeme Hesabı</option><option value="kk">Kredi Kartı</option><option value="varlik">Varlık</option></select><div class="mbtns"><button class="bc" onclick="closeNewAcc()">İptal</button><button class="bk" onclick="confirmNewAcc()">Ekle</button></div></div></div>
 
-<!-- Ay/Yıl Seçici Modal -->
-<div class="mback hid" id="monthYearPicker">
-  <div class="mbox">
-    <div class="mtitle">Ay ve Yıl Seç</div>
-    <div class="mlbl">Yıl</div>
-    <input class="minput" type="number" id="pickerYear" min="2020" max="2035">
-    <div class="mlbl">Ay</div>
-    <select class="msel" id="pickerMonth">
-      <option value="0">Ocak</option><option value="1">Şubat</option><option value="2">Mart</option><option value="3">Nisan</option>
-      <option value="4">Mayıs</option><option value="5">Haziran</option><option value="6">Temmuz</option><option value="7">Ağustos</option>
-      <option value="8">Eylül</option><option value="9">Ekim</option><option value="10">Kasım</option><option value="11">Aralık</option>
-    </select>
-    <div class="mbtns"><button class="bc" onclick="closeMonthYearPicker()">İptal</button><button class="bk" onclick="applyMonthYearPicker()">Git</button></div>
-  </div>
-</div>
+<div class="mback hid" id="monthYearPicker"><div class="mbox"><div class="mtitle">Ay ve Yıl Seç</div><div class="mlbl">Yıl</div><input class="minput" type="number" id="pickerYear" min="2020" max="2035"><div class="mlbl">Ay</div><select class="msel" id="pickerMonth"><option value="0">Ocak</option><option value="1">Şubat</option><option value="2">Mart</option><option value="3">Nisan</option><option value="4">Mayıs</option><option value="5">Haziran</option><option value="6">Temmuz</option><option value="7">Ağustos</option><option value="8">Eylül</option><option value="9">Ekim</option><option value="10">Kasım</option><option value="11">Aralık</option></select><div class="mbtns"><button class="bc" onclick="closeMonthYearPicker()">İptal</button><button class="bk" onclick="applyMonthYearPicker()">Git</button></div></div></div>
 
-<!-- İşlem Düzenleme Modalı (Sadeleştirilmiş) -->
-<div class="mback hid" id="editTxM">
-  <div class="mbox">
-    <div class="mtitle">İşlemi Düzenle</div>
-    <div class="mlbl">Tutar (₺)</div>
-    <input class="minput" type="number" id="edit_amt" step="0.01">
-    <div class="mlbl">Tarih</div>
-    <input class="minput" type="date" id="edit_date">
-    <div class="mlbl">Hesap</div>
-    <select class="msel" id="edit_acc"></select>
-    <div id="edit_rhedef" style="display:none;"><div class="mlbl">Hedef Hesap</div><select class="msel" id="edit_hacc"></select></div>
-    <div id="edit_rgelir" style="display:none;"><div class="mlbl">Gelir Türü</div><select class="msel" id="edit_ggrp"></select></div>
-    <div id="edit_rgider" style="display:none;"><div class="mlbl">Kategori</div><select class="msel" id="edit_mgrp"></select><div class="mlbl">Alt Kategori</div><select class="msel" id="edit_agrp"></select></div>
-    <div class="mlbl">Açıklama</div>
-    <input class="minput" type="text" id="edit_note">
-    <div style="display:flex;justify-content:space-between;padding:10px 0;">
-      <span id="edit_durL">✅ ÖDENDİ</span>
-      <div class="tsw on" id="edit_durT" onclick="editTogDur()"></div>
-    </div>
-    <div class="mbtns"><button class="bc" onclick="closeEditTx()">İptal</button><button class="bk" id="updateBtn" onclick="showUpdateOptions()">Güncelle</button><button class="bd" id="deleteBtn" onclick="showDeleteOptions()">Sil</button></div>
-  </div>
-</div>
+<!-- İşlem Düzenleme Modalı -->
+<div class="mback hid" id="editTxM"><div class="mbox"><div class="mtitle">İşlemi Düzenle</div><div class="mlbl">Tutar (₺)</div><input class="minput" type="number" id="edit_amt" step="0.01"><div class="mlbl">Tarih</div><input class="minput" type="date" id="edit_date"><div class="mlbl">Hesap</div><select class="msel" id="edit_acc"></select><div id="edit_rhedef" style="display:none;"><div class="mlbl">Hedef Hesap</div><select class="msel" id="edit_hacc"></select></div><div id="edit_rgelir" style="display:none;"><div class="mlbl">Gelir Türü</div><select class="msel" id="edit_ggrp"></select></div><div id="edit_rgider" style="display:none;"><div class="mlbl">Kategori</div><select class="msel" id="edit_mgrp"></select><div class="mlbl">Alt Kategori</div><select class="msel" id="edit_agrp"></select></div><div class="mlbl">Açıklama</div><input class="minput" type="text" id="edit_note"><div style="display:flex;justify-content:space-between;padding:10px 0;"><span id="edit_durL">✅ ÖDENDİ</span><div class="tsw on" id="edit_durT" onclick="editTogDur()"></div></div><div class="mbtns"><button class="bc" onclick="closeEditTx()">İptal</button><button class="bk" id="updateBtn" onclick="showUpdateOptions()">Güncelle</button><button class="bd" id="deleteBtn" onclick="showDeleteOptions()">Sil</button></div></div></div>
 
 <!-- Güncelleme Seçenekleri Modalı -->
-<div class="mback hid" id="updateOptionsM">
-  <div class="mbox">
-    <div class="mtitle" id="updateOptionsTitle">Güncelleme Seçeneği</div>
-    <div class="mbtns" style="flex-direction:column;">
-      <button class="bk" onclick="updateTransaction('one')">Sadece Bu Kaydı Güncelle</button>
-      <button class="bk" style="background:var(--orange);" id="updateForwardBtn" onclick="updateTransaction('forward')">Bu ve Sonraki Kayıtları Güncelle</button>
-      <button class="bc" onclick="closeUpdateOptions()">İptal</button>
-    </div>
-  </div>
-</div>
+<div class="mback hid" id="updateOptionsM"><div class="mbox"><div class="mtitle" id="updateOptionsTitle">Güncelleme Seçeneği</div><div class="mbtns" style="flex-direction:column;"><button class="bk" onclick="updateTransaction('one')">Sadece Bu Kaydı Güncelle</button><button class="bk" style="background:var(--orange);" id="updateForwardBtn" onclick="updateTransaction('forward')">Bu ve Sonraki Kayıtları Güncelle</button><button class="bc" onclick="closeUpdateOptions()">İptal</button></div></div></div>
 
 <!-- Silme Seçenekleri Modalı -->
-<div class="mback hid" id="deleteOptionsM">
-  <div class="mbox">
-    <div class="mtitle" id="deleteOptionsTitle">Silme Seçeneği</div>
-    <div class="mbtns" style="flex-direction:column;">
-      <button class="bk" onclick="deleteTransaction('one')">Sadece Bu Kaydı Sil</button>
-      <button class="bk" style="background:var(--orange);" id="deleteForwardBtn" onclick="deleteTransaction('forward')">Bu ve Sonraki Kayıtları Sil</button>
-      <button class="bd" id="deleteAllBtn" onclick="deleteTransaction('all')">Tüm Seriyi Sil</button>
-      <button class="bc" onclick="closeDeleteOptions()">İptal</button>
-    </div>
-  </div>
-</div>
+<div class="mback hid" id="deleteOptionsM"><div class="mbox"><div class="mtitle" id="deleteOptionsTitle">Silme Seçeneği</div><div class="mbtns" style="flex-direction:column;"><button class="bk" onclick="deleteTransaction('one')">Sadece Bu Kaydı Sil</button><button class="bk" style="background:var(--orange);" id="deleteForwardBtn" onclick="deleteTransaction('forward')">Bu ve Sonraki Kayıtları Sil</button><button class="bd" id="deleteAllBtn" onclick="deleteTransaction('all')">Tüm Seriyi Sil</button><button class="bc" onclick="closeDeleteOptions()">İptal</button></div></div></div>
 
-<!-- Gizli Hesapları Yönet Modalı -->
-<div class="mback hid" id="hiddenAccsM">
-  <div class="mbox">
-    <div class="mtitle">Gizli Hesapları Yönet</div>
-    <div id="hiddenAccsListModal"></div>
-    <div class="mbtns"><button class="bc" onclick="closeHiddenAccsModal()">Kapat</button></div>
-  </div>
-</div>
+<div class="mback hid" id="hiddenAccsM"><div class="mbox"><div class="mtitle">Gizli Hesapları Yönet</div><div id="hiddenAccsListModal"></div><div class="mbtns"><button class="bc" onclick="closeHiddenAccsModal()">Kapat</button></div></div></div>
 
 <!-- PAGES -->
-<div class="pg on" id="pg-calnd">
-  <div class="ph"><button class="hb-back" onclick="goToday()">Bugün</button><h1 id="mTitle" onclick="showMonthYearPicker()" style="cursor:pointer;">Takvim</h1><button class="hb-ic" onclick="showPg('searc')">🔍</button><button class="hb-ic" onclick="showAddType()">＋</button></div>
-  <div class="mnav" style="display:flex;justify-content:space-between;padding:7px 6px;background:var(--bg2);">
-    <button onclick="chMonth(-1)" style="background:none;border:none;color:var(--teal);font-size:24px;cursor:pointer;">‹</button>
-    <div style="flex:1;text-align:center;font-size:16px;font-weight:700;" id="mTitleDisplay"></div>
-    <button onclick="chMonth(1)" style="background:none;border:none;color:var(--teal);font-size:24px;cursor:pointer;">›</button>
-  </div>
-  <div class="cgrid" id="calGrid"></div>
-  <div id="calDay"></div>
-</div>
+<div class="pg on" id="pg-calnd"><div class="ph"><button class="hb-back" onclick="goToday()">Bugün</button><h1 id="mTitle" onclick="showMonthYearPicker()" style="cursor:pointer;">Takvim</h1><button class="hb-ic" onclick="showPg('searc')">🔍</button><button class="hb-ic" onclick="showAddType()">＋</button></div><div class="mnav" style="display:flex;justify-content:space-between;padding:7px 6px;background:var(--bg2);"><button onclick="chMonth(-1)" style="background:none;border:none;color:var(--teal);font-size:24px;cursor:pointer;">‹</button><div style="flex:1;text-align:center;font-size:16px;font-weight:700;" id="mTitleDisplay"></div><button onclick="chMonth(1)" style="background:none;border:none;color:var(--teal);font-size:24px;cursor:pointer;">›</button></div><div class="cgrid" id="calGrid"></div><div id="calDay"></div></div>
 
-<div class="pg" id="pg-addtx"><div class="ph"><button class="hb-back" onclick="showPg('calnd')">‹</button><h1 id="fTitle">Yeni İşlem</h1><button class="hb" onclick="saveTx()">Kaydet</button></div><div class="fsec"><div class="famount"><input type="number" id="f_amt" placeholder="0" step="0.01"></div><div class="fgrp"><div class="frow"><span class="ficon">🏦</span><span class="flbl">Hesap</span><select id="f_acc"></select></div></div><div class="fgrp hid" id="f_rthedef"><div class="frow"><span class="ficon">➡️</span><span class="flbl">Hedef Hesap</span><select id="f_hacc"></select></div></div><div class="fgrp hid" id="f_rgelir"><div class="frow"><span class="ficon">📂</span><span class="flbl">Gelir Türü</span><select id="f_ggrp"></select></div></div><div class="fgrp hid" id="f_rgider"><div class="frow"><span class="ficon">🏷️</span><span class="flbl">Kategori</span><select id="f_mgrp"></select></div><div class="frow"><span class="ficon">📁</span><span class="flbl">Alt Kategori</span><select id="f_agrp"></select></div></div><div class="fgrp"><div class="frow"><span class="ficon">📅</span><span class="flbl">Tarih</span><input type="date" id="f_date"></div><div class="frow"><span class="ficon">📝</span><span class="flbl">Not</span><input type="text" id="f_note" placeholder="Ekle..."></div></div><div class="fgrp"><div class="tog"><span id="f_durL">✅ ÖDENDİ</span><div class="tsw on" id="f_durT" onclick="togDur()"></div></div></div><button class="sbtn" id="fSaveBtn" style="background:var(--red);color:white;" onclick="saveTx()">Kaydet</button></div></div>
+<div class="pg" id="pg-addtx"><div class="ph"><button class="hb-back" onclick="showPg('calnd')">‹</button><h1 id="fTitle">Yeni İşlem</h1><button class="hb" onclick="saveTx()">Kaydet</button></div><div class="fsec"><div class="famount"><input type="number" id="f_amt" placeholder="0" step="0.01" value=""></div><div class="fgrp"><div class="frow"><span class="ficon">🏦</span><span class="flbl">Hesap</span><select id="f_acc"></select></div></div><div class="fgrp hid" id="f_rthedef"><div class="frow"><span class="ficon">➡️</span><span class="flbl">Hedef Hesap</span><select id="f_hacc"></select></div></div><div class="fgrp hid" id="f_rgelir"><div class="frow"><span class="ficon">📂</span><span class="flbl">Gelir Türü</span><select id="f_ggrp"></select></div></div><div class="fgrp hid" id="f_rgider"><div class="frow"><span class="ficon">🏷️</span><span class="flbl">Kategori</span><select id="f_mgrp"></select></div><div class="frow"><span class="ficon">📁</span><span class="flbl">Alt Kategori</span><select id="f_agrp"></select></div></div><div class="fgrp"><div class="frow"><span class="ficon">📅</span><span class="flbl">Tarih</span><input type="date" id="f_date"></div><div class="frow"><span class="ficon">📝</span><span class="flbl">Not</span><input type="text" id="f_note" placeholder="Ekle..."></div></div><div class="fgrp"><div class="tog"><span id="f_durL">✅ ÖDENDİ</span><div class="tsw on" id="f_durT" onclick="togDur()"></div></div></div><button class="sbtn" id="fSaveBtn" style="background:var(--red);color:white;" onclick="saveTx()">Kaydet</button></div></div>
 
 <div class="pg" id="pg-searc"><div class="ph"><button class="hb-back" onclick="showPg('calnd')">‹</button><h1>Ara</h1><button class="hb" onclick="clearSearch()">Temizle</button></div><div class="sbar"><span>🔍</span><input type="text" id="s_q" placeholder="Ara..." oninput="doSearch()"></div><div class="schips"><div class="chip on" onclick="setChip(this,'')">Tümü</div><div class="chip" onclick="setChip(this,'G')">Gider</div><div class="chip" onclick="setChip(this,'L')">Gelir</div><div class="chip" onclick="setChip(this,'T')">Transfer</div></div><div class="sfilt"><select id="s_acc"><option value="">Tüm hesaplar</option></select><select id="s_cat"><option value="">Tüm kategoriler</option></select></div><div class="sresult" id="sResult"></div><div id="sResults"></div></div>
 
-<div class="pg" id="pg-hesap">
-  <div class="ph"><h1>Bakiye</h1><button class="hb" onclick="showNewAcc()">+ Hesap</button><button class="hb-ic" onclick="showAddType()">＋</button><button class="hb" onclick="showHiddenAccsModal()" style="font-size:12px;">👁️ Gizliler</button></div>
-  <div class="bsum"><div class="bcard bg"><div class="bcard-l">Ödeme Hesabı</div><div class="bcard-v" id="h_odeme">₺0</div></div><div class="bcard br"><div class="bcard-l">Kredi Kartı Borcu</div><div class="bcard-v" id="h_kk">₺0</div></div><div class="bcard bt"><div class="bcard-l">Varlık</div><div class="bcard-v" id="h_varlik">₺0</div></div></div>
-  <div id="hesapList"></div>
-  <div class="gtotal"><div class="gl">NET TOPLAM</div><div class="gv" id="h_net">₺0</div></div>
-</div>
+<div class="pg" id="pg-hesap"><div class="ph"><h1>Bakiye</h1><button class="hb" onclick="showNewAcc()">+ Hesap</button><button class="hb-ic" onclick="showAddType()">＋</button><button class="hb" onclick="showHiddenAccsModal()" style="font-size:12px;">👁️ Gizliler</button></div><div class="bsum"><div class="bcard bg"><div class="bcard-l">Ödeme Hesabı</div><div class="bcard-v" id="h_odeme">₺0</div></div><div class="bcard br"><div class="bcard-l">Kredi Kartı Borcu</div><div class="bcard-v" id="h_kk">₺0</div></div><div class="bcard bt"><div class="bcard-l">Varlık</div><div class="bcard-v" id="h_varlik">₺0</div></div></div><div id="hesapList"></div><div class="gtotal"><div class="gl">NET TOPLAM</div><div class="gv" id="h_net">₺0</div></div></div>
 
-<div class="pg" id="pg-rapor">
-  <div class="ph"><h1>Rapor</h1><button class="hb" onclick="showPg('netwr')">💎</button></div>
-  <div class="rdr"><div class="rdr-date"><input type="date" id="r_start" onchange="renderRapor()"><span>—</span><input type="date" id="r_end" onchange="renderRapor()"></div><button class="rdr-dots" onclick="showDateQ()">···</button></div>
-  <div class="rsum"><div class="rcard rg"><div class="rl">Gelir</div><div class="rv" id="r_gel">₺0</div></div><div class="rcard rr"><div class="rl">Gider</div><div class="rv" id="r_gid">₺0</div></div><div class="rcard rb"><div class="rl">Net</div><div class="rv" id="r_net">₺0</div></div></div>
-  <div class="catlist" id="rCatList"></div>
-</div>
+<div class="pg" id="pg-rapor"><div class="ph"><h1>Rapor</h1><button class="hb" onclick="showPg('netwr')">💎</button></div><div class="rdr"><div class="rdr-date"><input type="date" id="r_start" onchange="renderRapor()"><span>—</span><input type="date" id="r_end" onchange="renderRapor()"></div><button class="rdr-dots" onclick="showDateQ()">···</button></div><div class="rsum"><div class="rcard rg"><div class="rl">Gelir</div><div class="rv" id="r_gel">₺0</div></div><div class="rcard rr"><div class="rl">Gider</div><div class="rv" id="r_gid">₺0</div></div><div class="rcard rb"><div class="rl">Net</div><div class="rv" id="r_net">₺0</div></div></div><div class="catlist" id="rCatList"></div></div>
 
 <div class="pg" id="pg-netwr"><div class="ph"><button class="hb-back" onclick="showPg('rapor')">‹</button><h1>Net Servet</h1></div><div id="ns_content"></div></div>
 
-<div class="pg" id="pg-setin">
-  <div class="ph"><button class="hb-back" onclick="showPg('calnd')">‹</button><h1>Ayarlar</h1></div>
-  
-  <div class="stgrp">
-    <div class="stgt">ONEDRİVE SENKRON</div>
-    <div class="stcard">
-      <div class="strow" style="cursor:default;flex-wrap:wrap;gap:6px;padding:14px;">
-        <div class="stic" style="background:rgba(0,120,212,.15);">☁️</div>
-        <div style="flex:1;"><div class="stlbl" id="od-status-lbl">Giriş yapılmadı</div><div style="font-size:11px;color:var(--t3);" id="od-user-lbl"></div></div>
-        <button id="od-login-btn" onclick="odLogin()" style="background:rgba(0,120,212,.8);color:white;border:none;border-radius:8px;padding:7px 14px;font-size:13px;cursor:pointer;">Giriş Yap</button>
-        <button id="od-logout-btn" onclick="odLogout()" style="display:none;background:var(--bg3);color:var(--t2);border:none;border-radius:8px;padding:7px 12px;font-size:13px;cursor:pointer;">Çıkış</button>
-      </div>
-      <div class="strow" id="od-sync-row" style="display:none;" onclick="odSync()"><div class="stic" style="background:rgba(0,120,212,.15);">🔄</div><div class="stlbl">Excel'e Kaydet / Yükle</div><span class="starr">›</span></div>
-      <div class="strow" id="od-pull-row" style="display:none;" onclick="odPull()"><div class="stic" style="background:rgba(78,205,196,.15);">⬇️</div><div class="stlbl" style="color:var(--orange);">Excel'den Al (üzerine yazar)</div><span class="starr">›</span></div>
-      <div style="padding:10px 14px;font-size:11px;color:var(--t3);" id="od-sync-info"></div>
-    </div>
-  </div>
-  
-  <div class="stgrp"><div class="stgt">VERİ</div><div class="stcard"><div class="strow" onclick="exportCSV()"><div class="stic">📤</div><div class="stlbl">CSV Dışa Aktar</div><span class="starr">›</span></div><div class="strow" onclick="document.getElementById('csvInput').click()"><div class="stic">📥</div><div class="stlbl">CSV İçe Aktar</div><span class="starr">›</span></div><div class="strow" onclick="resetAllData()"><div class="stic">🗑️</div><div class="stlbl" style="color:var(--red);">Tüm Verileri Sıfırla</div><span class="starr">›</span></div></div></div>
-  <div class="stgrp"><div class="stgt">HAKKINDA</div><div class="stcard"><div class="strow"><div class="stic">🏠</div><div class="stlbl">Ev Finans</div><span class="stval">v2.0</span></div><div class="strow"><div class="stic">📋</div><div class="stlbl">Toplam İşlem</div><span class="stval" id="txCount">-</span></div></div></div>
-  <input type="file" id="csvInput" accept=".csv" style="display:none;" onchange="importCSV(this)">
-</div>
+<div class="pg" id="pg-setin"><div class="ph"><button class="hb-back" onclick="showPg('calnd')">‹</button><h1>Ayarlar</h1></div><div class="stgrp"><div class="stgt">ONEDRİVE SENKRON</div><div class="stcard"><div class="strow" style="cursor:default;flex-wrap:wrap;gap:6px;padding:14px;"><div class="stic" style="background:rgba(0,120,212,.15);">☁️</div><div style="flex:1;"><div class="stlbl" id="od-status-lbl">Giriş yapılmadı</div><div style="font-size:11px;color:var(--t3);" id="od-user-lbl"></div></div><button id="od-login-btn" onclick="odLogin()" style="background:rgba(0,120,212,.8);color:white;border:none;border-radius:8px;padding:7px 14px;font-size:13px;cursor:pointer;">Giriş Yap</button><button id="od-logout-btn" onclick="odLogout()" style="display:none;background:var(--bg3);color:var(--t2);border:none;border-radius:8px;padding:7px 12px;font-size:13px;cursor:pointer;">Çıkış</button></div><div class="strow" id="od-sync-row" style="display:none;" onclick="odSync()"><div class="stic" style="background:rgba(0,120,212,.15);">🔄</div><div class="stlbl">Excel'e Kaydet / Yükle</div><span class="starr">›</span></div><div class="strow" id="od-pull-row" style="display:none;" onclick="odPull()"><div class="stic" style="background:rgba(78,205,196,.15);">⬇️</div><div class="stlbl" style="color:var(--orange);">Excel'den Al (üzerine yazar)</div><span class="starr">›</span></div><div style="padding:10px 14px;font-size:11px;color:var(--t3);" id="od-sync-info"></div></div></div><div class="stgrp"><div class="stgt">VERİ</div><div class="stcard"><div class="strow" onclick="exportCSV()"><div class="stic">📤</div><div class="stlbl">CSV Dışa Aktar</div><span class="starr">›</span></div><div class="strow" onclick="document.getElementById('csvInput').click()"><div class="stic">📥</div><div class="stlbl">CSV İçe Aktar</div><span class="starr">›</span></div><div class="strow" onclick="resetAllData()"><div class="stic">🗑️</div><div class="stlbl" style="color:var(--red);">Tüm Verileri Sıfırla</div><span class="starr">›</span></div></div></div><div class="stgrp"><div class="stgt">HAKKINDA</div><div class="stcard"><div class="strow"><div class="stic">🏠</div><div class="stlbl">Ev Finans</div><span class="stval">v2.0</span></div><div class="strow"><div class="stic">📋</div><div class="stlbl">Toplam İşlem</div><span class="stval" id="txCount">-</span></div></div></div><input type="file" id="csvInput" accept=".csv" style="display:none;" onchange="importCSV(this)"></div>
 
 <div class="nav"><div class="ni on" data-pg="calnd" onclick="showPg('calnd')"><svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg><span>Takvim</span><div class="ni-dot"></div></div><div class="ni" data-pg="hesap" onclick="showPg('hesap')"><svg viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.1 0-2-.9-2-2V5c0-1.1.9-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg><span>Bakiye</span><div class="ni-dot"></div></div><div class="ni" data-pg="rapor" onclick="showPg('rapor')"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg><span>Rapor</span><div class="ni-dot"></div></div><div class="ni" data-pg="setin" onclick="showPg('setin')"><svg viewBox="0 0 24 24"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg><span>Ayarlar</span><div class="ni-dot"></div></div></div>
 
@@ -319,6 +222,7 @@ let curPg='calnd', curMonth=new Date().getMonth(), curYear=new Date().getFullYea
 let selDate=new Date(), fType='I', editTxId=null;
 let sChip='';
 let touchStartX=0, touchEndX=0;
+let lastAction=null; // Geri al için son işlemi sakla
 
 // Hesap listeleri
 const ODEME_HESAPLARI = ['Cüzdan', 'TEB', 'TEB Marifetli', 'TEB VD', 'Enpara', 'Garanti', 'Ziraat', 'İşbank', 'Vahide'];
@@ -349,6 +253,32 @@ function isVarlik(acc){return VARLIKLAR.includes(acc);}
 function isBakiyeDuzeltme(t){return t.aciklama==='Bakiye Düzeltme';}
 
 let currentEditTransaction=null;
+
+function showUndoBar(msg, undoData){
+  lastAction=undoData;
+  document.getElementById('undoMsg').textContent=msg;
+  document.getElementById('undoBar').classList.remove('hid');
+  setTimeout(()=>{document.getElementById('undoBar').classList.add('hid'); lastAction=null;}, 8000);
+}
+function undoLastAction(){
+  if(!lastAction) return;
+  if(lastAction.type==='update'){
+    txs=lastAction.oldData;
+    saveData();
+    toast('Güncelleme geri alındı');
+  }else if(lastAction.type==='delete'){
+    txs=lastAction.oldData;
+    saveData();
+    toast('Silme geri alındı');
+  }else if(lastAction.type==='add'){
+    txs=lastAction.oldData;
+    saveData();
+    toast('Ekleme geri alındı');
+  }
+  lastAction=null;
+  document.getElementById('undoBar').classList.add('hid');
+  renderCal(); renderHesap();
+}
 
 function init(){
   try{custom=JSON.parse(localStorage.getItem(CK)||'{}');}catch(e){custom={};}
@@ -444,7 +374,7 @@ function mpRow(t,todayS,showDate){let isPaid=t.gerceklesme==='Gerçekleşmiş';l
 function openEditTxModal(id){
   let t=txs.find(x=>x.id===id);
   if(!t)return;
-  currentEditTransaction=t;
+  currentEditTransaction=JSON.parse(JSON.stringify(t));
   editTxId=id;
   document.getElementById('edit_amt').value=Math.abs(t.tutar);
   document.getElementById('edit_date').value=t.tarih;
@@ -487,6 +417,7 @@ function showUpdateOptions(){
 function closeUpdateOptions(){document.getElementById('updateOptionsM').classList.add('hid');}
 function updateTransaction(scope){
   if(!currentEditTransaction){closeUpdateOptions();return;}
+  let oldData=JSON.parse(JSON.stringify(txs));
   let amt=parseFloat(document.getElementById('edit_amt').value);
   if(!amt||amt<=0){toast('Tutar girin!','var(--red)');closeUpdateOptions();return;}
   let date=document.getElementById('edit_date').value;if(!date){toast('Tarih seçin!','var(--red)');closeUpdateOptions();return;}
@@ -521,7 +452,10 @@ function updateTransaction(scope){
       count++;
     });
   }
-  saveData();closeUpdateOptions();closeEditTx();toast('✓ '+count+' kayıt güncellendi');renderCal();renderHesap();showPg('calnd');
+  saveData();closeUpdateOptions();closeEditTx();
+  toast('✓ '+count+' kayıt güncellendi');
+  showUndoBar('Güncelleme geri alınsın mı?', {type:'update', oldData:oldData});
+  renderCal();renderHesap();showPg('calnd');
 }
 function showDeleteOptions(){
   let t=currentEditTransaction;
@@ -541,6 +475,7 @@ function closeDeleteOptions(){document.getElementById('deleteOptionsM').classLis
 function deleteTransaction(scope){
   let t=currentEditTransaction;
   if(!t){closeDeleteOptions();return;}
+  let oldData=JSON.parse(JSON.stringify(txs));
   let anaId=t.anaIslemId||t.id;
   if(scope==='all'){
     txs=txs.filter(x=>(x.anaIslemId||x.id)!==anaId);
@@ -549,7 +484,10 @@ function deleteTransaction(scope){
   }else{
     txs=txs.filter(x=>x.id!==t.id);
   }
-  saveData();closeDeleteOptions();closeEditTx();toast('🗑️ Silindi');renderCal();renderHesap();showPg('calnd');
+  saveData();closeDeleteOptions();closeEditTx();
+  toast('🗑️ Silindi');
+  showUndoBar('Silme geri alınsın mı?', {type:'delete', oldData:oldData});
+  renderCal();renderHesap();showPg('calnd');
 }
 
 // FORM
@@ -558,8 +496,9 @@ function fillSel(id,items,blank=false){let el=document.getElementById(id);if(!el
 function togDur(){let sw=document.getElementById('f_durT'),lb=document.getElementById('f_durL');sw.classList.toggle('on');lb.textContent=sw.classList.contains('on')?'✅ ÖDENDİ':'⏳ PLANLANMIŞ';}
 function showAddType(){document.getElementById('addTypeS').classList.remove('hid');}
 function closeAddType(){document.getElementById('addTypeS').classList.add('hid');}
-function openAddType(type){closeAddType();fType=type;document.getElementById('f_date').value=fmtDate(selDate);let labels={I:'Gider',G:'Gelir',T:'Transfer'};let colors={I:'var(--red)',G:'var(--green)',T:'var(--blue)'};document.getElementById('fTitle').textContent=labels[type];document.getElementById('fSaveBtn').style.background=colors[type];let isGider=(type==='I'),isGelir=(type==='G'),isTransfer=(type==='T');document.getElementById('f_rthedef').classList.toggle('hid',!isTransfer);document.getElementById('f_rgelir').classList.toggle('hid',!isGelir);document.getElementById('f_rgider').classList.toggle('hid',!isGider);fillSel('f_acc',accList.filter(a=>!isVarlik(a)));if(isTransfer)fillSel('f_hacc',accList);fillSel('f_ggrp',gelList,true);fillSel('f_mgrp',masList,true);fillSel('f_agrp',[],true);showPg('addtx');}
-function saveTx(){let amt=parseFloat(document.getElementById('f_amt').value);if(!amt||amt<=0){toast('Tutar girin!','var(--red)');return;}let date=document.getElementById('f_date').value;if(!date){toast('Tarih seçin!','var(--red)');return;}let paid=document.getElementById('f_durT').classList.contains('on');let nextId=txs.length?Math.max(...txs.map(t=>t.id))+1:1;txs.push({id:nextId,tarih:date,islemTuru:fType==='G'?'Gelir':(fType==='I'?'Gider':'Transfer'),kasa:document.getElementById('f_acc').value,hedefKasa:fType==='T'?document.getElementById('f_hacc').value:'',gelirAltGrp:fType==='G'?document.getElementById('f_ggrp').value:'',masrafGrp:fType==='I'?document.getElementById('f_mgrp').value:'',altGrp:fType==='I'?document.getElementById('f_agrp').value:'',tutar:amt,aciklama:document.getElementById('f_note').value,gerceklesme:paid?'Gerçekleşmiş':'Gerçekleşmemiş',taksitSayisi:1,taksitNo:1,anaIslemId:nextId});saveData();toast('✓ Kaydedildi');renderCal();renderHesap();showPg('calnd');}
+function resetAddForm(){document.getElementById('f_amt').value='';}
+function openAddType(type){closeAddType();fType=type;resetAddForm();document.getElementById('f_date').value=fmtDate(selDate);let labels={I:'Gider',G:'Gelir',T:'Transfer'};let colors={I:'var(--red)',G:'var(--green)',T:'var(--blue)'};document.getElementById('fTitle').textContent=labels[type];document.getElementById('fSaveBtn').style.background=colors[type];let isGider=(type==='I'),isGelir=(type==='G'),isTransfer=(type==='T');document.getElementById('f_rthedef').classList.toggle('hid',!isTransfer);document.getElementById('f_rgelir').classList.toggle('hid',!isGelir);document.getElementById('f_rgider').classList.toggle('hid',!isGider);fillSel('f_acc',accList.filter(a=>!isVarlik(a)));if(isTransfer)fillSel('f_hacc',accList);fillSel('f_ggrp',gelList,true);fillSel('f_mgrp',masList,true);fillSel('f_agrp',[],true);showPg('addtx');}
+function saveTx(){let amt=parseFloat(document.getElementById('f_amt').value);if(!amt||amt<=0){toast('Tutar girin!','var(--red)');return;}let date=document.getElementById('f_date').value;if(!date){toast('Tarih seçin!','var(--red)');return;}let paid=document.getElementById('f_durT').classList.contains('on');let nextId=txs.length?Math.max(...txs.map(t=>t.id))+1:1;let oldData=JSON.parse(JSON.stringify(txs));txs.push({id:nextId,tarih:date,islemTuru:fType==='G'?'Gelir':(fType==='I'?'Gider':'Transfer'),kasa:document.getElementById('f_acc').value,hedefKasa:fType==='T'?document.getElementById('f_hacc').value:'',gelirAltGrp:fType==='G'?document.getElementById('f_ggrp').value:'',masrafGrp:fType==='I'?document.getElementById('f_mgrp').value:'',altGrp:fType==='I'?document.getElementById('f_agrp').value:'',tutar:amt,aciklama:document.getElementById('f_note').value,gerceklesme:paid?'Gerçekleşmiş':'Gerçekleşmemiş',taksitSayisi:1,taksitNo:1,anaIslemId:nextId});saveData();resetAddForm();toast('✓ Kaydedildi');showUndoBar('Ekleme geri alınsın mı?', {type:'add', oldData:oldData});renderCal();renderHesap();showPg('calnd');}
 
 // SEARCH
 function initSearch(){let sa=document.getElementById('s_acc'),sc=document.getElementById('s_cat');if(sa){sa.innerHTML='<option value="">Tüm hesaplar</option>';accList.forEach(a=>sa.innerHTML+='<option>'+escapeHtml(a)+'</option>');}if(sc){sc.innerHTML='<option value="">Tüm kategoriler</option>';masList.forEach(m=>sc.innerHTML+='<option>'+escapeHtml(m)+'</option>');}}
