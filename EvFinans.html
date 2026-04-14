@@ -6,6 +6,7 @@
 <title>Ev Finans</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23111927'/%3E%3Crect x='2' y='2' width='60' height='60' rx='13' fill='url(%23g)'/%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%234ecdc4'/%3E%3Cstop offset='1' stop-color='%2327ae60'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ctext x='32' y='46' text-anchor='middle' font-family='system-ui' font-size='36' font-weight='700' fill='%23fff'%3E%E2%82%BA%3C/text%3E%3C/svg%3E">
 <style>
+/* Tüm stiller aynı - kısaltmak için önceki stillerin aynısı */
 :root{
   --bg:#111927;--bg2:#151e2d;--bg3:#1c2a3a;--card:#1e2d3e;
   --border:#263244;--t1:#e8f0f8;--t2:#7a93a8;--t3:#3d5468;
@@ -205,8 +206,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <!-- Silme Seçenekleri Modalı -->
 <div class="mback hid" id="deleteOptionsM">
   <div class="mbox">
-    <div class="mtitle">İşlemi Sil</div>
-    <div class="mbtns" style="flex-direction:column;">
+    <div class="mtitle" id="deleteOptionsTitle">İşlemi Sil</div>
+    <div class="mbtns" style="flex-direction:column;" id="deleteOptionsBtns">
       <button class="bk" onclick="deleteTransaction('one')">Sadece Bu Kaydı Sil</button>
       <button class="bk" style="background:var(--orange);" id="deleteForwardBtn" onclick="deleteTransaction('forward')">Bu ve Sonraki Kayıtları Sil</button>
       <button class="bd" id="deleteAllBtn" onclick="deleteTransaction('all')">Tüm Seriyi Sil</button>
@@ -291,6 +292,7 @@ function escapeHtml(str){if(!str)return'';return str.replace(/[&<>]/g,function(m
 function isKrediKarti(acc){return acc.endsWith(' KK') || KREDI_KARTLARI.includes(acc);}
 function isOdemeHesabi(acc){return ODEME_HESAPLARI.includes(acc);}
 function isVarlik(acc){return VARLIKLAR.includes(acc);}
+function isBakiyeDuzeltme(t){return t.aciklama==='Bakiye Düzeltme';}
 
 function init(){
   try{custom=JSON.parse(localStorage.getItem(CK)||'{}');}catch(e){custom={};}
@@ -395,11 +397,6 @@ function openEditTxModal(id){
   document.getElementById('edit_rgelir').style.display=isGelir?'block':'none';
   document.getElementById('edit_rgider').style.display=isGider?'block':'none';
   
-  // Seri kontrolü
-  let series=txs.filter(x=>x.anaIslemId===t.anaIslemId||x.id===t.id);
-  let hasFuture=series.some(x=>x.tarih>t.tarih);
-  document.getElementById('editAllBtn').style.display=hasFuture?'block':'none';
-  
   document.getElementById('editTxM').classList.remove('hid');
 }
 function closeEditTx(){document.getElementById('editTxM').classList.add('hid');editTxId=null;currentEditTransaction=null;}
@@ -451,14 +448,18 @@ function saveEditAllTx(){
   saveData();closeEditTx();toast('✓ '+count+' kayıt güncellendi');renderCal();renderHesap();
 }
 function showDeleteOptions(){
-  closeEditTx();
   let t=currentEditTransaction;
   if(!t)return;
-  let series=txs.filter(x=>x.anaIslemId===t.anaIslemId||x.id===t.id);
+  let series=txs.filter(x=>(x.anaIslemId||x.id)=== (t.anaIslemId||t.id));
   let hasFuture=series.some(x=>x.tarih>t.tarih);
   let hasMultiple=series.length>1;
   document.getElementById('deleteForwardBtn').style.display=hasFuture?'block':'none';
   document.getElementById('deleteAllBtn').style.display=hasMultiple?'block':'none';
+  if(!hasFuture && !hasMultiple){
+    deleteTransaction('one');
+    return;
+  }
+  document.getElementById('deleteOptionsTitle').textContent=hasMultiple? (hasFuture?'Tekrarlı/Taksitli İşlem':'Tekrarlı İşlem') : 'İşlem';
   document.getElementById('deleteOptionsM').classList.remove('hid');
 }
 function closeDeleteOptions(){document.getElementById('deleteOptionsM').classList.add('hid');}
@@ -613,14 +614,14 @@ document.getElementById('varlikAltGrpSelect').addEventListener('change',function
   document.getElementById('altinAltDiv').style.display=this.value==='Altın'?'block':'none';
 });
 
-// RAPOR
+// RAPOR - Bakiye düzeltmeler hariç
 function initRaporDates(){let now=new Date();let y=now.getFullYear(),m=now.getMonth();document.getElementById('r_start').value=y+'-'+String(m+1).padStart(2,'0')+'-01';document.getElementById('r_end').value=fmtDate(now);}
 function showDateQ(){document.getElementById('dateQS').classList.remove('hid');}
 function closeDateQ(){document.getElementById('dateQS').classList.add('hid');}
 function setDateQ(q){let now=new Date(),y=now.getFullYear(),m=now.getMonth();if(q==='week'){let d=new Date(now);d.setDate(d.getDate()-6);document.getElementById('r_start').value=fmtDate(d);}else if(q==='thismonth')document.getElementById('r_start').value=y+'-'+String(m+1).padStart(2,'0')+'-01';else if(q==='lastmonth'){let lm=m===0?11:m-1,ly=m===0?y-1:y;document.getElementById('r_start').value=ly+'-'+String(lm+1).padStart(2,'0')+'-01';let lastDays=new Date(y,m,0).getDate();document.getElementById('r_end').value=ly+'-'+String(lm+1).padStart(2,'0')+'-'+lastDays;}else if(q==='3months'){let d=new Date(now);d.setMonth(d.getMonth()-2);d.setDate(1);document.getElementById('r_start').value=fmtDate(d);}else if(q==='thisyear')document.getElementById('r_start').value=y+'-01-01';else if(q==='lastyear'){document.getElementById('r_start').value=(y-1)+'-01-01';document.getElementById('r_end').value=(y-1)+'-12-31';}closeDateQ();renderRapor();}
 function renderRapor(){
   let s=document.getElementById('r_start').value,e=document.getElementById('r_end').value;
-  let filtered=txs.filter(t=>t.tarih>=s&&t.tarih<=e&&t.gerceklesme==='Gerçekleşmiş');
+  let filtered=txs.filter(t=>t.tarih>=s&&t.tarih<=e&&t.gerceklesme==='Gerçekleşmiş'&&!isBakiyeDuzeltme(t));
   let gelir=0,gider=0;
   filtered.forEach(t=>{if(t.islemTuru==='Gelir')gelir+=t.tutar;if(t.islemTuru==='Gider')gider+=t.tutar;});
   document.getElementById('r_gel').textContent='₺'+fmt(gelir);
@@ -642,7 +643,7 @@ function renderRapor(){
   document.getElementById('rCatList').innerHTML=html;
 }
 function showCategoryDetails(cat,s,e){
-  let filtered=txs.filter(t=>t.tarih>=s&&t.tarih<=e&&t.gerceklesme==='Gerçekleşmiş'&&t.islemTuru==='Gider'&&(t.masrafGrp||'Diğer')===cat);
+  let filtered=txs.filter(t=>t.tarih>=s&&t.tarih<=e&&t.gerceklesme==='Gerçekleşmiş'&&!isBakiyeDuzeltme(t)&&t.islemTuru==='Gider'&&(t.masrafGrp||'Diğer')===cat);
   filtered.sort((a,b)=>b.tarih.localeCompare(a.tarih));
   let html='<div style="padding:6px 12px;background:var(--bg2);"><span onclick="renderRapor()" style="color:var(--teal);cursor:pointer;">‹ Geri</span> <b>'+escapeHtml(cat)+'</b> ('+filtered.length+' işlem)</div><div class="mp-list">';
   filtered.forEach(t=>html+=mpRow(t,fmtDate(new Date()),true));
