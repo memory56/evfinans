@@ -6,7 +6,6 @@
 <title>Ev Finans</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23111927'/%3E%3Crect x='2' y='2' width='60' height='60' rx='13' fill='url(%23g)'/%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%234ecdc4'/%3E%3Cstop offset='1' stop-color='%2327ae60'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ctext x='32' y='46' text-anchor='middle' font-family='system-ui' font-size='36' font-weight='700' fill='%23fff'%3E%E2%82%BA%3C/text%3E%3C/svg%3E">
 <style>
-/* Tüm stiller aynı - kısaltmak için önceki stillerin aynısı */
 :root{
   --bg:#111927;--bg2:#151e2d;--bg3:#1c2a3a;--card:#1e2d3e;
   --border:#263244;--t1:#e8f0f8;--t2:#7a93a8;--t3:#3d5468;
@@ -15,7 +14,7 @@
   --sp:14px;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;max-width:480px;margin:0 auto;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;max-width:480px;margin:0 auto;overflow-x:hidden;}
 .nav{display:flex;position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:rgba(17,25,39,.92);backdrop-filter:blur(20px);border-top:1px solid var(--border);z-index:100;padding:8px 0;}
 .ni{flex:1;display:flex;flex-direction:column;align-items:center;padding:4px 0;cursor:pointer;color:var(--t3);font-size:10px;gap:3px;}
 .ni.on{color:var(--teal);}
@@ -180,6 +179,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 <div class="mback hid" id="newAccM"><div class="mbox"><div class="mtitle">Yeni Hesap Ekle</div><div class="mlbl">Hesap Adı</div><input class="minput" type="text" id="newAccName" placeholder="Örn: Ziraat, N26..."><div class="mlbl">Grup</div><select class="msel" id="newAccGroup"><option value="odeme">Ödeme Hesabı</option><option value="kk">Kredi Kartı</option><option value="varlik">Varlık</option></select><div class="mbtns"><button class="bc" onclick="closeNewAcc()">İptal</button><button class="bk" onclick="confirmNewAcc()">Ekle</button></div></div></div>
 
+<!-- Ay/Yıl Seçici Modal -->
+<div class="mback hid" id="monthYearPicker">
+  <div class="mbox">
+    <div class="mtitle">Ay ve Yıl Seç</div>
+    <div class="mlbl">Yıl</div>
+    <input class="minput" type="number" id="pickerYear" min="2020" max="2035">
+    <div class="mlbl">Ay</div>
+    <select class="msel" id="pickerMonth">
+      <option value="0">Ocak</option><option value="1">Şubat</option><option value="2">Mart</option><option value="3">Nisan</option>
+      <option value="4">Mayıs</option><option value="5">Haziran</option><option value="6">Temmuz</option><option value="7">Ağustos</option>
+      <option value="8">Eylül</option><option value="9">Ekim</option><option value="10">Kasım</option><option value="11">Aralık</option>
+    </select>
+    <div class="mbtns"><button class="bc" onclick="closeMonthYearPicker()">İptal</button><button class="bk" onclick="applyMonthYearPicker()">Git</button></div>
+  </div>
+</div>
+
 <!-- İşlem Düzenleme Modalı -->
 <div class="mback hid" id="editTxM">
   <div class="mbox">
@@ -226,7 +241,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 </div>
 
 <!-- PAGES -->
-<div class="pg on" id="pg-calnd"><div class="ph"><button class="hb-back" onclick="goToday()">Bugün</button><h1 id="mTitle">Takvim</h1><button class="hb-ic" onclick="showPg('searc')">🔍</button><button class="hb-ic" onclick="showAddType()">＋</button></div><div class="cgrid" id="calGrid"></div><div id="calDay"></div></div>
+<div class="pg on" id="pg-calnd">
+  <div class="ph"><button class="hb-back" onclick="goToday()">Bugün</button><h1 id="mTitle" onclick="showMonthYearPicker()" style="cursor:pointer;">Takvim</h1><button class="hb-ic" onclick="showPg('searc')">🔍</button><button class="hb-ic" onclick="showAddType()">＋</button></div>
+  <div class="mnav" style="display:flex;justify-content:space-between;padding:7px 6px;background:var(--bg2);">
+    <button onclick="chMonth(-1)" style="background:none;border:none;color:var(--teal);font-size:24px;cursor:pointer;">‹</button>
+    <div style="flex:1;text-align:center;font-size:16px;font-weight:700;" id="mTitleDisplay"></div>
+    <button onclick="chMonth(1)" style="background:none;border:none;color:var(--teal);font-size:24px;cursor:pointer;">›</button>
+  </div>
+  <div class="cgrid" id="calGrid"></div>
+  <div id="calDay"></div>
+</div>
 
 <div class="pg" id="pg-addtx"><div class="ph"><button class="hb-back" onclick="showPg('calnd')">‹</button><h1 id="fTitle">Yeni İşlem</h1><button class="hb" onclick="saveTx()">Kaydet</button></div><div class="fsec"><div class="famount"><input type="number" id="f_amt" placeholder="0" step="0.01"></div><div class="fgrp"><div class="frow"><span class="ficon">🏦</span><span class="flbl">Hesap</span><select id="f_acc"></select></div></div><div class="fgrp hid" id="f_rthedef"><div class="frow"><span class="ficon">➡️</span><span class="flbl">Hedef Hesap</span><select id="f_hacc"></select></div></div><div class="fgrp hid" id="f_rgelir"><div class="frow"><span class="ficon">📂</span><span class="flbl">Gelir Türü</span><select id="f_ggrp"></select></div></div><div class="fgrp hid" id="f_rgider"><div class="frow"><span class="ficon">🏷️</span><span class="flbl">Kategori</span><select id="f_mgrp"></select></div><div class="frow"><span class="ficon">📁</span><span class="flbl">Alt Kategori</span><select id="f_agrp"></select></div></div><div class="fgrp"><div class="frow"><span class="ficon">📅</span><span class="flbl">Tarih</span><input type="date" id="f_date"></div><div class="frow"><span class="ficon">📝</span><span class="flbl">Not</span><input type="text" id="f_note" placeholder="Ekle..."></div></div><div class="fgrp"><div class="tog"><span id="f_durL">✅ ÖDENDİ</span><div class="tsw on" id="f_durT" onclick="togDur()"></div></div></div><button class="sbtn" id="fSaveBtn" style="background:var(--red);color:white;" onclick="saveTx()">Kaydet</button></div></div>
 
@@ -250,6 +274,22 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 <div class="pg" id="pg-setin">
   <div class="ph"><button class="hb-back" onclick="showPg('calnd')">‹</button><h1>Ayarlar</h1></div>
+  
+  <div class="stgrp">
+    <div class="stgt">ONEDRİVE SENKRON</div>
+    <div class="stcard">
+      <div class="strow" style="cursor:default;flex-wrap:wrap;gap:6px;padding:14px;">
+        <div class="stic" style="background:rgba(0,120,212,.15);">☁️</div>
+        <div style="flex:1;"><div class="stlbl" id="od-status-lbl">Giriş yapılmadı</div><div style="font-size:11px;color:var(--t3);" id="od-user-lbl"></div></div>
+        <button id="od-login-btn" onclick="odLogin()" style="background:rgba(0,120,212,.8);color:white;border:none;border-radius:8px;padding:7px 14px;font-size:13px;cursor:pointer;">Giriş Yap</button>
+        <button id="od-logout-btn" onclick="odLogout()" style="display:none;background:var(--bg3);color:var(--t2);border:none;border-radius:8px;padding:7px 12px;font-size:13px;cursor:pointer;">Çıkış</button>
+      </div>
+      <div class="strow" id="od-sync-row" style="display:none;" onclick="odSync()"><div class="stic" style="background:rgba(0,120,212,.15);">🔄</div><div class="stlbl">Excel'e Kaydet / Yükle</div><span class="starr">›</span></div>
+      <div class="strow" id="od-pull-row" style="display:none;" onclick="odPull()"><div class="stic" style="background:rgba(78,205,196,.15);">⬇️</div><div class="stlbl" style="color:var(--orange);">Excel'den Al (üzerine yazar)</div><span class="starr">›</span></div>
+      <div style="padding:10px 14px;font-size:11px;color:var(--t3);" id="od-sync-info"></div>
+    </div>
+  </div>
+  
   <div class="stgrp"><div class="stgt">VERİ</div><div class="stcard"><div class="strow" onclick="exportCSV()"><div class="stic">📤</div><div class="stlbl">CSV Dışa Aktar</div><span class="starr">›</span></div><div class="strow" onclick="document.getElementById('csvInput').click()"><div class="stic">📥</div><div class="stlbl">CSV İçe Aktar</div><span class="starr">›</span></div><div class="strow" onclick="resetAllData()"><div class="stic">🗑️</div><div class="stlbl" style="color:var(--red);">Tüm Verileri Sıfırla</div><span class="starr">›</span></div></div></div>
   <div class="stgrp"><div class="stgt">HAKKINDA</div><div class="stcard"><div class="strow"><div class="stic">🏠</div><div class="stlbl">Ev Finans</div><span class="stval">v2.0</span></div><div class="strow"><div class="stic">📋</div><div class="stlbl">Toplam İşlem</div><span class="stval" id="txCount">-</span></div></div></div>
   <input type="file" id="csvInput" accept=".csv" style="display:none;" onchange="importCSV(this)">
@@ -257,6 +297,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 <div class="nav"><div class="ni on" data-pg="calnd" onclick="showPg('calnd')"><svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg><span>Takvim</span><div class="ni-dot"></div></div><div class="ni" data-pg="hesap" onclick="showPg('hesap')"><svg viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.1 0-2-.9-2-2V5c0-1.1.9-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg><span>Bakiye</span><div class="ni-dot"></div></div><div class="ni" data-pg="rapor" onclick="showPg('rapor')"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg><span>Rapor</span><div class="ni-dot"></div></div><div class="ni" data-pg="setin" onclick="showPg('setin')"><svg viewBox="0 0 24 24"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg><span>Ayarlar</span><div class="ni-dot"></div></div></div>
 
+<script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3.28.1/lib/msal-browser.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
 // DATA
@@ -265,6 +306,7 @@ let txs=[], custom={};
 let curPg='calnd', curMonth=new Date().getMonth(), curYear=new Date().getFullYear();
 let selDate=new Date(), fType='I', editTxId=null;
 let sChip='', rLevel=0, rCat='';
+let touchStartX=0, touchEndX=0;
 
 // Hesap listeleri
 const ODEME_HESAPLARI = ['Cüzdan', 'TEB', 'TEB Marifetli', 'TEB VD', 'Enpara', 'Garanti', 'Ziraat', 'İşbank', 'Vahide'];
@@ -315,6 +357,16 @@ function init(){
   renderCal();showPg('calnd');
   document.getElementById('txCount').textContent=txs.length;
   document.getElementById('f_date').value=fmtDate(selDate);
+  odInit();
+  
+  // Kaydırma için event listener
+  let calContainer=document.getElementById('pg-calnd');
+  calContainer.addEventListener('touchstart', function(e){touchStartX=e.changedTouches[0].screenX;});
+  calContainer.addEventListener('touchend', function(e){touchEndX=e.changedTouches[0].screenX;handleSwipe();});
+}
+function handleSwipe(){
+  if(touchEndX<touchStartX-50) chMonth(1);
+  if(touchEndX>touchStartX+50) chMonth(-1);
 }
 function saveData(){localStorage.setItem(SK,JSON.stringify(txs));renderRapor();}
 function saveCustom(){localStorage.setItem(CK,JSON.stringify(custom));}
@@ -336,9 +388,23 @@ let calMode='day';
 function goToday(){let now=new Date();curMonth=now.getMonth();curYear=now.getFullYear();selDate=new Date(now);calMode='day';renderCal();}
 function chMonth(d){curMonth+=d;if(curMonth>11){curMonth=0;curYear++;}if(curMonth<0){curMonth=11;curYear--;}calMode='month';renderCal();}
 function selDay(d){let clicked=new Date(curYear,curMonth,d);if(calMode==='day'&&fmtDate(clicked)===fmtDate(selDate))calMode='month';else{calMode='day';selDate=clicked;}renderCal();}
+function showMonthYearPicker(){
+  document.getElementById('pickerYear').value=curYear;
+  document.getElementById('pickerMonth').value=curMonth;
+  document.getElementById('monthYearPicker').classList.remove('hid');
+}
+function closeMonthYearPicker(){document.getElementById('monthYearPicker').classList.add('hid');}
+function applyMonthYearPicker(){
+  curYear=parseInt(document.getElementById('pickerYear').value);
+  curMonth=parseInt(document.getElementById('pickerMonth').value);
+  closeMonthYearPicker();
+  calMode='month';
+  renderCal();
+}
 function renderCal(){
   let ms=curYear+'-'+String(curMonth+1).padStart(2,'0');
   document.getElementById('mTitle').textContent=AYLAR[curMonth]+' '+curYear;
+  document.getElementById('mTitleDisplay').textContent=AYLAR[curMonth]+' '+curYear;
   let g=document.getElementById('calGrid');g.innerHTML='';
   let todayS=fmtDate(new Date());
   let dayInfo={};
@@ -396,6 +462,10 @@ function openEditTxModal(id){
   document.getElementById('edit_rhedef').style.display=isTransfer?'block':'none';
   document.getElementById('edit_rgelir').style.display=isGelir?'block':'none';
   document.getElementById('edit_rgider').style.display=isGider?'block':'none';
+  
+  let series=txs.filter(x=>(x.anaIslemId||x.id)=== (t.anaIslemId||t.id));
+  let hasFuture=series.some(x=>x.tarih>t.tarih);
+  document.getElementById('editAllBtn').style.display=hasFuture?'block':'none';
   
   document.getElementById('editTxM').classList.remove('hid');
 }
@@ -614,7 +684,7 @@ document.getElementById('varlikAltGrpSelect').addEventListener('change',function
   document.getElementById('altinAltDiv').style.display=this.value==='Altın'?'block':'none';
 });
 
-// RAPOR - Bakiye düzeltmeler hariç
+// RAPOR
 function initRaporDates(){let now=new Date();let y=now.getFullYear(),m=now.getMonth();document.getElementById('r_start').value=y+'-'+String(m+1).padStart(2,'0')+'-01';document.getElementById('r_end').value=fmtDate(now);}
 function showDateQ(){document.getElementById('dateQS').classList.remove('hid');}
 function closeDateQ(){document.getElementById('dateQS').classList.add('hid');}
@@ -656,6 +726,24 @@ function renderNetwr(){let{bal}=calcBal();let odemeToplam=ODEME_HESAPLARI.reduce
 function exportCSV(){if(!txs.length){toast('Veri yok!','var(--orange)');return;}let hd=['Tarih','İşlem Türü','Hesap','Hedef Hesap','Gelir Türü','Kategori','Alt Kategori','Tutar','Açıklama','Gerçekleşme'];let csv='\uFEFF'+hd.join('\t')+'\n';txs.forEach(t=>{csv+=[t.tarih,t.islemTuru,t.kasa,t.hedefKasa,t.gelirAltGrp,t.masrafGrp,t.altGrp,t.tutar.toString().replace('.',','),t.aciklama,t.gerceklesme].join('\t')+'\n';});let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));a.download='evfinans_'+fmtDate(new Date())+'.csv';a.click();toast('📥 İndirildi');}
 function resetAllData(){if(!confirm('Tüm yerel veriler silinecek. Emin misiniz?'))return;[SK,CK].forEach(k=>localStorage.removeItem(k));location.reload();}
 function importCSV(input){let f=input.files[0];if(!f)return;let r=new FileReader();r.onload=e=>{let lines=e.target.result.split('\n').slice(1);let added=0;let nextId=txs.length?Math.max(...txs.map(t=>t.id))+1:1;lines.forEach(line=>{let c=line.split('\t');if(c.length<5)return;let[tarih,islemTuru,kasa,hedefKasa,gelirAltGrp,masrafGrp,altGrp,tutarRaw,aciklama,gerceklesme]=c;let tutar=parseFloat((tutarRaw||'0').replace(',','.'));if(!tutar||!tarih)return;txs.push({id:nextId++,tarih:tarih.trim(),islemTuru:islemTuru.trim(),kasa:kasa.trim(),hedefKasa:(hedefKasa||'').trim(),gelirAltGrp:(gelirAltGrp||'').trim(),masrafGrp:(masrafGrp||'').trim(),altGrp:(altGrp||'').trim(),tutar,aciklama:(aciklama||'').trim(),gerceklesme:(gerceklesme||'Gerçekleşmiş').trim(),taksitSayisi:1,taksitNo:1,anaIslemId:nextId-1});added++;});saveData();toast('✓ '+added+' işlem içe aktarıldı');renderCal();renderHesap();document.getElementById('txCount').textContent=txs.length;};r.readAsText(f,'utf-8');input.value='';}
+
+// ONEDRIVE SYNC
+const MSAL_CFG={clientId:'bb5edae6-2364-4789-a70c-c844fe42cc95',authority:'https://login.microsoftonline.com/consumers',redirectUri:window.location.origin+window.location.pathname};
+const GRAPH_SCOPES=['Files.ReadWrite','offline_access'];
+const EXCEL_FILE='EvFinans.xlsx';
+const EXCEL_SHEET='Islemler';
+const EXCEL_COLS=['ID','Tarih','IslemTuru','Kasa','HedefKasa','GelirAltGrp','MasrafGrp','AltGrp','AltGrp2','Tutar','Aciklama','Gerceklesme','Taksit','TaksitNo','Tekrar','TekrarBitis','AnaId'];
+let msalApp=null, odAccount=null;
+async function odInit(){if(!window.msal){setTimeout(odInit,500);return;}try{msalApp=new msal.PublicClientApplication({auth:MSAL_CFG,cache:{cacheLocation:'localStorage',storeAuthStateInCookie:false}});await msalApp.initialize();let resp=await msalApp.handleRedirectPromise();if(resp)odAccount=resp.account;let accs=msalApp.getAllAccounts();if(!odAccount&&accs.length>0)odAccount=accs[0];odUpdateUI();}catch(e){console.error('MSAL init failed',e);}}
+function odUpdateUI(){let li=!!odAccount;document.getElementById('od-login-btn').style.display=li?'none':'block';document.getElementById('od-logout-btn').style.display=li?'block':'none';document.getElementById('od-sync-row').style.display=li?'flex':'none';document.getElementById('od-pull-row').style.display=li?'flex':'none';document.getElementById('od-status-lbl').textContent=li?'Giriş yapıldı':'Giriş yapılmadı';document.getElementById('od-user-lbl').textContent=li?(odAccount.username||odAccount.name||''):'';if(li)document.getElementById('od-sync-info').textContent='OneDrive\'a bağlı.';}
+function odLogin(){if(!msalApp){toast('MSAL başlatılamadı','var(--red)');return;}msalApp.loginRedirect({scopes:GRAPH_SCOPES}).catch(e=>toast('Giriş hatası: '+e.message,'var(--red)'));}
+function odLogout(){if(!msalApp||!odAccount)return;msalApp.logoutRedirect({account:odAccount});odAccount=null;odUpdateUI();}
+async function getToken(){if(!msalApp||!odAccount)throw new Error('Giriş yapılmadı');try{let r=await msalApp.acquireTokenSilent({scopes:GRAPH_SCOPES,account:odAccount});return r.accessToken;}catch(e){let r2=await msalApp.acquireTokenPopup({scopes:GRAPH_SCOPES,account:odAccount});return r2.accessToken;}}
+function txToRow(t){return[t.id,t.tarih,t.islemTuru,t.kasa,t.hedefKasa||'',t.gelirAltGrp||'',t.masrafGrp||'',t.altGrp||'','',t.tutar,t.aciklama||'',t.gerceklesme,t.taksitSayisi||1,t.taksitNo||1,'Tekrar Yok','',t.id];}
+function rowToTx(row){if(!row||row.length<12)return null;let tutar=parseFloat(String(row[9]).replace(',','.'));if(!tutar&&tutar!==0)return null;return{id:parseInt(row[0])||0,tarih:String(row[1]),islemTuru:String(row[2]),kasa:String(row[3]),hedefKasa:String(row[4]||''),gelirAltGrp:String(row[5]||''),masrafGrp:String(row[6]||''),altGrp:String(row[7]||''),altGrp2:'',tutar:tutar,aciklama:String(row[10]||''),gerceklesme:String(row[11]||'Gerçekleşmiş'),taksitSayisi:parseInt(row[12])||1,taksitNo:parseInt(row[13])||1,tekrarPeriyodu:'Tekrar Yok',tekrarBitis:'',anaIslemId:parseInt(row[16])||parseInt(row[0])||0};}
+function xhrPut(url,headers,body){return new Promise((resolve,reject)=>{let xhr=new XMLHttpRequest();xhr.open('PUT',url,true);xhr.responseType='text';for(let h in headers)xhr.setRequestHeader(h,headers[h]);xhr.onload=()=>{if(xhr.status>=200&&xhr.status<300)resolve({ok:true});else reject(new Error('HTTP '+xhr.status));};xhr.onerror=()=>reject(new Error('Network error'));xhr.ontimeout=()=>reject(new Error('Timeout'));xhr.timeout=60000;xhr.send(body);});}
+async function odSync(silent){try{if(!window.XLSX){toast('SheetJS yükleniyor...','var(--orange)');return;}toast('Excel hazırlanıyor...','var(--blue)');let token=await getToken();let wsData=[EXCEL_COLS].concat(txs.map(txToRow));let ws=XLSX.utils.aoa_to_sheet(wsData);let wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,EXCEL_SHEET);let xlsxArr=XLSX.write(wb,{bookType:'xlsx',type:'array'});let blob=new Blob([new Uint8Array(xlsxArr)],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});if(blob.size<200)throw new Error('XLSX oluşturulamadı');let sessionRes=await fetch('https://graph.microsoft.com/v1.0/me/drive/root:/'+EXCEL_FILE+':/createUploadSession',{method:'POST',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({'item':{'@microsoft.graph.conflictBehavior':'replace','name':EXCEL_FILE}})});if(!sessionRes.ok)throw new Error('Session hatası');let sessionJson=await sessionRes.json();let uploadUrl=sessionJson.uploadUrl;if(!uploadUrl)throw new Error('uploadUrl alınamadı');await xhrPut(uploadUrl,{'Content-Range':'bytes 0-'+(blob.size-1)+'/'+blob.size},blob);let now=new Date();document.getElementById('od-sync-info').textContent=txs.length+' işlem - '+now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');if(!silent)toast('Excel\'e kaydedildi: '+txs.length+' işlem');else toast('☁️ OneDrive\'a kaydedildi','var(--teal)');}catch(e){console.error(e);toast('Hata: '+(e.message||'').substring(0,80),'var(--red)');}}
+async function odPull(){let msg='UYARI: Bu cihazdaki TÜM veriler silinip OneDrive\'daki Excel ile değiştirilecek.\n\nDevam etmek istiyor musunuz?';if(!confirm(msg))return;try{if(!window.XLSX){toast('SheetJS yükleniyor...','var(--orange)');return;}toast('Excel\'den indiriliyor...','var(--blue)');let token=await getToken();let dlRes=await fetch('https://graph.microsoft.com/v1.0/me/drive/root:/'+EXCEL_FILE+':/content',{headers:{'Authorization':'Bearer '+token}});if(!dlRes.ok){if(dlRes.status===404)throw new Error('EvFinans.xlsx bulunamadı. Önce "Excel\'e Kaydet" ile yükleyin.');throw new Error('İndirme hatası '+dlRes.status);}let arrayBuf=await dlRes.arrayBuffer();let wb2=XLSX.read(arrayBuf,{type:'array'});let sheetName=wb2.SheetNames.find(n=>n===EXCEL_SHEET)||wb2.SheetNames[0];let ws2=wb2.Sheets[sheetName];if(!ws2){toast('Excel sayfası bulunamadı','var(--orange)');return;}let data=XLSX.utils.sheet_to_json(ws2,{header:1,raw:false});if(data.length<2){toast('Excel boş veya veri yok','var(--orange)');return;}let newTxs=data.slice(1).map(rowToTx).filter(Boolean);if(!newTxs.length){toast('Aktarılacak veri bulunamadı','var(--orange)');return;}txs=newTxs;saveData();renderCal();renderHesap();document.getElementById('txCount').textContent=txs.length;toast(txs.length+' işlem alındı');}catch(e){toast('Hata: '+(e.message||'').substring(0,80),'var(--red)');}}
 
 document.addEventListener('DOMContentLoaded',()=>{init();});
 </script>
