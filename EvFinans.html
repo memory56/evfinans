@@ -233,8 +233,8 @@ const KREDI_KARTLARI = ['TEB KK', 'TEB VD KK', 'Enpara KK', 'Ziraat KK'];
 const VARLIKLAR = ['Altın', 'USD', 'Euro', 'Borsa', 'Gümüş', 'Fon', 'Yatırım'];
 
 let accList = [...ODEME_HESAPLARI, ...KREDI_KARTLARI, ...VARLIKLAR];
-const MAS = ['Alışveriş', 'Araba', 'Ev', 'Yemek', 'Sağlık', 'Eğlence', 'Giyim', 'Hizmet', 'Diğer'];
-const GEL = ['Maaş', 'Kira', 'Faiz', 'Promosyon', 'Diğer'];
+const MAS = ['Alışveriş','Araba','Ev','Hizmet','İnternet','Yemek','Giyim','Sağlık','KişiBakım','Bağış','Aidat','Kültürel','Eğlence','Yazılım','Sigorta','Vergi','Seyahat','Kırtasiye','Hediye','Diğer'];
+const GEL = ['Maaş','Faiz','Promosyon','Kira','Diğer'];
 let masList = [...MAS], gelList = [...GEL];
 
 const ACC_ICONS = {
@@ -699,7 +699,8 @@ document.addEventListener('DOMContentLoaded',()=>{init();});
 
 // KATEGORİ YÖNETİMİ
 let catMgmtMode='mas';
-function getSubCategories(parent){return(custom.subCategories&&custom.subCategories[parent])||[];}
+const DEFAULT_SUBCAT={'Alışveriş':['Market','Fırın','Balık','İçme Suyu','Süt','Yumurta','Zeytin&Z.Yağ','Kasap','İçecek','Pazar&Manav','Süt Ürün','Kuruyemiş','Diğer'],'Araba':['Yakıt','Otopark','Yıkama','Muayene','MTV','HGS','Diğer'],'Ev':['Tüp','Demirbaş','Bakım, Tamir','Kira','Temizlik','Halı Yıkama','Bahçe','Diğer'],'Hizmet':['Elektrik','Su','IPTV','İnternet','Cep Tel MD','Cep Tel VD','Çöp','Arıtma','Diğer'],'İnternet':['Hepsiburada','Amazon','Trendyol','N11','Apple','DeFacto','Pazarama','Temu','Diğer'],'Yemek':['Restoran','Kafe','Fast Food','Diğer'],'Giyim':['Kıyafet','Ayakkabı','Çanta','Aksesuar','Diğer'],'Sağlık':['Hastane','Eczane','Diğer'],'KişiBakım':['Kuaför','Berber','Spor','Masaj','Fizyoterapi','GETAT','Diğer'],'Bağış':['Bağış','Bahşiş'],'Aidat':['Site','Dernek','Diğer'],'Kültürel':['Kitap','Kurs','Müze','Tur','Diğer'],'Eğlence':['Sinema','Tiyatro','Konser','Plaj','Etkinlik','Diğer'],'Yazılım':['Google','Apple','E-Kitap','Microsoft','Uygulama','Müzik','Diğer'],'Sigorta':['Kasko','Trafik','Ev','Dask','Garanti','Diğer'],'Vergi':[],'Seyahat':['Taksi, Dolmuş','Otobüs','Feribot','Gemi','Tren','Konaklama','Tatil','Milli Park','Diğer'],'Kırtasiye':[],'Hediye':[],'Diğer':[]};
+function getSubCategories(parent){if(custom.subCategories&&custom.subCategories[parent]&&custom.subCategories[parent].length>0){return custom.subCategories[parent];}return DEFAULT_SUBCAT[parent]||[];}
 function updateSubCatSel(mgrpId,agrpId){let parent=document.getElementById(mgrpId).value;let subs=getSubCategories(parent);fillSel(agrpId,subs,true);}
 function showCatMgmt(mode){catMgmtMode=mode;let titles={mas:'Gider Kategorileri',gel:'Gelir Kategorileri',sub:'Alt Kategoriler'};document.getElementById('catMgmtTitle').textContent=titles[mode];let subDiv=document.getElementById('catSubParentDiv');if(mode==='sub'){subDiv.style.display='block';fillSel('catSubParent',masList);}else{subDiv.style.display='none';}document.getElementById('catMgmtInput').value='';renderCatMgmtList();document.getElementById('catMgmtM').classList.remove('hid');}
 function closeCatMgmt(){document.getElementById('catMgmtM').classList.add('hid');}
