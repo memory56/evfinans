@@ -31,7 +31,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .empty{text-align:center;padding:40px 20px;color:var(--t3);font-size:14px;}
 .hid{display:none!important;}
 .mback{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:400;display:flex;align-items:center;justify-content:center;}
-.mbox{background:var(--card);border-radius:22px;padding:21px 18px;width:93%;max-width:400px;}
+.mbox{background:var(--card);border-radius:22px;padding:21px 18px;width:93%;max-width:400px;max-height:90vh;overflow-y:auto;}
 .mtitle{font-size:16px;font-weight:700;margin-bottom:15px;text-align:center;}
 .mlbl{font-size:11px;text-transform:uppercase;color:var(--t3);margin:11px 0 4px;}
 .minput{width:100%;background:var(--bg3);border:1px solid var(--border);color:var(--t1);padding:12px 13px;border-radius:11px;font-size:14px;outline:none;}
@@ -40,6 +40,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .mbtns button{flex:1;padding:13px;border-radius:11px;border:none;font-size:14px;font-weight:600;cursor:pointer;}
 .bc{background:var(--bg3);color:var(--t2);}
 .bk{background:var(--teal);color:white;}
+.bd{background:var(--red);color:white;}
 .asback{position:fixed;inset:0;background:rgba(0,0,0,.58);z-index:350;display:flex;align-items:flex-end;justify-content:center;}
 .asbox{background:var(--bg2);border-radius:22px 22px 0 0;width:100%;max-width:480px;padding:10px 14px;}
 .as-tit{font-size:12px;color:var(--t3);text-align:center;padding:5px 0 12px;border-bottom:1px solid var(--border);margin-bottom:9px;}
@@ -72,11 +73,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .cdot.plan{border:1.5px solid var(--t3);background:transparent;}
 .cdot.late{background:var(--red);}
 .mp-list{border-top:1px solid var(--border);}
-.mp-row{display:flex;align-items:center;padding:12px var(--sp);border-bottom:1px solid var(--border);cursor:pointer;gap:13px;}
+.mp-row{display:flex;align-items:center;padding:12px var(--sp);border-bottom:1px solid var(--border);cursor:pointer;gap:13px;flex-wrap:wrap;}
 .mp-ic{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;}
-.mp-info{flex:1;}
-.mp-name{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.mp-sub{font-size:11px;color:var(--t3);margin-top:2px;display:flex;gap:4px;}
+.mp-info{flex:1;min-width:120px;}
+.mp-name{font-size:14px;font-weight:500;white-space:normal;word-break:break-word;}
+.mp-sub{font-size:11px;color:var(--t3);margin-top:2px;display:flex;gap:4px;flex-wrap:wrap;}
 .mp-amt{flex-shrink:0;padding:6px 13px;border-radius:10px;font-size:14px;font-weight:700;min-width:80px;text-align:right;}
 .mp-amt.green{background:rgba(46,204,113,.2);color:var(--green);}
 .mp-amt.red{background:rgba(231,76,60,.18);color:var(--red);}
@@ -151,12 +152,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .rcard.rr .rv{color:var(--red);}
 .rcard.rb .rv{color:var(--teal);}
 .catlist{padding:0 var(--sp);}
-.catrow{display:flex;align-items:center;padding:11px 14px;background:var(--card);border-radius:12px;margin-bottom:7px;}
+.catrow{display:flex;align-items:center;padding:11px 14px;background:var(--card);border-radius:12px;margin-bottom:7px;cursor:pointer;}
 .cat-ic-sm{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;margin-right:10px;}
 .cat-nm{flex:1;font-size:13px;}
 .cat-bw{width:60px;height:4px;background:var(--border);border-radius:2px;margin:0 10px;}
 .cat-bf{height:100%;border-radius:2px;}
 .cat-am{font-size:13px;font-weight:700;min-width:70px;text-align:right;}
+.cat-arr{font-size:15px;color:var(--t3);margin-left:5px;}
 .dqbox{background:var(--bg2);border-radius:22px 22px 0 0;width:100%;max-width:480px;padding:13px 14px;}
 .dqbtn{width:100%;padding:14px;border:none;border-radius:13px;font-size:14px;cursor:pointer;margin-bottom:8px;background:var(--card);color:var(--t1);text-align:center;}
 </style>
@@ -177,7 +179,41 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 <div class="mback hid" id="newAccM"><div class="mbox"><div class="mtitle">Yeni Hesap Ekle</div><div class="mlbl">Hesap Adı</div><input class="minput" type="text" id="newAccName" placeholder="Örn: Ziraat, N26..."><div class="mlbl">Grup</div><select class="msel" id="newAccGroup"><option value="odeme">Ödeme Hesabı</option><option value="kk">Kredi Kartı</option><option value="varlik">Varlık</option></select><div class="mbtns"><button class="bc" onclick="closeNewAcc()">İptal</button><button class="bk" onclick="confirmNewAcc()">Ekle</button></div></div></div>
 
-<div class="mback hid" id="editTxM"><div class="mbox"><div class="mtitle">İşlemi Düzenle</div><div class="mlbl">Tutar (₺)</div><input class="minput" type="number" id="edit_amt" step="0.01"><div class="mlbl">Tarih</div><input class="minput" type="date" id="edit_date"><div class="mlbl">Hesap</div><select class="msel" id="edit_acc"></select><div id="edit_rhedef" style="display:none;"><div class="mlbl">Hedef Hesap</div><select class="msel" id="edit_hacc"></select></div><div id="edit_rgelir" style="display:none;"><div class="mlbl">Gelir Türü</div><select class="msel" id="edit_ggrp"></select></div><div id="edit_rgider" style="display:none;"><div class="mlbl">Kategori</div><select class="msel" id="edit_mgrp"></select><div class="mlbl">Alt Kategori</div><select class="msel" id="edit_agrp"></select></div><div class="mlbl">Açıklama</div><input class="minput" type="text" id="edit_note"><div style="display:flex;justify-content:space-between;padding:10px 0;"><span id="edit_durL">✅ ÖDENDİ</span><div class="tsw on" id="edit_durT" onclick="editTogDur()"></div></div><div class="mbtns"><button class="bc" onclick="closeEditTx()">İptal</button><button class="bk" onclick="saveEditTx()">Kaydet</button></div></div></div>
+<!-- İşlem Düzenleme Modalı -->
+<div class="mback hid" id="editTxM">
+  <div class="mbox">
+    <div class="mtitle">İşlemi Düzenle</div>
+    <div class="mlbl">Tutar (₺)</div>
+    <input class="minput" type="number" id="edit_amt" step="0.01">
+    <div class="mlbl">Tarih</div>
+    <input class="minput" type="date" id="edit_date">
+    <div class="mlbl">Hesap</div>
+    <select class="msel" id="edit_acc"></select>
+    <div id="edit_rhedef" style="display:none;"><div class="mlbl">Hedef Hesap</div><select class="msel" id="edit_hacc"></select></div>
+    <div id="edit_rgelir" style="display:none;"><div class="mlbl">Gelir Türü</div><select class="msel" id="edit_ggrp"></select></div>
+    <div id="edit_rgider" style="display:none;"><div class="mlbl">Kategori</div><select class="msel" id="edit_mgrp"></select><div class="mlbl">Alt Kategori</div><select class="msel" id="edit_agrp"></select></div>
+    <div class="mlbl">Açıklama</div>
+    <input class="minput" type="text" id="edit_note">
+    <div style="display:flex;justify-content:space-between;padding:10px 0;">
+      <span id="edit_durL">✅ ÖDENDİ</span>
+      <div class="tsw on" id="edit_durT" onclick="editTogDur()"></div>
+    </div>
+    <div class="mbtns"><button class="bc" onclick="closeEditTx()">İptal</button><button class="bk" onclick="saveEditTx()">Sadece Bu</button><button class="bk" style="background:var(--orange);" id="editAllBtn" onclick="saveEditAllTx()">Bu ve Sonrakiler</button><button class="bd" onclick="showDeleteOptions()">🗑️ Sil</button></div>
+  </div>
+</div>
+
+<!-- Silme Seçenekleri Modalı -->
+<div class="mback hid" id="deleteOptionsM">
+  <div class="mbox">
+    <div class="mtitle">İşlemi Sil</div>
+    <div class="mbtns" style="flex-direction:column;">
+      <button class="bk" onclick="deleteTransaction('one')">Sadece Bu Kaydı Sil</button>
+      <button class="bk" style="background:var(--orange);" id="deleteForwardBtn" onclick="deleteTransaction('forward')">Bu ve Sonraki Kayıtları Sil</button>
+      <button class="bd" id="deleteAllBtn" onclick="deleteTransaction('all')">Tüm Seriyi Sil</button>
+      <button class="bc" onclick="closeDeleteOptions()">İptal</button>
+    </div>
+  </div>
+</div>
 
 <!-- Gizli Hesapları Yönet Modalı -->
 <div class="mback hid" id="hiddenAccsM">
@@ -202,26 +238,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <div class="gtotal"><div class="gl">NET TOPLAM</div><div class="gv" id="h_net">₺0</div></div>
 </div>
 
-<div class="pg" id="pg-rapor"><div class="ph"><h1>Rapor</h1><button class="hb" onclick="showPg('netwr')">💎</button></div><div class="rdr"><div class="rdr-date"><input type="date" id="r_start"><span>—</span><input type="date" id="r_end"></div><button class="rdr-dots" onclick="showDateQ()">···</button></div><div class="rsum"><div class="rcard rg"><div class="rl">Gelir</div><div class="rv" id="r_gel">₺0</div></div><div class="rcard rr"><div class="rl">Gider</div><div class="rv" id="r_gid">₺0</div></div><div class="rcard rb"><div class="rl">Net</div><div class="rv" id="r_net">₺0</div></div></div><div class="catlist" id="rCatList"></div></div>
+<div class="pg" id="pg-rapor">
+  <div class="ph"><h1>Rapor</h1><button class="hb" onclick="showPg('netwr')">💎</button></div>
+  <div class="rdr"><div class="rdr-date"><input type="date" id="r_start" onchange="renderRapor()"><span>—</span><input type="date" id="r_end" onchange="renderRapor()"></div><button class="rdr-dots" onclick="showDateQ()">···</button></div>
+  <div class="rsum"><div class="rcard rg"><div class="rl">Gelir</div><div class="rv" id="r_gel">₺0</div></div><div class="rcard rr"><div class="rl">Gider</div><div class="rv" id="r_gid">₺0</div></div><div class="rcard rb"><div class="rl">Net</div><div class="rv" id="r_net">₺0</div></div></div>
+  <div class="catlist" id="rCatList"></div>
+</div>
 
 <div class="pg" id="pg-netwr"><div class="ph"><button class="hb-back" onclick="showPg('rapor')">‹</button><h1>Net Servet</h1></div><div id="ns_content"></div></div>
 
 <div class="pg" id="pg-setin">
   <div class="ph"><button class="hb-back" onclick="showPg('calnd')">‹</button><h1>Ayarlar</h1></div>
-  <div class="stgrp">
-    <div class="stgt">ONEDRİVE SENKRON</div>
-    <div class="stcard">
-      <div class="strow" style="cursor:default;flex-wrap:wrap;gap:6px;padding:14px;">
-        <div class="stic" style="background:rgba(0,120,212,.15);">☁️</div>
-        <div style="flex:1;"><div class="stlbl" id="od-status-lbl">Giriş yapılmadı</div><div style="font-size:11px;color:var(--t3);" id="od-user-lbl"></div></div>
-        <button id="od-login-btn" onclick="odLogin()" style="background:rgba(0,120,212,.8);color:white;border:none;border-radius:8px;padding:7px 14px;font-size:13px;cursor:pointer;">Giriş Yap</button>
-        <button id="od-logout-btn" onclick="odLogout()" style="display:none;background:var(--bg3);color:var(--t2);border:none;border-radius:8px;padding:7px 12px;font-size:13px;cursor:pointer;">Çıkış</button>
-      </div>
-      <div class="strow" id="od-sync-row" style="display:none;" onclick="odSync()"><div class="stic" style="background:rgba(0,120,212,.15);">🔄</div><div class="stlbl">Excel'e Kaydet / Yükle</div><span class="starr">›</span></div>
-      <div class="strow" id="od-pull-row" style="display:none;" onclick="odPull()"><div class="stic" style="background:rgba(78,205,196,.15);">⬇️</div><div class="stlbl" style="color:var(--orange);">Excel'den Al (üzerine yazar)</div><span class="starr">›</span></div>
-      <div style="padding:10px 14px;font-size:11px;color:var(--t3);" id="od-sync-info"></div>
-    </div>
-  </div>
   <div class="stgrp"><div class="stgt">VERİ</div><div class="stcard"><div class="strow" onclick="exportCSV()"><div class="stic">📤</div><div class="stlbl">CSV Dışa Aktar</div><span class="starr">›</span></div><div class="strow" onclick="document.getElementById('csvInput').click()"><div class="stic">📥</div><div class="stlbl">CSV İçe Aktar</div><span class="starr">›</span></div><div class="strow" onclick="resetAllData()"><div class="stic">🗑️</div><div class="stlbl" style="color:var(--red);">Tüm Verileri Sıfırla</div><span class="starr">›</span></div></div></div>
   <div class="stgrp"><div class="stgt">HAKKINDA</div><div class="stcard"><div class="strow"><div class="stic">🏠</div><div class="stlbl">Ev Finans</div><span class="stval">v2.0</span></div><div class="strow"><div class="stic">📋</div><div class="stlbl">Toplam İşlem</div><span class="stval" id="txCount">-</span></div></div></div>
   <input type="file" id="csvInput" accept=".csv" style="display:none;" onchange="importCSV(this)">
@@ -229,7 +256,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 
 <div class="nav"><div class="ni on" data-pg="calnd" onclick="showPg('calnd')"><svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11z"/></svg><span>Takvim</span><div class="ni-dot"></div></div><div class="ni" data-pg="hesap" onclick="showPg('hesap')"><svg viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.1 0-2-.9-2-2V5c0-1.1.9-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg><span>Bakiye</span><div class="ni-dot"></div></div><div class="ni" data-pg="rapor" onclick="showPg('rapor')"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg><span>Rapor</span><div class="ni-dot"></div></div><div class="ni" data-pg="setin" onclick="showPg('setin')"><svg viewBox="0 0 24 24"><path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.8,11.69,4.8,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.44-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/></svg><span>Ayarlar</span><div class="ni-dot"></div></div></div>
 
-<script src="https://cdn.jsdelivr.net/npm/@azure/msal-browser@3.28.1/lib/msal-browser.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <script>
 // DATA
@@ -237,7 +263,7 @@ const SK='evfinans_tx', CK='evfinans_custom';
 let txs=[], custom={};
 let curPg='calnd', curMonth=new Date().getMonth(), curYear=new Date().getFullYear();
 let selDate=new Date(), fType='I', editTxId=null;
-let sChip='';
+let sChip='', rLevel=0, rCat='';
 
 // Hesap listeleri
 const ODEME_HESAPLARI = ['Cüzdan', 'TEB', 'TEB Marifetli', 'TEB VD', 'Enpara', 'Garanti', 'Ziraat', 'İşbank', 'Vahide'];
@@ -287,9 +313,8 @@ function init(){
   renderCal();showPg('calnd');
   document.getElementById('txCount').textContent=txs.length;
   document.getElementById('f_date').value=fmtDate(selDate);
-  odInit();
 }
-function saveData(){localStorage.setItem(SK,JSON.stringify(txs));}
+function saveData(){localStorage.setItem(SK,JSON.stringify(txs));renderRapor();}
 function saveCustom(){localStorage.setItem(CK,JSON.stringify(custom));}
 function showPg(pg){
   curPg=pg;
@@ -339,9 +364,11 @@ function renderCalDay(){let el=document.getElementById('calDay');let todayS=fmtD
 function mpRow(t,todayS,showDate){let isPaid=t.gerceklesme==='Gerçekleşmiş';let isLate=!isPaid&&t.tarih<todayS;let isIncome=t.islemTuru==='Gelir';let isTransfer=t.islemTuru==='Transfer';let cat=t.masrafGrp||t.gelirAltGrp||(isTransfer?'Transfer':'Diğer');let icon=isIncome?'💰':(isTransfer?'↔️':'📋');let name=cat+(t.altGrp?' ('+t.altGrp+')':'')+(t.aciklama?' ('+t.aciklama+')':'');let dp=t.tarih.split('-');let dateLabel=AYLAR_K[parseInt(dp[1])-1]+' '+parseInt(dp[2]);let amtCl=isTransfer?'blue':(isIncome?'green':(isLate?'red':'gray'));let accLine=t.kasa+(t.hedefKasa?' → '+t.hedefKasa:'');return'<div class="mp-row" onclick="openEditTxModal('+t.id+')"><div class="mp-ic">'+icon+'</div><div class="mp-info"><div class="mp-name">'+escapeHtml(name)+'</div><div class="mp-sub">'+(showDate?'<span>'+dateLabel+'</span><span>⏱</span><span>'+accLine+'</span>':'<span>'+accLine+'</span>')+'</div></div><div class="mp-amt '+amtCl+'">₺'+fmt(Math.abs(t.tutar))+'</div></div>';}
 
 // İŞLEM DÜZENLEME MODALI
+let currentEditTransaction=null;
 function openEditTxModal(id){
   let t=txs.find(x=>x.id===id);
   if(!t)return;
+  currentEditTransaction=t;
   editTxId=id;
   document.getElementById('edit_amt').value=Math.abs(t.tutar);
   document.getElementById('edit_date').value=t.tarih;
@@ -368,9 +395,14 @@ function openEditTxModal(id){
   document.getElementById('edit_rgelir').style.display=isGelir?'block':'none';
   document.getElementById('edit_rgider').style.display=isGider?'block':'none';
   
+  // Seri kontrolü
+  let series=txs.filter(x=>x.anaIslemId===t.anaIslemId||x.id===t.id);
+  let hasFuture=series.some(x=>x.tarih>t.tarih);
+  document.getElementById('editAllBtn').style.display=hasFuture?'block':'none';
+  
   document.getElementById('editTxM').classList.remove('hid');
 }
-function closeEditTx(){document.getElementById('editTxM').classList.add('hid');editTxId=null;}
+function closeEditTx(){document.getElementById('editTxM').classList.add('hid');editTxId=null;currentEditTransaction=null;}
 function editTogDur(){let t=document.getElementById('edit_durT'),l=document.getElementById('edit_durL');t.classList.toggle('on');l.textContent=t.classList.contains('on')?'✅ ÖDENDİ':'⏳ PLANLANMIŞ';}
 function saveEditTx(){
   let amt=parseFloat(document.getElementById('edit_amt').value);
@@ -390,6 +422,59 @@ function saveEditTx(){
     aciklama:document.getElementById('edit_note').value,gerceklesme:paid};
   saveData();closeEditTx();toast('✓ Güncellendi');renderCal();renderHesap();
 }
+function saveEditAllTx(){
+  if(!currentEditTransaction)return;
+  let amt=parseFloat(document.getElementById('edit_amt').value);
+  if(!amt||amt<=0){toast('Tutar girin!','var(--red)');return;}
+  let date=document.getElementById('edit_date').value;if(!date){toast('Tarih seçin!','var(--red)');return;}
+  let paid=document.getElementById('edit_durT').classList.contains('on')?'Gerçekleşmiş':'Gerçekleşmemiş';
+  let isTransfer=document.getElementById('edit_rhedef').style.display!=='none';
+  let isGelir=document.getElementById('edit_rgelir').style.display!=='none';
+  let newKasa=document.getElementById('edit_acc').value;
+  let newHacc=isTransfer?document.getElementById('edit_hacc').value:'';
+  let newGgrp=isGelir?document.getElementById('edit_ggrp').value:'';
+  let newMgrp=!isGelir&&!isTransfer?document.getElementById('edit_mgrp').value:'';
+  let newAgrp=!isGelir&&!isTransfer?document.getElementById('edit_agrp').value:'';
+  let newNote=document.getElementById('edit_note').value;
+  let newTp=isTransfer?'Transfer':(isGelir?'Gelir':'Gider');
+  let anaId=currentEditTransaction.anaIslemId||currentEditTransaction.id;
+  let count=0;
+  txs.forEach((tx,i)=>{
+    if((tx.anaIslemId||tx.id)!==anaId)return;
+    if(tx.tarih<currentEditTransaction.tarih)return;
+    txs[i]={...tx,tarih:date,tutar:amt,kasa:newKasa,hedefKasa:newHacc,
+      gelirAltGrp:newGgrp,masrafGrp:newMgrp,altGrp:newAgrp,
+      aciklama:newNote,islemTuru:newTp,
+      gerceklesme:tx.tarih===currentEditTransaction.tarih?paid:tx.gerceklesme};
+    count++;
+  });
+  saveData();closeEditTx();toast('✓ '+count+' kayıt güncellendi');renderCal();renderHesap();
+}
+function showDeleteOptions(){
+  closeEditTx();
+  let t=currentEditTransaction;
+  if(!t)return;
+  let series=txs.filter(x=>x.anaIslemId===t.anaIslemId||x.id===t.id);
+  let hasFuture=series.some(x=>x.tarih>t.tarih);
+  let hasMultiple=series.length>1;
+  document.getElementById('deleteForwardBtn').style.display=hasFuture?'block':'none';
+  document.getElementById('deleteAllBtn').style.display=hasMultiple?'block':'none';
+  document.getElementById('deleteOptionsM').classList.remove('hid');
+}
+function closeDeleteOptions(){document.getElementById('deleteOptionsM').classList.add('hid');}
+function deleteTransaction(scope){
+  let t=currentEditTransaction;
+  if(!t){closeDeleteOptions();return;}
+  let anaId=t.anaIslemId||t.id;
+  if(scope==='all'){
+    txs=txs.filter(x=>(x.anaIslemId||x.id)!==anaId);
+  }else if(scope==='forward'){
+    txs=txs.filter(x=>(x.anaIslemId||x.id)!==anaId||x.tarih<t.tarih);
+  }else{
+    txs=txs.filter(x=>x.id!==t.id);
+  }
+  saveData();closeDeleteOptions();toast('🗑️ Silindi');renderCal();renderHesap();currentEditTransaction=null;
+}
 
 // FORM
 function fillFormSelects(){fillSel('f_acc',accList.filter(a=>!isVarlik(a)));fillSel('f_hacc',accList);fillSel('f_ggrp',gelList,true);fillSel('f_mgrp',masList,true);fillSel('f_agrp',[],true);}
@@ -398,7 +483,7 @@ function togDur(){let sw=document.getElementById('f_durT'),lb=document.getElemen
 function showAddType(){document.getElementById('addTypeS').classList.remove('hid');}
 function closeAddType(){document.getElementById('addTypeS').classList.add('hid');}
 function openAddType(type){closeAddType();fType=type;document.getElementById('f_date').value=fmtDate(selDate);let labels={I:'Gider',G:'Gelir',T:'Transfer'};let colors={I:'var(--red)',G:'var(--green)',T:'var(--blue)'};document.getElementById('fTitle').textContent=labels[type];document.getElementById('fSaveBtn').style.background=colors[type];let isGider=(type==='I'),isGelir=(type==='G'),isTransfer=(type==='T');document.getElementById('f_rthedef').classList.toggle('hid',!isTransfer);document.getElementById('f_rgelir').classList.toggle('hid',!isGelir);document.getElementById('f_rgider').classList.toggle('hid',!isGider);fillSel('f_acc',accList.filter(a=>!isVarlik(a)));if(isTransfer)fillSel('f_hacc',accList);fillSel('f_ggrp',gelList,true);fillSel('f_mgrp',masList,true);fillSel('f_agrp',[],true);showPg('addtx');}
-function saveTx(){let amt=parseFloat(document.getElementById('f_amt').value);if(!amt||amt<=0){toast('Tutar girin!','var(--red)');return;}let date=document.getElementById('f_date').value;if(!date){toast('Tarih seçin!','var(--red)');return;}let paid=document.getElementById('f_durT').classList.contains('on');let nextId=txs.length?Math.max(...txs.map(t=>t.id))+1:1;txs.push({id:nextId,tarih:date,islemTuru:fType==='G'?'Gelir':(fType==='I'?'Gider':'Transfer'),kasa:document.getElementById('f_acc').value,hedefKasa:fType==='T'?document.getElementById('f_hacc').value:'',gelirAltGrp:fType==='G'?document.getElementById('f_ggrp').value:'',masrafGrp:fType==='I'?document.getElementById('f_mgrp').value:'',altGrp:fType==='I'?document.getElementById('f_agrp').value:'',tutar:amt,aciklama:document.getElementById('f_note').value,gerceklesme:paid?'Gerçekleşmiş':'Gerçekleşmemiş',taksitSayisi:1,taksitNo:1});saveData();toast('✓ Kaydedildi');renderCal();renderHesap();showPg('calnd');}
+function saveTx(){let amt=parseFloat(document.getElementById('f_amt').value);if(!amt||amt<=0){toast('Tutar girin!','var(--red)');return;}let date=document.getElementById('f_date').value;if(!date){toast('Tarih seçin!','var(--red)');return;}let paid=document.getElementById('f_durT').classList.contains('on');let nextId=txs.length?Math.max(...txs.map(t=>t.id))+1:1;txs.push({id:nextId,tarih:date,islemTuru:fType==='G'?'Gelir':(fType==='I'?'Gider':'Transfer'),kasa:document.getElementById('f_acc').value,hedefKasa:fType==='T'?document.getElementById('f_hacc').value:'',gelirAltGrp:fType==='G'?document.getElementById('f_ggrp').value:'',masrafGrp:fType==='I'?document.getElementById('f_mgrp').value:'',altGrp:fType==='I'?document.getElementById('f_agrp').value:'',tutar:amt,aciklama:document.getElementById('f_note').value,gerceklesme:paid?'Gerçekleşmiş':'Gerçekleşmemiş',taksitSayisi:1,taksitNo:1,anaIslemId:nextId});saveData();toast('✓ Kaydedildi');renderCal();renderHesap();showPg('calnd');}
 
 // SEARCH
 function initSearch(){let sa=document.getElementById('s_acc'),sc=document.getElementById('s_cat');if(sa){sa.innerHTML='<option value="">Tüm hesaplar</option>';accList.forEach(a=>sa.innerHTML+='<option>'+escapeHtml(a)+'</option>');}if(sc){sc.innerHTML='<option value="">Tüm kategoriler</option>';masList.forEach(m=>sc.innerHTML+='<option>'+escapeHtml(m)+'</option>');}}
@@ -528,36 +613,48 @@ document.getElementById('varlikAltGrpSelect').addEventListener('change',function
   document.getElementById('altinAltDiv').style.display=this.value==='Altın'?'block':'none';
 });
 
-// REPORT
+// RAPOR
 function initRaporDates(){let now=new Date();let y=now.getFullYear(),m=now.getMonth();document.getElementById('r_start').value=y+'-'+String(m+1).padStart(2,'0')+'-01';document.getElementById('r_end').value=fmtDate(now);}
 function showDateQ(){document.getElementById('dateQS').classList.remove('hid');}
 function closeDateQ(){document.getElementById('dateQS').classList.add('hid');}
 function setDateQ(q){let now=new Date(),y=now.getFullYear(),m=now.getMonth();if(q==='week'){let d=new Date(now);d.setDate(d.getDate()-6);document.getElementById('r_start').value=fmtDate(d);}else if(q==='thismonth')document.getElementById('r_start').value=y+'-'+String(m+1).padStart(2,'0')+'-01';else if(q==='lastmonth'){let lm=m===0?11:m-1,ly=m===0?y-1:y;document.getElementById('r_start').value=ly+'-'+String(lm+1).padStart(2,'0')+'-01';let lastDays=new Date(y,m,0).getDate();document.getElementById('r_end').value=ly+'-'+String(lm+1).padStart(2,'0')+'-'+lastDays;}else if(q==='3months'){let d=new Date(now);d.setMonth(d.getMonth()-2);d.setDate(1);document.getElementById('r_start').value=fmtDate(d);}else if(q==='thisyear')document.getElementById('r_start').value=y+'-01-01';else if(q==='lastyear'){document.getElementById('r_start').value=(y-1)+'-01-01';document.getElementById('r_end').value=(y-1)+'-12-31';}closeDateQ();renderRapor();}
-function renderRapor(){let s=document.getElementById('r_start').value,e=document.getElementById('r_end').value;let filtered=txs.filter(t=>t.tarih>=s&&t.tarih<=e&&t.gerceklesme==='Gerçekleşmiş');let gelir=0,gider=0;filtered.forEach(t=>{if(t.islemTuru==='Gelir')gelir+=t.tutar;if(t.islemTuru==='Gider')gider+=t.tutar;});document.getElementById('r_gel').textContent='₺'+fmt(gelir);document.getElementById('r_gid').textContent='₺'+fmt(gider);let net=gelir-gider;document.getElementById('r_net').textContent=(net>=0?'+':'')+'₺'+fmt(Math.abs(net));let data={};filtered.forEach(t=>{if(t.islemTuru==='Gider'){let k=t.masrafGrp||'Diğer';data[k]=(data[k]||0)+t.tutar;}});let sorted=Object.entries(data).sort((a,b)=>b[1]-a[1]);let total=sorted.reduce((s,v)=>s+v[1],0)||1;let html='';sorted.forEach(([k,v])=>{let pct=Math.round(v/total*100);html+='<div class="catrow"><div class="cat-ic-sm">📋</div><div class="cat-nm">'+escapeHtml(k)+'</div><div class="cat-bw"><div class="cat-bf" style="width:'+pct+'%;background:var(--blue);"></div></div><div class="cat-am">'+fmt(v)+' ₺</div></div>';});if(!html)html='<div class="empty">Bu dönemde veri yok</div>';document.getElementById('rCatList').innerHTML=html;}
+function renderRapor(){
+  let s=document.getElementById('r_start').value,e=document.getElementById('r_end').value;
+  let filtered=txs.filter(t=>t.tarih>=s&&t.tarih<=e&&t.gerceklesme==='Gerçekleşmiş');
+  let gelir=0,gider=0;
+  filtered.forEach(t=>{if(t.islemTuru==='Gelir')gelir+=t.tutar;if(t.islemTuru==='Gider')gider+=t.tutar;});
+  document.getElementById('r_gel').textContent='₺'+fmt(gelir);
+  document.getElementById('r_gid').textContent='₺'+fmt(gider);
+  let net=gelir-gider;
+  document.getElementById('r_net').textContent=(net>=0?'+':'')+'₺'+fmt(Math.abs(net));
+  
+  let data={};
+  filtered.forEach(t=>{if(t.islemTuru==='Gider'){let k=t.masrafGrp||'Diğer';data[k]=(data[k]||0)+t.tutar;}});
+  let sorted=Object.entries(data).sort((a,b)=>b[1]-a[1]);
+  let total=sorted.reduce((s,v)=>s+v[1],0)||1;
+  let html='';
+  sorted.forEach(([k,v],i)=>{
+    let pct=Math.round(v/total*100);
+    let col=['#e74c3c','#f5a623','#3498db','#27ae60','#9b59b6','#4ecdc4'][i%6];
+    html+=`<div class="catrow" onclick="showCategoryDetails('${k.replace(/'/g,"\\'")}','${s}','${e}')"><div class="cat-ic-sm" style="background:${col}22;">📋</div><div class="cat-nm">${escapeHtml(k)}</div><div class="cat-bw"><div class="cat-bf" style="width:${pct}%;background:${col};"></div></div><div class="cat-am">${fmt(v)} ₺</div><div class="cat-arr">›</div></div>`;
+  });
+  if(!html)html='<div class="empty">Bu dönemde veri yok</div>';
+  document.getElementById('rCatList').innerHTML=html;
+}
+function showCategoryDetails(cat,s,e){
+  let filtered=txs.filter(t=>t.tarih>=s&&t.tarih<=e&&t.gerceklesme==='Gerçekleşmiş'&&t.islemTuru==='Gider'&&(t.masrafGrp||'Diğer')===cat);
+  filtered.sort((a,b)=>b.tarih.localeCompare(a.tarih));
+  let html='<div style="padding:6px 12px;background:var(--bg2);"><span onclick="renderRapor()" style="color:var(--teal);cursor:pointer;">‹ Geri</span> <b>'+escapeHtml(cat)+'</b> ('+filtered.length+' işlem)</div><div class="mp-list">';
+  filtered.forEach(t=>html+=mpRow(t,fmtDate(new Date()),true));
+  html+='</div>';
+  document.getElementById('rCatList').innerHTML=html;
+}
 function renderNetwr(){let{bal}=calcBal();let odemeToplam=ODEME_HESAPLARI.reduce((s,k)=>s+Math.max(bal[k]||0,0),0);let varlikToplam=VARLIKLAR.reduce((s,k)=>s+(bal[k]||0),0);let kkBorc=KREDI_KARTLARI.reduce((s,k)=>s+Math.abs(Math.min(bal[k]||0,0)),0);let net=odemeToplam+varlikToplam-kkBorc;document.getElementById('ns_content').innerHTML='<div class="ncard"><div class="nc-lbl">NET SERVET</div><div class="nc-val">₺'+fmt(net)+'</div></div><div class="ratebox"><div class="rate-hd">VARLIK DAĞILIMI</div><div class="rateg"><div class="rc"><div class="rc-s">🏦</div><div class="rc-n">Ödeme Hesabı</div><div class="rc-v">₺'+fmt(odemeToplam)+'</div></div><div class="rc"><div class="rc-s">💎</div><div class="rc-n">Varlık</div><div class="rc-v">₺'+fmt(varlikToplam)+'</div></div><div class="rc"><div class="rc-s">💳</div><div class="rc-n">Kredi Kartı</div><div class="rc-v">₺'+fmt(kkBorc)+'</div></div></div></div>';}
 
-// CSV & ONEDRIVE
+// CSV
 function exportCSV(){if(!txs.length){toast('Veri yok!','var(--orange)');return;}let hd=['Tarih','İşlem Türü','Hesap','Hedef Hesap','Gelir Türü','Kategori','Alt Kategori','Tutar','Açıklama','Gerçekleşme'];let csv='\uFEFF'+hd.join('\t')+'\n';txs.forEach(t=>{csv+=[t.tarih,t.islemTuru,t.kasa,t.hedefKasa,t.gelirAltGrp,t.masrafGrp,t.altGrp,t.tutar.toString().replace('.',','),t.aciklama,t.gerceklesme].join('\t')+'\n';});let a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));a.download='evfinans_'+fmtDate(new Date())+'.csv';a.click();toast('📥 İndirildi');}
 function resetAllData(){if(!confirm('Tüm yerel veriler silinecek. Emin misiniz?'))return;[SK,CK].forEach(k=>localStorage.removeItem(k));location.reload();}
-function importCSV(input){let f=input.files[0];if(!f)return;let r=new FileReader();r.onload=e=>{let lines=e.target.result.split('\n').slice(1);let added=0;let nextId=txs.length?Math.max(...txs.map(t=>t.id))+1:1;lines.forEach(line=>{let c=line.split('\t');if(c.length<5)return;let[tarih,islemTuru,kasa,hedefKasa,gelirAltGrp,masrafGrp,altGrp,tutarRaw,aciklama,gerceklesme]=c;let tutar=parseFloat((tutarRaw||'0').replace(',','.'));if(!tutar||!tarih)return;txs.push({id:nextId++,tarih:tarih.trim(),islemTuru:islemTuru.trim(),kasa:kasa.trim(),hedefKasa:(hedefKasa||'').trim(),gelirAltGrp:(gelirAltGrp||'').trim(),masrafGrp:(masrafGrp||'').trim(),altGrp:(altGrp||'').trim(),tutar,aciklama:(aciklama||'').trim(),gerceklesme:(gerceklesme||'Gerçekleşmiş').trim(),taksitSayisi:1,taksitNo:1});added++;});saveData();toast('✓ '+added+' işlem içe aktarıldı');renderCal();renderHesap();document.getElementById('txCount').textContent=txs.length;};r.readAsText(f,'utf-8');input.value='';}
-
-// ONEDRIVE SYNC
-const MSAL_CFG={clientId:'bb5edae6-2364-4789-a70c-c844fe42cc95',authority:'https://login.microsoftonline.com/consumers',redirectUri:window.location.origin+window.location.pathname};
-const GRAPH_SCOPES=['Files.ReadWrite','offline_access'];
-const EXCEL_FILE='EvFinans.xlsx';
-const EXCEL_SHEET='Islemler';
-const EXCEL_COLS=['ID','Tarih','IslemTuru','Kasa','HedefKasa','GelirAltGrp','MasrafGrp','AltGrp','AltGrp2','Tutar','Aciklama','Gerceklesme','Taksit','TaksitNo','Tekrar','TekrarBitis','AnaId'];
-let msalApp=null, odAccount=null;
-async function odInit(){if(!window.msal){setTimeout(odInit,500);return;}try{msalApp=new msal.PublicClientApplication({auth:MSAL_CFG,cache:{cacheLocation:'localStorage',storeAuthStateInCookie:false}});await msalApp.initialize();let resp=await msalApp.handleRedirectPromise();if(resp)odAccount=resp.account;let accs=msalApp.getAllAccounts();if(!odAccount&&accs.length>0)odAccount=accs[0];odUpdateUI();}catch(e){console.error('MSAL init failed',e);}}
-function odUpdateUI(){let li=!!odAccount;document.getElementById('od-login-btn').style.display=li?'none':'block';document.getElementById('od-logout-btn').style.display=li?'block':'none';document.getElementById('od-sync-row').style.display=li?'flex':'none';document.getElementById('od-pull-row').style.display=li?'flex':'none';document.getElementById('od-status-lbl').textContent=li?'Giriş yapıldı':'Giriş yapılmadı';document.getElementById('od-user-lbl').textContent=li?(odAccount.username||odAccount.name||''):'';if(li)document.getElementById('od-sync-info').textContent='OneDrive\'a bağlı.';}
-function odLogin(){if(!msalApp){toast('MSAL başlatılamadı','var(--red)');return;}msalApp.loginRedirect({scopes:GRAPH_SCOPES}).catch(e=>toast('Giriş hatası: '+e.message,'var(--red)'));}
-function odLogout(){if(!msalApp||!odAccount)return;msalApp.logoutRedirect({account:odAccount});odAccount=null;odUpdateUI();}
-async function getToken(){if(!msalApp||!odAccount)throw new Error('Giriş yapılmadı');try{let r=await msalApp.acquireTokenSilent({scopes:GRAPH_SCOPES,account:odAccount});return r.accessToken;}catch(e){let r2=await msalApp.acquireTokenPopup({scopes:GRAPH_SCOPES,account:odAccount});return r2.accessToken;}}
-function txToRow(t){return[t.id,t.tarih,t.islemTuru,t.kasa,t.hedefKasa||'',t.gelirAltGrp||'',t.masrafGrp||'',t.altGrp||'','',t.tutar,t.aciklama||'',t.gerceklesme,t.taksitSayisi||1,t.taksitNo||1,'Tekrar Yok','',t.id];}
-function rowToTx(row){if(!row||row.length<12)return null;let tutar=parseFloat(String(row[9]).replace(',','.'));if(!tutar&&tutar!==0)return null;return{id:parseInt(row[0])||0,tarih:String(row[1]),islemTuru:String(row[2]),kasa:String(row[3]),hedefKasa:String(row[4]||''),gelirAltGrp:String(row[5]||''),masrafGrp:String(row[6]||''),altGrp:String(row[7]||''),altGrp2:'',tutar:tutar,aciklama:String(row[10]||''),gerceklesme:String(row[11]||'Gerçekleşmiş'),taksitSayisi:parseInt(row[12])||1,taksitNo:parseInt(row[13])||1,tekrarPeriyodu:'Tekrar Yok',tekrarBitis:'',anaIslemId:parseInt(row[16])||parseInt(row[0])||0};}
-function xhrPut(url,headers,body){return new Promise((resolve,reject)=>{let xhr=new XMLHttpRequest();xhr.open('PUT',url,true);xhr.responseType='text';for(let h in headers)xhr.setRequestHeader(h,headers[h]);xhr.onload=()=>{if(xhr.status>=200&&xhr.status<300)resolve({ok:true});else reject(new Error('HTTP '+xhr.status));};xhr.onerror=()=>reject(new Error('Network error'));xhr.ontimeout=()=>reject(new Error('Timeout'));xhr.timeout=60000;xhr.send(body);});}
-async function odSync(silent){try{if(!window.XLSX){toast('SheetJS yükleniyor...','var(--orange)');return;}toast('Excel hazırlanıyor...','var(--blue)');let token=await getToken();let wsData=[EXCEL_COLS].concat(txs.map(txToRow));let ws=XLSX.utils.aoa_to_sheet(wsData);let wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,EXCEL_SHEET);let xlsxArr=XLSX.write(wb,{bookType:'xlsx',type:'array'});let blob=new Blob([new Uint8Array(xlsxArr)],{type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});if(blob.size<200)throw new Error('XLSX oluşturulamadı');let sessionRes=await fetch('https://graph.microsoft.com/v1.0/me/drive/root:/'+EXCEL_FILE+':/createUploadSession',{method:'POST',headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify({'item':{'@microsoft.graph.conflictBehavior':'replace','name':EXCEL_FILE}})});if(!sessionRes.ok)throw new Error('Session hatası');let sessionJson=await sessionRes.json();let uploadUrl=sessionJson.uploadUrl;if(!uploadUrl)throw new Error('uploadUrl alınamadı');await xhrPut(uploadUrl,{'Content-Range':'bytes 0-'+(blob.size-1)+'/'+blob.size},blob);let now=new Date();document.getElementById('od-sync-info').textContent=txs.length+' işlem - '+now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');if(!silent)toast('Excel\'e kaydedildi: '+txs.length+' işlem');else toast('☁️ OneDrive\'a kaydedildi','var(--teal)');}catch(e){console.error(e);toast('Hata: '+(e.message||'').substring(0,80),'var(--red)');}}
-async function odPull(){let msg='UYARI: Bu cihazdaki TÜM veriler silinip OneDrive\'daki Excel ile değiştirilecek.\n\nDevam etmek istiyor musunuz?';if(!confirm(msg))return;try{if(!window.XLSX){toast('SheetJS yükleniyor...','var(--orange)');return;}toast('Excel\'den indiriliyor...','var(--blue)');let token=await getToken();let dlRes=await fetch('https://graph.microsoft.com/v1.0/me/drive/root:/'+EXCEL_FILE+':/content',{headers:{'Authorization':'Bearer '+token}});if(!dlRes.ok){if(dlRes.status===404)throw new Error('EvFinans.xlsx bulunamadı. Önce "Excel\'e Kaydet" ile yükleyin.');throw new Error('İndirme hatası '+dlRes.status);}let arrayBuf=await dlRes.arrayBuffer();let wb2=XLSX.read(arrayBuf,{type:'array'});let sheetName=wb2.SheetNames.find(n=>n===EXCEL_SHEET)||wb2.SheetNames[0];let ws2=wb2.Sheets[sheetName];if(!ws2){toast('Excel sayfası bulunamadı','var(--orange)');return;}let data=XLSX.utils.sheet_to_json(ws2,{header:1,raw:false});if(data.length<2){toast('Excel boş veya veri yok','var(--orange)');return;}let newTxs=data.slice(1).map(rowToTx).filter(Boolean);if(!newTxs.length){toast('Aktarılacak veri bulunamadı','var(--orange)');return;}txs=newTxs;saveData();renderCal();renderHesap();document.getElementById('txCount').textContent=txs.length;toast(txs.length+' işlem alındı');}catch(e){toast('Hata: '+(e.message||'').substring(0,80),'var(--red)');}}
+function importCSV(input){let f=input.files[0];if(!f)return;let r=new FileReader();r.onload=e=>{let lines=e.target.result.split('\n').slice(1);let added=0;let nextId=txs.length?Math.max(...txs.map(t=>t.id))+1:1;lines.forEach(line=>{let c=line.split('\t');if(c.length<5)return;let[tarih,islemTuru,kasa,hedefKasa,gelirAltGrp,masrafGrp,altGrp,tutarRaw,aciklama,gerceklesme]=c;let tutar=parseFloat((tutarRaw||'0').replace(',','.'));if(!tutar||!tarih)return;txs.push({id:nextId++,tarih:tarih.trim(),islemTuru:islemTuru.trim(),kasa:kasa.trim(),hedefKasa:(hedefKasa||'').trim(),gelirAltGrp:(gelirAltGrp||'').trim(),masrafGrp:(masrafGrp||'').trim(),altGrp:(altGrp||'').trim(),tutar,aciklama:(aciklama||'').trim(),gerceklesme:(gerceklesme||'Gerçekleşmiş').trim(),taksitSayisi:1,taksitNo:1,anaIslemId:nextId-1});added++;});saveData();toast('✓ '+added+' işlem içe aktarıldı');renderCal();renderHesap();document.getElementById('txCount').textContent=txs.length;};r.readAsText(f,'utf-8');input.value='';}
 
 document.addEventListener('DOMContentLoaded',()=>{init();});
 </script>
