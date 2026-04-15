@@ -625,20 +625,36 @@ function renderAccDetail(){
   if(!accName)return;
   const fromVal=document.getElementById('accDetailFrom').value;
   const toVal=document.getElementById('accDetailTo').value;
-  const fromDate=fromVal?new Date(fromVal+'T00:00:00'):null;
-  const toDate=toVal?new Date(toVal+'T23:59:59'):null;
+  let fromY=0,fromM=0,fromD=0,toY=9999,toM=12,toD=31;
+  if(fromVal){const p=fromVal.split('-');if(p.length===3){fromY=parseInt(p[0]);fromM=parseInt(p[1]);fromD=parseInt(p[2]);}}
+  if(toVal){const p=toVal.split('-');if(p.length===3){toY=parseInt(p[0]);toM=parseInt(p[1]);toD=parseInt(p[2]);}}
+  function parseTarih(s){
+    if(!s)return null;
+    let p=String(s).split('-');
+    if(p.length===3&&p[0].length===4){const y=parseInt(p[0]),m=parseInt(p[1]),d=parseInt(p[2]);if(y>0&&m>0&&d>0)return{y,m,d};}
+    p=String(s).split('.');
+    if(p.length===3&&p[2].length===4){const y=parseInt(p[2]),m=parseInt(p[1]),d=parseInt(p[0]);if(y>0&&m>0&&d>0)return{y,m,d};}
+    p=String(s).split('/');
+    if(p.length===3){const y=parseInt(p[2]),m=parseInt(p[0]),d=parseInt(p[1]);if(y>0&&m>0&&d>0)return{y,m,d};}
+    return null;
+  }
+  function cmpDate(a,b){if(a.y!==b.y)return a.y-b.y;if(a.m!==b.m)return a.m-b.m;return a.d-b.d;}
+  const fromDt={y:fromY,m:fromM,d:fromD};
+  const toDt={y:toY,m:toM,d:toD};
   const filtered=txs.filter(t=>{
-    const inAcc=t.kasa===accName||t.hedefKasa===accName;
-    if(!inAcc)return false;
-    if(!t.tarih)return false;
-    const parts=t.tarih.split('-');
-    if(parts.length<3)return false;
-    const tDate=new Date(parseInt(parts[0]),parseInt(parts[1])-1,parseInt(parts[2]));
-    if(fromDate&&tDate<fromDate)return false;
-    if(toDate&&tDate>toDate)return false;
+    if(t.kasa!==accName&&t.hedefKasa!==accName)return false;
+    const dt=parseTarih(t.tarih);
+    if(!dt)return false;
+    if(cmpDate(dt,fromDt)<0)return false;
+    if(cmpDate(dt,toDt)>0)return false;
     return true;
   });
-  filtered.sort((a,b)=>{const da=a.tarih||'',db=b.tarih||'';return db.localeCompare(da);});
+  filtered.sort((a,b)=>{
+    const da=parseTarih(a.tarih),db=parseTarih(b.tarih);
+    if(!da||!db)return 0;
+    const c=cmpDate(db,da);if(c!==0)return c;
+    return(b.id||0)-(a.id||0);
+  });
   const listEl=document.getElementById('accDetailList');
   const sumEl=document.getElementById('accDetailSum');
   if(!filtered.length){
@@ -648,24 +664,28 @@ function renderAccDetail(){
   }
   let totalIn=0,totalOut=0;
   let html='';
-  const AYLAR=['Oca','Şub','Mar','Nis','May','Haz','Tem','ĞğMu','Eyl','Eki','Kas','Ara'];
+  const AYLAR=['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
   filtered.forEach(t=>{
     const isTransfer=t.isleTuru==='Transfer';
     const isIncome=t.isleTuru==='Gelir';
     const isExpense=t.isleTuru==='Gider';
     const isBD=isBakiyeDuzeltme(t);
-    let amt=t.tutar||0;
+    const isPending=t.gerceklesme!=='Gerçekleşmiş';
+    let amt=parseFloat(t.tutar)||0;
     let sign=0;
     if(isTransfer){
-      if(t.hedefKasa===accName&&t.kasa!==accName)sign=1;
-      else if(t.kasa===accName&&t.hedefKasa!==accName)sign=-1;
-    }else if(isIncome||isBD)sign=1;
-    else if(isExpense)sign=-1;
+      if(t.hedefKasa===accName&&t.kasa!==accName){sign=1;}
+      else if(t.kasa===accName){sign=-1;}
+    }else if(isIncome||isBD){sign=1;}
+    else if(isExpense){sign=-1;}
+    else{sign=1;}
     const displayAmt=sign*Math.abs(amt);
-    if(displayAmt>0)totalIn+=displayAmt;
-    else if(displayAmt<0)totalOut+=Math.abs(displayAmt);
-    const dp=t.tarih?t.tarih.split('-'):['','',''];
-    const dateStr=dp.length>=3?(parseInt(dp[2])+' '+(AYLAR[parseInt(dp[1])-1]||'')+' '+dp[0]):'';
+    if(!isPending){
+      if(displayAmt>0)totalIn+=displayAmt;
+      else if(displayAmt<0)totalOut+=Math.abs(displayAmt);
+    }
+    const dt=parseTarih(t.tarih)||{y:'',m:0,d:''};
+    const dateStr=dt.y?(dt.d+' '+(AYLAR[dt.m-1]||'')+' '+dt.y):'';
     let cat=t.isleTuru||'';
     if(isExpense&&t.masrafGrp)cat=t.masrafGrp+(t.altGrp?(' / '+t.altGrp):'')+(t.altGrp2?(' / '+t.altGrp2):'');
     else if(isIncome&&t.gelirAltGrp)cat=t.gelirAltGrp;
@@ -673,7 +693,8 @@ function renderAccDetail(){
     const amtCls=displayAmt>0?'pos':(displayAmt<0?'neg':'blue');
     const amtStr=(displayAmt>=0?'+':'')+String.fromCharCode(8378)+fmt(Math.abs(displayAmt));
     const desc=t.aciklama?escapeHtml(t.aciklama):'—';
-    html+='<div class="acc-dtx" onclick="openEditTxModal('+t.id+')"><div class="acc-dtx-info"><div class="acc-dtx-cat">'+cat+'</div><div class="acc-dtx-desc">'+desc+'</div></div><div style="text-align:right"><div class="acc-dtx-date">'+dateStr+'</div><div class="acc-dtx-amt '+amtCls+'">'+amtStr+'</div></div></div>';
+    const pendingMark=isPending?' ⏳':'';
+    html+='<div class="acc-dtx" onclick="openEditTxModal('+t.id+')"><div class="acc-dtx-info"><div class="acc-dtx-cat">'+escapeHtml(cat)+pendingMark+'</div><div class="acc-dtx-desc">'+desc+'</div></div><div style="text-align:right"><div class="acc-dtx-date">'+dateStr+'</div><div class="acc-dtx-amt '+amtCls+'">'+amtStr+'</div></div></div>';
   });
   listEl.innerHTML=html;
   sumEl.style.display='flex';
