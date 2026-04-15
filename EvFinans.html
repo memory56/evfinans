@@ -347,7 +347,7 @@ function showPg(pg){
   document.querySelectorAll('.ni').forEach(n=>n.classList.remove('on'));
   let ni=document.querySelector('.ni[data-pg="'+pg+'"]');if(ni)ni.classList.add('on');
   if(pg==='calnd')renderCal();
-  else if(pg==='hesap')renderHesap();
+  else if(pg==='hesap'){closeAccDetail();renderHesap();}
   else if(pg==='rapor')renderRapor();
   else if(pg==='searc')doSearch();
   else if(pg==='setin')document.getElementById('txCount').textContent=txs.length;
