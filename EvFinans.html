@@ -587,7 +587,7 @@ function renderHesap(){
       let b=bal[k]||0;netTotal+=b;
       let neg=(isKK&&b<0)?' neg':'';
       let ic2=ACC_ICONS[k]||'🏦';
-      html+='<div class="bi" data-acc="'+escapeHtml(k)+'" data-acc-detail="1"><div class="bi-ic" style="background:'+grp.icBg+';">'+ic2+'</div><div class="bi-name">'+escapeHtml(k)+'</div><div class="bi-amt'+neg+'">'+String.fromCharCode(8378)+''+fmt(Math.abs(b))+'</div><button class="bi-act-btn" data-acc-act="'+escapeHtml(k)+'" onclick="event.stopPropagation()">⚙</button></div>';
+      html+='<div class="bi" data-acc="'+escapeHtml(k)+'" data-acc-detail="1"><div class="bi-ic" style="background:'+grp.icBg+';">'+ic2+'</div><div class="bi-name">'+escapeHtml(k)+'</div><div class="bi-amt'+neg+'">'+String.fromCharCode(8378)+''+fmt(Math.abs(b))+'</div><button class="bi-act-btn" onclick="event.stopPropagation();openAccAct(this.dataset.acc,calcBal().bal[this.dataset.acc]||0)" data-acc="'+escapeHtml(k)+'">⚙</button></div>';
     });
     html+='</div>';
   });
@@ -595,7 +595,7 @@ function renderHesap(){
   document.getElementById('hesapList').innerHTML=html;
   document.getElementById('h_net').textContent='₺'+fmt(netTotal);
   let hl=document.getElementById('hesapList');
-  hl.onclick=function(e){let actEl=e.target.closest('[data-acc-act]');if(actEl){openAccAct(actEl.dataset.accAct,calcBal().bal[actEl.dataset.accAct]||0);return;}let el=e.target.closest('[data-acc]');if(!el)return;showAccDetail(el.dataset.acc);};
+  hl.onclick=function(e){let el=e.target.closest('[data-acc]');if(!el||e.target.classList.contains('bi-act-btn'))return;showAccDetail(el.dataset.acc);};
 }
 
 let curAccName='',curAccBal=0;
