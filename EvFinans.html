@@ -666,9 +666,9 @@ function renderAccDetail(){
   let html='';
   const AYLAR=['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
   filtered.forEach(t=>{
-    const isTransfer=t.isleTuru==='Transfer';
-    const isIncome=t.isleTuru==='Gelir';
-    const isExpense=t.isleTuru==='Gider';
+    const isTransfer=t.islemTuru==='Transfer';
+    const isIncome=t.islemTuru==='Gelir';
+    const isExpense=t.islemTuru==='Gider';
     const isBD=isBakiyeDuzeltme(t);
     const isPending=t.gerceklesme!=='Gerçekleşmiş';
     let amt=parseFloat(t.tutar)||0;
@@ -686,7 +686,7 @@ function renderAccDetail(){
     }
     const dt=parseTarih(t.tarih)||{y:'',m:0,d:''};
     const dateStr=dt.y?(dt.d+' '+(AYLAR[dt.m-1]||'')+' '+dt.y):'';
-    let cat=t.isleTuru||'';
+    let cat=t.islemTuru||'';
     if(isExpense&&t.masrafGrp)cat=t.masrafGrp+(t.altGrp?(' / '+t.altGrp):'')+(t.altGrp2?(' / '+t.altGrp2):'');
     else if(isIncome&&t.gelirAltGrp)cat=t.gelirAltGrp;
     else if(isTransfer)cat='Transfer → '+(t.kasa===accName?escapeHtml(t.hedefKasa||''):escapeHtml(t.kasa||''));
