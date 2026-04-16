@@ -219,7 +219,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <div class="mback hid" id="editTxM"><div class="mbox"><div class="mtitle">İşlemi Düzenle</div><div class="mlbl">Tutar (₺)</div><input class="minput" type="number" id="edit_amt" step="0.01"><div class="mlbl">Tarih</div><input class="minput" type="date" id="edit_date"><div class="mlbl">Hesap</div><select class="msel" id="edit_acc"></select><div id="edit_rhedef" style="display:none;"><div class="mlbl">Hedef Hesap</div><select class="msel" id="edit_hacc"></select></div><div id="edit_rgelir" style="display:none;"><div class="mlbl">Gelir Türü</div><select class="msel" id="edit_ggrp"></select></div><div id="edit_rgider" style="display:none;"><div class="mlbl">Kategori</div><select class="msel" id="edit_mgrp" onchange="updateSubCatSel('edit_mgrp','edit_agrp')"></select><div class="mlbl">Alt Kategori</div><select class="msel" id="edit_agrp" onchange="updateSubCatSel2('edit_agrp','edit_agrp2')"></select><div class="mlbl">Alt Alt Kategori</div><select class="msel" id="edit_agrp2"></select></div><div class="mlbl">Açıklama</div><input class="minput" type="text" id="edit_note"><div style="display:flex;justify-content:space-between;padding:10px 0;"><span id="edit_durL">✅ ÖDENDİ</span><div class="tsw on" id="edit_durT" onclick="editTogDur()"></div></div><div class="mbtns" style="flex-wrap:wrap;gap:8px;"><button class="bc" onclick="closeEditTx()">İptal</button><button class="bk" id="updateBtn" onclick="showUpdateOptions()">Kaydet</button><button class="bd" id="deleteBtn" onclick="showDeleteOptions()">Sil</button></div><div style="margin-top:8px;"><button style="width:100%;padding:11px;border-radius:11px;border:none;background:var(--bg3);color:var(--teal);font-size:13px;cursor:pointer;" onclick="copyTxFromEdit()">📋 Kopyala (Bugünün Tarihi)</button></div></div></div>
 
 <!-- Güncelleme Seçenekleri Modalı -->
-<div class="mback hid" id="updateOptionsM"><div class="mbox"><div class="mtitle" id="updateOptionsTitle">Güncelleme Seçeneği</div><div class="mbtns" style="flex-direction:column;"><button class="bk" onclick="updateTransaction('one')">Sadece Bu Kaydı</button><button class="bk" style="background:var(--orange);" id="updateForwardBtn" onclick="updateTransaction('forward')">Bu ve Sonraki Kayıtlar</button><button class="bc" onclick="closeUpdateOptions()">İptal</button></div></div></div>
+<div class="mback hid" id="updateOptionsM"><div class="mbox"><div class="mtitle" id="updateOptionsTitle">Güncelleme Seçeneği</div><div class="mbtns" style="flex-direction:column;"><button class="bk" onclick="updateTransaction('one')">Bu Kaydı</button><button class="bk" style="background:var(--orange);" id="updateForwardBtn" onclick="updateTransaction('forward')">Bu ve Sonraki Kayıtlar</button><button class="bc" onclick="closeUpdateOptions()">İptal</button></div></div></div>
 
 <!-- Silme Seçenekleri Modalı -->
 <div class="mback hid" id="deleteOptionsM"><div class="mbox"><div class="mtitle" id="deleteOptionsTitle">Silme Seçeneği</div><div class="mbtns" style="flex-direction:column;"><button class="bk" onclick="deleteTransaction('one')">Sadece Bu Kaydı</button><button class="bk" style="background:var(--orange);" id="deleteForwardBtn" onclick="deleteTransaction('forward')">Bu ve Sonraki Kayıtlar</button><button class="bd" id="deleteAllBtn" onclick="deleteTransaction('all')">Tüm Seri</button><button class="bc" onclick="closeDeleteOptions()">İptal</button></div></div></div>
@@ -457,13 +457,22 @@ function closeEditTx(){document.getElementById('editTxM').classList.add('hid');e
 function copyTx(id){let t=txs.find(x=>x.id===id);if(!t)return;let oldData=JSON.parse(JSON.stringify(txs));let nextId=txs.length?Math.max(...txs.map(x=>x.id))+1:1;let todayStr=fmtDate(new Date());txs.push({...JSON.parse(JSON.stringify(t)),id:nextId,tarih:todayStr,taksitSayisi:1,taksitNo:1,anaIslemId:nextId,gerceklesme:'Gerçekleşmiş'});saveData();toast('📋 Kopyalandı');showUndoBar('Kopyalama',{type:'add',oldData:oldData});renderCal();renderHesap();}
 function copyTxFromEdit(){if(!currentEditTransaction)return;copyTx(currentEditTransaction.id);closeEditTx();}
 function editTogDur(){let t=document.getElementById('edit_durT'),l=document.getElementById('edit_durL');t.classList.toggle('on');l.textContent=t.classList.contains('on')?'✅ ÖDENDİ':'⏳ PLANLANMIŞ';}
+function isRecurringOrInstalment(t){
+  if((t.taksitSayisi||1)>1)return true;
+  if(t.anaIslemId)return true;
+  let series=txs.filter(x=>(x.anaIslemId||x.id)===(t.anaIslemId||t.id));
+  if(series.length>1)return true;
+  let dayMs=24*3600*1000;
+  let samePattern=txs.filter(x=>x.id!==t.id&&x.tarih!==t.tarih&&x.tutar===t.tutar&&x.islemTuru===t.islemTuru&&Math.abs(new Date(x.tarih)-new Date(t.tarih))%(28*dayMs)<2*dayMs);
+  return samePattern.length>0;
+}
 function showUpdateOptions(){
   let t=currentEditTransaction;
   if(!t)return;
-  let series=txs.filter(x=>(x.anaIslemId||x.id)=== (t.anaIslemId||t.id));
+  if(!isRecurringOrInstalment(t)){updateTransaction('one');return;}
+  let series=txs.filter(x=>(x.anaIslemId||x.id)===(t.anaIslemId||t.id));
   let hasFuture=series.some(x=>x.tarih>t.tarih);
-  let hasMultiple=series.length>1||((t.taksitSayisi||1)>1);
-  document.getElementById('updateForwardBtn').style.display=(hasFuture||hasMultiple)?'block':'none';
+  document.getElementById('updateForwardBtn').style.display=hasFuture?'block':'none';
   document.getElementById('updateOptionsM').classList.remove('hid');
 }
 function closeUpdateOptions(){document.getElementById('updateOptionsM').classList.add('hid');}
