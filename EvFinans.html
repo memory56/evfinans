@@ -2,8 +2,13 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
-<title>Ev Finans</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no,viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Ev Finans">
+    <meta name="theme-color" content="#111927">
+  <title>Ev Finans</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23111927'/%3E%3Crect x='2' y='2' width='60' height='60' rx='13' fill='url(%23g)'/%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%234ecdc4'/%3E%3Cstop offset='1' stop-color='%2327ae60'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ctext x='32' y='46' text-anchor='middle' font-family='system-ui' font-size='36' font-weight='700' fill='%23fff'%3E%E2%82%BA%3C/text%3E%3C/svg%3E">
 <style>
 :root{
@@ -14,14 +19,14 @@
   --sp:14px;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--t1);min-height:100vh;max-width:480px;margin:0 auto;overflow-x:hidden;}
-.nav{display:flex;position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:rgba(17,25,39,.92);backdrop-filter:blur(20px);border-top:1px solid var(--border);z-index:100;padding:8px 0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serhif;background:var(--bg);color:var(--t1);min-height:100dvh;min-height:100vh;max-width:480px;margin:0 auto;overflow-x:hidden;}
+.nav{display:flex;position:fixed;bottom:0;padding-bottom:env(safe-area-inset-bottom);left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:rgba(17,25,39,.92);backdrop-filter:blur(20px);border-top:1px solid var(--border);z-index:100;padding:8px 0;}
 .ni{flex:1;display:flex;flex-direction:column;align-items:center;padding:4px 0;cursor:pointer;color:var(--t3);font-size:10px;gap:3px;}
 .ni.on{color:var(--teal);}
 .ni svg{width:24px;height:24px;fill:currentColor;}
 .ni-dot{width:4px;height:4px;border-radius:50%;background:var(--teal);opacity:0;margin-top:1px;}
 .ni.on .ni-dot{opacity:1;}
-.pg{display:none;padding-bottom:82px;min-height:100vh;}
+.pg{display:none;padding-bottom:calc(82px + env(safe-area-inset-bottom));min-height:100dvh;min-height:100vh;}
 .pg.on{display:block;}
 .ph{display:flex;align-items:center;padding:13px var(--sp);background:rgba(17,25,39,.88);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:50;gap:6px;}
 .ph h1{font-size:17px;font-weight:600;flex:1;}
