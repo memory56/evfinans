@@ -535,13 +535,17 @@ function updateTransaction(scope){
       count=1;
     }
   }else{
+    let oldBaseDate=new Date(currentEditTransaction.tarih);
+    let newBaseDate=new Date(date);
+    let dayShift=Math.round((newBaseDate-oldBaseDate)/86400000);
     txs.forEach((tx,i)=>{
       if((tx.anaIslemId||tx.id)!==anaId)return;
       if(tx.tarih<currentEditTransaction.tarih)return;
-      txs[i]={...tx,tarih:date,tutar:amt,kasa:newKasa,hedefKasa:newHacc,
+      let newTarih=tx.tarih;if(dayShift!==0){let d=new Date(tx.tarih);d.setDate(d.getDate()+dayShift);newTarih=fmtDate(d);}
+      txs[i]={...tx,tarih:newTarih,tutar:amt,kasa:newKasa,hedefKasa:newHacc,
         gelirAltGrp:newGgrp,masrafGrp:newMgrp,altGrp:newAgrp,altGrp2:newAgrp2,
         aciklama:newNote,islemTuru:newTp,
-        gerceklesme:tx.tarih===currentEditTransaction.tarih?paid:tx.gerceklesme};
+        gerceklesme:tx.id===currentEditTransaction.id?paid:tx.gerceklesme};
       count++;
     });
   }
