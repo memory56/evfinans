@@ -13,6 +13,14 @@ Uygulama tek bir `EvFinans.html` dosyasıdır. iOS'ta "Ana Ekrana Ekle" ile PWA 
 - **XLSX üretim:** SheetJS (`window.XLSX`) CDN'den yükleniyor.
 - **Auto-sync:** `odInit` içinde 3 dakikada bir `odSync(true)` tick'i + `visibilitychange` tetikleyici.
 - **Concurrency koruması:** Global `odSyncLock` mutex (aynı anda sadece bir sync/pull).
+- **Birleştirerek senkron (v2.1+):** `odSync` önce buluttaki dosyayı indirir, `mergeRemote` ile kayıt kayıt birleştirir, sonra eTag (`If-Match`) ile yükler; 412 gelirse bir kez yeniden dener.
+  - Her kayıtta `upd` (son değişiklik zamanı) tutulur; `saveData` → `trackChanges` değişen kayıtları damgalar, silinenleri `tomb` (localStorage `evfinans_del`) listesine yazar.
+  - Excel: `Islemler` (işlemler), `Silinenler` (silinen ID + zaman), `Ayarlar` (hesap/kategori/bütçe/kur ayarları, JSON parçaları). Bu sayfalar silinmemeli.
+  - Eşitlikte bulut kazanır; eski formatlı (Upd sütunu olmayan) dosyada yerel kazanır.
+  - ID'ler `newId()` ile zaman damgası tabanlı üretilir (cihazlar arası çakışmaz).
+- **Hesap grupları:** `getAccGroup` — önce `custom.accGroups` (odeme/kk/varlik/borc), sonra varsayılan listeler. Ad değiştirme `custom.removedAccs` ile kalıcı.
+- **Otomatik ödeme:** `otoOdeme` alanı; `applyAutoPaid` günü gelen kayıtları ödendi yapar (açılışta, 10 dakikada bir, uygulamaya dönünce). Taksitler hep otomatik.
+- **Döviz/altın:** işlemde `miktar` alanı; `calcQty` + `custom.kurlar` ile güncel değer (`marketValue`).
 
 ## Dikkat Edilecekler
 
@@ -33,13 +41,14 @@ Uygulama tek bir `EvFinans.html` dosyasıdır. iOS'ta "Ana Ekrana Ekle" ile PWA 
 1. **Arşivleme modu:** 2+ yıl öncesi işlemleri ayrı `EvFinans-Arsiv-YYYY.xlsx` dosyasına taşıma.
 2. **Delta / range sync:** Microsoft Graph Excel API ile sadece değişen satırları güncelleme (hücre bazlı).
 3. **Sync debounce:** Çok sık işlem girişlerinde auto-sync'i batch'leme (pil/veri tasarrufu).
-4. **Çakışma tespiti:** Birden fazla cihazdan eş zamanlı düzenlemede son yazanın kazanması yerine merge mantığı.
 5. **Yedek / versiyon:** OneDrive'da haftalık snapshot dosyaları (`EvFinans-Backup-YYYY-WW.xlsx`).
 
 ## Commit Geçmişi Önemli Noktaları
 
 - `eebf1c0` — OneDrive session (iOS PWA) + boş veri koruması + ilk açılışta otomatik pull
 - `02f58a5` — HTTP 409 conflict için sync lock mutex + 409/423 retry
+- v2.1 — birleştirerek senkron, dinamik hesap grupları, otomatik ödeme, mükerrer uyarısı, geçmiş/gelecek arama, hata düzeltmeleri
+- v2.2 — bütçe, grafikli raporlar (pasta, trend, alt kategori), borç/alacak, döviz/altın miktarı ve kur, kredi kartı limit/ekstre, hızlı Öde, gecikme uyarıları, fiş bölme, arama filtreleri, kategori adı değiştirme, hesap sıralama/silme, tekrarlı transfer, hesapta yürüyen bakiye
 
 ## Deployment
 
